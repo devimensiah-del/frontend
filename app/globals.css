@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 195 100% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 195 100% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 195 100% 5%;
+    --primary: 195 100% 8%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 100% 55%;
+    --secondary-foreground: 195 100% 8%;
+    --muted: 195 20% 96%;
+    --muted-foreground: 195 15% 45%;
+    --accent: 45 100% 55%;
+    --accent-foreground: 195 100% 8%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 195 20% 90%;
+    --input: 195 20% 90%;
+    --ring: 45 100% 55%;
+    --radius: 0.75rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 195 100% 5%;
+    --foreground: 0 0% 98%;
+    --card: 195 100% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 195 100% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 45 100% 55%;
+    --primary-foreground: 195 100% 8%;
+    --secondary: 195 50% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 195 50% 15%;
+    --muted-foreground: 195 20% 70%;
+    --accent: 45 100% 55%;
+    --accent-foreground: 195 100% 8%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 195 50% 20%;
+    --input: 195 50% 20%;
+    --ring: 45 100% 55%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  /* Gradient backgrounds for hero sections - IMENSIAH */
+  .gradient-hero {
+    background: linear-gradient(135deg, #001A2E 0%, #002A45 50%, #003A5C 100%);
+  }
+
+  .gradient-hero-subtle {
+    background: linear-gradient(135deg, #F5F8FA 0%, #E8EFF5 50%, #DBE5EF 100%);
+  }
+
+  .gradient-imensiah {
+    background: linear-gradient(135deg, #001A2E 0%, #003A5C 50%, #FFC107 100%);
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Animated gradient background - IMENSIAH version */
+  .animated-gradient {
+    background-color: #F5F8FA; /* Fallback light color */
+    background: linear-gradient(-45deg, #F5F8FA, #E8EFF5, #DBE5EF, #FFF8E1);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+  }
+
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* Dot pattern background - IMENSIAH */
+  .dot-pattern {
+    background-image: radial-gradient(circle, rgba(255, 193, 7, 0.15) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  /* Text gradient - IMENSIAH */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+  }
+
+  /* Shadow elevations - IMENSIAH */
+  .shadow-soft {
+    box-shadow: 0 2px 8px rgba(0, 26, 46, 0.08);
+  }
+
+  .shadow-medium {
+    box-shadow: 0 4px 16px rgba(0, 26, 46, 0.12);
+  }
+
+  .shadow-strong {
+    box-shadow: 0 8px 24px rgba(0, 26, 46, 0.16);
+  }
+
+  /* Gold accent glow */
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+  }
+}
