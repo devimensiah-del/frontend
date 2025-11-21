@@ -8,7 +8,7 @@ import { Save, Trash2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/Input';
-import { FormField } from '@/components/ui/FormField';
+import { FormFieldWrapper } from '@/components/ui/FormFieldWrapper';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Dialog,
@@ -162,7 +162,7 @@ export default function ConfiguracoesPage() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Alterar Senha</h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           {/* Current Password */}
-          <FormField
+          <FormFieldWrapper
             label="Senha Atual"
             id="currentPassword"
             required
@@ -193,10 +193,10 @@ export default function ConfiguracoesPage() {
                 )}
               </button>
             </div>
-          </FormField>
+          </FormFieldWrapper>
 
           {/* New Password */}
-          <FormField
+          <FormFieldWrapper
             label="Nova Senha"
             id="newPassword"
             required
@@ -219,10 +219,10 @@ export default function ConfiguracoesPage() {
                 {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-          </FormField>
+          </FormFieldWrapper>
 
           {/* Confirm Password */}
-          <FormField
+          <FormFieldWrapper
             label="Confirmar Nova Senha"
             id="confirmPassword"
             required
@@ -258,7 +258,7 @@ export default function ConfiguracoesPage() {
                 )}
               </button>
             </div>
-          </FormField>
+          </FormFieldWrapper>
 
           {/* Error Message */}
           {passwordError && (
