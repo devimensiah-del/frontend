@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  output: 'standalone', // Required for Docker deployment
+  output: 'standalone', // Required for Docker and Vercel deployment
   eslint: {
     // Don't block production builds on ESLint warnings
     ignoreDuringBuilds: true,
