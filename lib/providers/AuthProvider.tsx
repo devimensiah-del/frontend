@@ -98,48 +98,113 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Sign in
+  // Sign in - Use backend proxy for authentication
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // Call backend proxy instead of Supabase directly
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/auth/login`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
-    if (error) {
-      throw new Error(error.message);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Login failed' }));
+        throw new Error(errorData.message || 'Invalid credentials');
+      }
+
+      const data = await response.json();
+
+      // Backend returns the Supabase session - extract token and user
+      const token = data.access_token || data.token;
+      if (!token) {
+        throw new Error('No access token received');
+      }
+
+      // Save token to localStorage for API calls
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', token);
+      }
+
+      // Set Supabase session manually for supabase.auth state
+      if (data.user) {
+        await supabase.auth.setSession({
+          access_token: token,
+          refresh_token: data.refresh_token || '',
+        });
+      }
+
+      // Fetch user profile from backend
+      const session = await supabase.auth.getSession();
+      if (session.data.session) {
+        const profile = await fetchUserProfile(session.data.session);
+        setUser(profile);
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Login failed');
     }
-
-    if (data.session) {
-      const profile = await fetchUserProfile(data.session);
-      setUser(profile);
-    }
-
-    return data;
   };
 
-  // Sign up
+  // Sign up - Use backend proxy
   const signUp = async (email: string, password: string, name: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-        },
-        // Email confirmation disabled - users can login immediately
-      },
-    });
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/auth/signup`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password, fullName: name }),
+        }
+      );
 
-    if (error) {
-      throw new Error(error.message);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Signup failed' }));
+        throw new Error(errorData.message || 'Failed to create account');
+      }
+
+      const data = await response.json();
+
+      // Save token and set session
+      const token = data.access_token || data.token;
+      if (token && typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', token);
+      }
+
+      if (data.user && token) {
+        await supabase.auth.setSession({
+          access_token: token,
+          refresh_token: data.refresh_token || '',
+        });
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Signup failed');
     }
-
-    // User can sign in immediately without email verification
-    return data;
   };
 
   // Sign out
   const signOut = async () => {
+    // Clear localStorage token
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+    }
+
     const { error } = await supabase.auth.signOut();
     if (error) {
       throw new Error(error.message);

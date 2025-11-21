@@ -89,9 +89,36 @@ export function SubmissionForm() {
   async function onSubmit(data: FormValues) {
     setIsSubmitting(true)
     try {
-      // TODO: Replace with your actual API call
-      console.log("Submitting data:", data)
-      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate API call
+      // Prepare submission data for backend
+      const submissionData = {
+        company_name: data.companyName,
+        industry_name: data.companyIndustry || "Não especificado",
+        website_url: data.companyWebsite || "",
+        annual_revenue: data.annualRevenueMax ? parseFloat(data.annualRevenueMax.toString()) : null,
+        employee_count: data.companySize ? parseInt(data.companySize) : null,
+        location: data.companyLocation || "",
+        description: data.businessChallenge || "",
+        email: data.contactEmail,
+        phone_number: data.contactPhone || "",
+      }
+
+      // Call backend API
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
+      const response = await fetch(`${apiUrl}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Falha no envio' }))
+        throw new Error(errorData.message || 'Erro ao enviar formulário')
+      }
+
+      const result = await response.json()
+      console.log("Submission successful:", result)
 
       toast({
         title: "Diagnóstico Solicitado!",
