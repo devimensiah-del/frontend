@@ -1,56 +1,38 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import React from "react";
+import { cn } from "@/lib/utils/cn";
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string
-  error?: string
-  helperText?: string
+/* ============================================
+   INPUT COMPONENT - Editorial Form Input
+   ============================================ */
+
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  variant?: "editorial" | "default";
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, label, error, helperText, ...props }, ref) => {
-    const id = props.id || props.name
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ variant = "editorial", className, ...props }, ref) => {
+    const variants = {
+      editorial: "input-editorial",
+      default: "input-editorial",
+    };
 
     return (
-      <div className="w-full">
-        {label && (
-          <label
-            htmlFor={id}
-            className="block text-sm font-medium text-foreground mb-2"
-          >
-            {label}
-            {props.required && <span className="text-destructive ml-1">*</span>}
-          </label>
+      <input
+        ref={ref}
+        className={cn(
+          variants[variant],
+          // Focus visible styles
+          "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold-500)] focus-visible:ring-offset-2",
+          // Invalid state
+          props["aria-invalid"] && "border-red-500 focus-visible:ring-red-500",
+          className
         )}
-        <input
-          type={type}
-          className={cn(
-            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-            error && "border-destructive focus-visible:ring-destructive",
-            className
-          )}
-          ref={ref}
-          id={id}
-          aria-invalid={error ? "true" : "false"}
-          aria-describedby={error ? `${id}-error` : helperText ? `${id}-helper` : undefined}
-          {...props}
-        />
-        {error && (
-          <p className="mt-1.5 text-sm text-destructive" id={`${id}-error`}>
-            {error}
-          </p>
-        )}
-        {helperText && !error && (
-          <p className="mt-1.5 text-sm text-muted-foreground" id={`${id}-helper`}>
-            {helperText}
-          </p>
-        )}
-      </div>
-    )
+        {...props}
+      />
+    );
   }
-)
+);
 
-Input.displayName = "Input"
-
-export { Input }
+Input.displayName = "Input";

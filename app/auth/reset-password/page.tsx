@@ -1,167 +1,194 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Loader2, Mail, ArrowLeft, CheckCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { FormEvent, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Container } from "@/components/ui/Grid";
+import { Heading, Text } from "@/components/ui/Typography";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/FormField";
+import { Logo } from "@/components/ui/Logo";
+import { useAuthContext } from "@/lib/providers/AuthProvider";
+import { toast } from "sonner";
 
 export default function ResetPasswordPage() {
-  const { toast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { updatePassword } = useAuthContext();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    // Check if we have the necessary token/code from the URL
+    const token = searchParams.get("token") || searchParams.get("access_token");
+    setHasToken(!!token);
+  }, [searchParams]);
+
+  const validateForm = (): boolean => {
+    if (password.length < 6) {
+      setError("Senha deve ter pelo menos 6 caracteres");
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      setError("As senhas não coincidem");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setError("");
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+      await updatePassword(password);
+      setIsSuccess(true);
+      toast.success("Senha redefinida com sucesso!");
 
-      if (!response.ok) {
-        throw new Error('Erro ao enviar email de recuperação');
-      }
-
-      setIsSubmitted(true);
-      toast({
-        title: 'Email enviado!',
-        description: 'Verifique sua caixa de entrada',
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao enviar email',
-        description: error instanceof Error ? error.message : 'Tente novamente',
-      });
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Erro ao redefinir senha";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isSubmitted) {
+  if (!hasToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
-        <div className="w-full max-w-md">
-          <Card className="shadow-xl">
-            <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
-              </div>
-              <CardTitle className="text-2xl font-bold">Email Enviado!</CardTitle>
-              <CardDescription>
-                Enviamos instruções para redefinir sua senha para <strong>{email}</strong>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-gray-700">
-                <p className="font-semibold mb-2">Próximos passos:</p>
-                <ol className="list-decimal list-inside space-y-1">
-                  <li>Verifique sua caixa de entrada</li>
-                  <li>Clique no link de recuperação</li>
-                  <li>Crie uma nova senha</li>
-                </ol>
-              </div>
-              <p className="text-xs text-gray-500 text-center">
-                Não recebeu o email? Verifique a pasta de spam ou{' '}
-                <button
-                  onClick={() => setIsSubmitted(false)}
-                  className="text-blue-600 hover:underline"
-                >
-                  tente novamente
-                </button>
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link href="/auth/login" className="w-full">
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar para login
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
+      <Container className="min-h-screen flex items-center justify-center bg-surface-paper">
+        <div className="max-w-md w-full bg-white p-12 border border-line shadow-sm relative">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gold-500" />
+
+          <div className="flex flex-col items-center mb-10">
+            <Logo className="w-12 h-12 mb-4" />
+            <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
+              IMENSIAH
+            </Heading>
+          </div>
+
+          <div className="space-y-6">
+            <div className="p-6 bg-red-50 border border-red-200 rounded">
+              <Text className="text-red-800 text-center">
+                Link inválido ou expirado. Por favor, solicite um novo link de recuperação.
+              </Text>
+            </div>
+            <Link href="/auth/forgot-password" className="block">
+              <Button variant="architect" className="w-full">
+                Solicitar Novo Link
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
+      </Container>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
-      <div className="w-full max-w-md">
-        {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-blue-900 mb-2">IMENSIAH</h1>
-          <p className="text-gray-600">Relatórios Estratégicos Inteligentes</p>
+    <Container className="min-h-screen flex items-center justify-center bg-surface-paper">
+      <div className="max-w-md w-full bg-white p-12 border border-line shadow-sm relative">
+        {/* Gold Accent Top */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gold-500" />
+
+        {/* Logo and Branding */}
+        <div className="flex flex-col items-center mb-10">
+          <Logo className="w-12 h-12 mb-4" />
+          <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
+            IMENSIAH
+          </Heading>
+          <Text variant="small" className="text-center mt-2 text-text-secondary">
+            Redefinir Senha
+          </Text>
         </div>
 
-        <Card className="shadow-xl">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Recuperar Senha</CardTitle>
-            <CardDescription>
-              Digite seu email para receber instruções de recuperação
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                    autoComplete="email"
-                  />
-                </div>
+        {isSuccess ? (
+          <div className="space-y-6">
+            <div className="p-6 bg-green-50 border border-green-200 rounded">
+              <Text className="text-green-800 text-center">
+                Senha redefinida com sucesso! Você será redirecionado para o login.
+              </Text>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Instructions */}
+            <div className="mb-6">
+              <Text variant="small" className="text-center text-text-secondary">
+                Digite sua nova senha abaixo.
+              </Text>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded">
+                <Text variant="small" className="text-red-600">
+                  {error}
+                </Text>
               </div>
+            )}
+
+            {/* Reset Password Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <FormField
+                label="Nova Senha"
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+
+              <FormField
+                label="Confirmar Nova Senha"
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                disabled={isLoading}
+              />
 
               <Button
+                variant="architect"
                 type="submit"
-                className="w-full"
+                className="w-full mt-8"
                 disabled={isLoading}
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  'Enviar Link de Recuperação'
-                )}
+                {isLoading ? "Redefinindo..." : "Redefinir Senha"}
               </Button>
             </form>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Link href="/auth/login" className="w-full">
-              <Button variant="ghost" className="w-full">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar para login
-              </Button>
-            </Link>
-          </CardFooter>
-        </Card>
 
-        {/* Additional info */}
-        <div className="mt-8 text-center text-sm text-gray-600">
-          <p>Problemas para recuperar sua conta?</p>
-          <a href="mailto:suporte@imensiah.com" className="text-blue-600 hover:underline">
-            suporte@imensiah.com
-          </a>
-        </div>
+            {/* Footer Links */}
+            <div className="mt-8 text-center">
+              <Text variant="small" className="text-text-tertiary">
+                Lembrou sua senha?{" "}
+                <Link href="/login" className="text-gold-600 hover:text-gold-700 font-medium">
+                  Fazer login
+                </Link>
+              </Text>
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </Container>
   );
 }
