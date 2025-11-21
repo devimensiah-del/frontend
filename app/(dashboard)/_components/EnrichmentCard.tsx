@@ -75,7 +75,7 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
               {enrichment.competitors.map((competitor, index) => (
                 <Badge
                   key={index}
-                  variant="outline"
+                  variant="default"
                   className="bg-gray-50 text-gray-700"
                 >
                   {competitor}
@@ -93,7 +93,7 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
               {enrichment.technologyStack.map((tech, index) => (
                 <Badge
                   key={index}
-                  variant="outline"
+                  variant="default"
                   className="bg-blue-50 text-blue-700 border-blue-200"
                 >
                   {tech}
@@ -226,7 +226,7 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
               {enrichment.partnerships.map((partner, index) => (
                 <Badge
                   key={index}
-                  variant="outline"
+                  variant="default"
                   className="bg-purple-50 text-purple-700 border-purple-200"
                 >
                   {partner}
