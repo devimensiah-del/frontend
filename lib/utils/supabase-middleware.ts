@@ -6,14 +6,20 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextRequest } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 /**
  * Get authenticated user from request
  */
 export async function getAuthUser(request: NextRequest) {
   try {
+    // Check if Supabase is configured
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.warn('Supabase not configured - authentication disabled');
+      return null;
+    }
+
     // Try to get token from cookie or Authorization header
     const cookieToken = request.cookies.get('imensiah-auth-token')?.value;
     const authHeader = request.headers.get('Authorization');
@@ -56,6 +62,10 @@ export async function getAuthUser(request: NextRequest) {
  */
 export async function isUserAdmin(userId: string): Promise<boolean> {
   try {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return false;
+    }
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     const { data: profile } = await supabase
@@ -76,6 +86,10 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
  */
 export async function validateSessionToken(token: string): Promise<boolean> {
   try {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return false;
+    }
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     const { data: { user }, error } = await supabase.auth.getUser(token);

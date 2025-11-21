@@ -7,8 +7,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 /**
  * Get session from Supabase auth cookies
@@ -46,6 +46,13 @@ export async function middleware(request: NextRequest) {
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
   if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
+  // Check if Supabase is configured
+  if (!supabaseUrl || !supabaseAnonKey) {
+    // Supabase not configured - allow all routes during build/development
+    console.warn('Supabase not configured - authentication middleware disabled');
     return NextResponse.next();
   }
 
