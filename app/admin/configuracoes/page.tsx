@@ -86,7 +86,7 @@ export default function AdminConfiguracoes() {
               value={email}
               onChange={() => {}} // Read-only
               disabled
-              helpText="O email não pode ser alterado"
+              helperText="O email não pode ser alterado"
             />
 
             {/* Save Button */}
