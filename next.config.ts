@@ -1,7 +1,8 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  output: 'standalone', // Required for Docker and Vercel deployment
+  // Note: 'standalone' output is only for Docker/self-hosting, not Vercel
+  // Vercel handles deployment automatically without standalone mode
   eslint: {
     // Don't block production builds on ESLint warnings
     ignoreDuringBuilds: true,
