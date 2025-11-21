@@ -67,7 +67,7 @@ export function EditorPanel({ analysis, onAnalysisChange }: EditorPanelProps) {
     onAnalysisChange({
       ...analysis,
       [category]: {
-        ...(analysis[category] || {}),
+        ...(analysis[category] as Record<string, any>),
         [field]: items,
       },
     });
