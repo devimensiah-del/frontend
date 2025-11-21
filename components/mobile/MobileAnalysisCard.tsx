@@ -96,7 +96,7 @@ export function MobileAnalysisCard({
             {frameworks.map((framework, index) => (
               <Badge
                 key={index}
-                variant="outline"
+                variant="default"
                 className="text-xs bg-navy-50 text-navy-700 border-navy-200"
               >
                 {framework}
