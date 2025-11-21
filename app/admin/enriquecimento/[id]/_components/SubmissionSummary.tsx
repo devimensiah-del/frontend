@@ -74,10 +74,10 @@ export function SubmissionSummary({ submission }: SubmissionSummaryProps) {
           <div>
             <SectionTitle>Endereço</SectionTitle>
             <div className="space-y-3 mt-3">
-              <DataRow label="Rua" value={submission.address.street} />
-              <DataRow label="Cidade" value={submission.address.city} />
-              <DataRow label="Estado" value={submission.address.state} />
-              <DataRow label="CEP" value={submission.address.zipCode} />
+              <DataRow label="Rua" value={submission.address?.street || 'N/A'} />
+              <DataRow label="Cidade" value={submission.address?.city || 'N/A'} />
+              <DataRow label="Estado" value={submission.address?.state || 'N/A'} />
+              <DataRow label="CEP" value={submission.address?.zipCode || 'N/A'} />
             </div>
           </div>
         )}
