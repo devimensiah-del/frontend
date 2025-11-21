@@ -61,19 +61,18 @@ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
   required?: boolean;
 }
 
-export const Label: React.FC<LabelProps> = ({
-  className,
-  children,
-  required,
-  ...props
-}) => {
-  return (
-    <label className={cn("label-editorial", className)} {...props}>
-      {children}
-      {required && <span className="text-gold-500 ml-1">*</span>}
-    </label>
-  );
-};
+export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
+  ({ className, children, required, ...props }, ref) => {
+    return (
+      <label ref={ref} className={cn("label-editorial", className)} {...props}>
+        {children}
+        {required && <span className="text-gold-500 ml-1">*</span>}
+      </label>
+    );
+  }
+);
+
+Label.displayName = "Label";
 
 /* ============================================
    BADGE COMPONENT - For Step Numbers
