@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { FormField } from '@/components/ui/FormField';
 import { toast } from '@/components/ui/use-toast';
 import { useState } from 'react';

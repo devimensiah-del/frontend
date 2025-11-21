@@ -8,7 +8,7 @@ import { adminApi, enrichmentApi } from "@/lib/api/client";
 import { toast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/Input";
 import { EnrichmentListSkeleton } from "@/components/skeletons";
 import type { Submission, Enrichment } from "@/types";
 
