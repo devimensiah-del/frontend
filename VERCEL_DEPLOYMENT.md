@@ -63,14 +63,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY
 **Description:** Public API key for client-side Supabase operations
 **Required for:** User authentication, session management
 
-```bash
-SUPABASE_SERVICE_ROLE_KEY
-```
-**Value:** Your Supabase service role key
-**Description:** Server-side secret key with elevated permissions
-**Required for:** Admin operations, server-side auth
-**⚠️ KEEP SECRET:** This should NEVER be exposed to the client
-
 ---
 
 ### Application Configuration (Required)
@@ -87,12 +79,6 @@ NEXT_PUBLIC_APP_NAME
 ```
 **Value:** `IMENSIAH`
 **Description:** Application name displayed in UI
-
-```bash
-NEXT_PUBLIC_REPORT_PRICE
-```
-**Value:** `890`
-**Description:** Price for reports in Brazilian Reais (BRL)
 
 ---
 
@@ -165,10 +151,8 @@ Use this checklist when configuring Vercel:
 - [ ] `NEXT_PUBLIC_API_URL` - Backend API endpoint
 - [ ] `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
 - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase public key
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` - Supabase secret key (server-only)
 - [ ] `NEXT_PUBLIC_APP_URL` - Your Vercel deployment URL
 - [ ] `NEXT_PUBLIC_APP_NAME` - Application name (IMENSIAH)
-- [ ] `NEXT_PUBLIC_REPORT_PRICE` - Report price (890)
 
 ### Optional (Recommended)
 - [ ] `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - For payments
