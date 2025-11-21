@@ -251,7 +251,7 @@ export default function SignupPage() {
             type="submit"
             className="w-full mt-8"
             isLoading={isLoading}
-            disabled={isLoading || (password && !isPasswordValid())}
+            disabled={isLoading || (!!password && !isPasswordValid())}
           >
             Criar Conta
           </Button>

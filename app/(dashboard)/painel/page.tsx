@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { SubmissionCard } from '../_components/SubmissionCard';
 import { EnrichmentCard } from '../_components/EnrichmentCard';
 import { AnalysisCard } from '../_components/AnalysisCard';
@@ -92,12 +93,12 @@ export default function PainelPage() {
             {error || 'Você ainda não realizou nenhuma submissão. Comece criando uma nova análise.'}
           </p>
           {!error && (
-            <a
+            <Link
               href="/#diagnostico"
               className="inline-block px-6 py-3 bg-navy-900 text-white text-sm font-medium uppercase tracking-wider hover:bg-navy-800 transition-colors"
             >
               Criar Nova Análise
-            </a>
+            </Link>
           )}
           {error && (
             <button
