@@ -124,17 +124,10 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
     );
   }
 
-  // Parse notes JSON
-  let parsedNotes: any = {};
-  try {
-    parsedNotes = JSON.parse(submission.notes || '{}');
-  } catch {
-    parsedNotes = {};
-  }
-
-  const companyName = parsedNotes.companyName || submission.personalInfo?.fullName || 'N/A';
+  // Use submission fields directly (new structure)
+  const companyName = submission.companyName || 'N/A';
   const hasEnrichment = !!enrichment;
-  const hasAnalysis = submission.status === 'completed';
+  const hasAnalysis = submission.status === 'concluido'; // Portuguese status
 
   return (
     <div className="space-y-6">
@@ -189,33 +182,6 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
           </AccordionTrigger>
           <AccordionContent className="px-6 pb-6">
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Contact Information */}
-              <Card className="p-4 bg-gray-50">
-                <h4 className="font-semibold text-gray-900 mb-3">Informações de Contato</h4>
-                <dl className="space-y-2 text-sm">
-                  <div>
-                    <dt className="font-medium text-gray-700">Nome:</dt>
-                    <dd className="text-gray-600">{submission.personalInfo?.fullName || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-gray-700">Email:</dt>
-                    <dd className="text-gray-600">{submission.personalInfo?.email || 'N/A'}</dd>
-                  </div>
-                  {submission.personalInfo?.phone && (
-                    <div>
-                      <dt className="font-medium text-gray-700">Telefone:</dt>
-                      <dd className="text-gray-600">{submission.personalInfo?.phone}</dd>
-                    </div>
-                  )}
-                  {parsedNotes.contactPosition && (
-                    <div>
-                      <dt className="font-medium text-gray-700">Cargo:</dt>
-                      <dd className="text-gray-600">{parsedNotes.contactPosition}</dd>
-                    </div>
-                  )}
-                </dl>
-              </Card>
-
               {/* Company Information */}
               <Card className="p-4 bg-gray-50">
                 <h4 className="font-semibold text-gray-900 mb-3">Informações da Empresa</h4>
@@ -224,29 +190,29 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
                     <dt className="font-medium text-gray-700">Nome:</dt>
                     <dd className="text-gray-600">{companyName}</dd>
                   </div>
-                  {parsedNotes.companyIndustry && (
-                    <div>
-                      <dt className="font-medium text-gray-700">Setor:</dt>
-                      <dd className="text-gray-600">{parsedNotes.companyIndustry}</dd>
-                    </div>
-                  )}
-                  {parsedNotes.companySize && (
-                    <div>
-                      <dt className="font-medium text-gray-700">Tamanho:</dt>
-                      <dd className="text-gray-600">{parsedNotes.companySize}</dd>
-                    </div>
-                  )}
-                  {parsedNotes.companyWebsite && (
+                  <div>
+                    <dt className="font-medium text-gray-700">CNPJ:</dt>
+                    <dd className="text-gray-600">{submission.cnpj || 'N/A'}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-gray-700">Setor:</dt>
+                    <dd className="text-gray-600">{submission.industry || 'N/A'}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-gray-700">Tamanho:</dt>
+                    <dd className="text-gray-600">{submission.companySize || 'N/A'}</dd>
+                  </div>
+                  {submission.website && (
                     <div>
                       <dt className="font-medium text-gray-700">Website:</dt>
                       <dd className="text-gray-600">
                         <a
-                          href={parsedNotes.companyWebsite}
+                          href={submission.website}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-[#00a859] hover:underline"
                         >
-                          {parsedNotes.companyWebsite}
+                          {submission.website}
                         </a>
                       </dd>
                     </div>
@@ -254,12 +220,37 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
                 </dl>
               </Card>
 
-              {/* Business Challenge */}
-              {parsedNotes.businessChallenge && (
+              {/* Strategic Context */}
+              <Card className="p-4 bg-gray-50">
+                <h4 className="font-semibold text-gray-900 mb-3">Contexto Estratégico</h4>
+                <dl className="space-y-2 text-sm">
+                  <div>
+                    <dt className="font-medium text-gray-700">Objetivo Estratégico:</dt>
+                    <dd className="text-gray-600">{submission.strategicGoal || 'N/A'}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-gray-700">Posição Competitiva:</dt>
+                    <dd className="text-gray-600">{submission.competitivePosition || 'N/A'}</dd>
+                  </div>
+                </dl>
+              </Card>
+
+              {/* Current Challenges */}
+              {submission.currentChallenges && (
                 <Card className="p-4 bg-gray-50 md:col-span-2">
-                  <h4 className="font-semibold text-gray-900 mb-3">Desafio Estratégico</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3">Desafios Atuais</h4>
                   <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                    {parsedNotes.businessChallenge}
+                    {submission.currentChallenges}
+                  </p>
+                </Card>
+              )}
+
+              {/* Additional Information */}
+              {submission.additionalInfo && (
+                <Card className="p-4 bg-gray-50 md:col-span-2">
+                  <h4 className="font-semibold text-gray-900 mb-3">Informações Adicionais</h4>
+                  <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                    {submission.additionalInfo}
                   </p>
                 </Card>
               )}
@@ -312,7 +303,7 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
 
             {/* Enrichment Data Available */}
             {!enrichmentLoading && hasEnrichment && enrichment && (
-              <EnrichmentDisplay enrichment={enrichment} />
+              <EnrichmentDisplay enrichment={enrichment as any} />
             )}
           </AccordionContent>
         </AccordionItem>

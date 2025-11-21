@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import { Container } from "@/components/ui/Grid";
 import { Heading, Text, Label } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/button";
+import { siteConfig, publicRoutes } from "@/lib/config/site";
 
 export default function ThankYouPage() {
+  const router = useRouter();
+
   useEffect(() => {
     // Optional: Add analytics tracking here
     console.log("Thank you page viewed");
@@ -64,7 +68,7 @@ export default function ThankYouPage() {
 
           <Button
             variant="architect"
-            onClick={() => window.location.href = "/"}
+            onClick={() => router.push(publicRoutes.home)}
             className="mx-auto"
           >
             Voltar ao Início
@@ -76,10 +80,10 @@ export default function ThankYouPage() {
           <Text variant="small" className="text-text-tertiary">
             Dúvidas? Entre em contato:{" "}
             <a
-              href="mailto:contato@imensiah.com"
+              href={`mailto:${siteConfig.contact.email}`}
               className="text-gold-500 hover:underline"
             >
-              contato@imensiah.com
+              {siteConfig.contact.email}
             </a>
           </Text>
         </div>

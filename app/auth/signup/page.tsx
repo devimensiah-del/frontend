@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/FormField";
 import { Logo } from "@/components/ui/Logo";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
+import { siteConfig, authRoutes } from "@/lib/config/site";
 
 export default function SignupPage() {
   const router = useRouter();
   const { signUp } = useAuthContext();
+  const { toast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,12 +59,23 @@ export default function SignupPage() {
 
     try {
       await signUp(email, password, name);
-      toast.success("Conta criada com sucesso! Verifique seu email para confirmar.");
-      router.push("/auth/verify-email");
+
+      toast({
+        title: "Conta Criada",
+        description: "Verifique seu email para confirmar.",
+        variant: "success",
+      });
+
+      router.push(authRoutes.verifyEmail);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao criar conta";
       setError(errorMessage);
-      toast.error(errorMessage);
+
+      toast({
+        title: "Erro ao Criar Conta",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +91,7 @@ export default function SignupPage() {
         <div className="flex flex-col items-center mb-10">
           <Logo className="w-12 h-12 mb-4" />
           <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
-            IMENSIAH
+            {siteConfig.brand.name}
           </Heading>
           <Text variant="small" className="text-center mt-2 text-text-secondary">
             Criar Nova Conta
@@ -144,9 +157,9 @@ export default function SignupPage() {
             variant="architect"
             type="submit"
             className="w-full mt-8"
-            disabled={isLoading}
+            isLoading={isLoading}
           >
-            {isLoading ? "Criando conta..." : "Criar Conta"}
+            Criar Conta
           </Button>
         </form>
 
@@ -154,7 +167,7 @@ export default function SignupPage() {
         <div className="mt-8 text-center space-y-2">
           <Text variant="small" className="text-text-tertiary">
             Já tem uma conta?{" "}
-            <Link href="/login" className="text-gold-600 hover:text-gold-700 font-medium">
+            <Link href={authRoutes.login} className="text-gold-600 hover:text-gold-700 font-medium">
               Fazer login
             </Link>
           </Text>

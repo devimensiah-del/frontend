@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/Input';
 import { FormField } from '@/components/ui/FormField';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { useState } from 'react';
 
 // Mock user data - in production, fetch from API
@@ -17,6 +17,7 @@ const mockUser = {
 };
 
 export default function PerfilPage() {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: mockUser.fullName,
     jobTitle: mockUser.jobTitle,
@@ -48,7 +49,7 @@ export default function PerfilPage() {
       toast({
         title: 'Erro',
         description: 'Erro ao salvar perfil. Tente novamente.',
-        variant: 'error',
+        variant: 'destructive',
       });
     } finally {
       setSaving(false);

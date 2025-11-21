@@ -31,7 +31,7 @@ export default function EnrichmentEditorPage({
 
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [localEnrichmentData, setLocalEnrichmentData] = useState<
-    Partial<Enrichment["data"]>
+    Partial<Record<string, any>>
   >({});
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(
     null
@@ -70,8 +70,8 @@ export default function EnrichmentEditorPage({
 
   // Initialize local enrichment data
   useEffect(() => {
-    if (enrichment?.data) {
-      setLocalEnrichmentData(enrichment.data);
+    if ((enrichment as any)?.data) {
+      setLocalEnrichmentData((enrichment as any).data);
     }
   }, [enrichment]);
 
@@ -98,7 +98,7 @@ export default function EnrichmentEditorPage({
   }, [autoSaveTimer]);
 
   // Handle enrichment data change
-  const handleEnrichmentChange = (data: Partial<Enrichment["data"]>) => {
+  const handleEnrichmentChange = (data: Partial<Record<string, any>>) => {
     setLocalEnrichmentData(data);
     scheduleAutoSave();
   };
@@ -106,7 +106,7 @@ export default function EnrichmentEditorPage({
   // Save draft
   const handleSaveDraft = async (isAutoSave = false) => {
     try {
-      await update({ data: localEnrichmentData });
+      await update({ data: localEnrichmentData } as any);
 
       if (!isAutoSave) {
         toast({
@@ -130,7 +130,7 @@ export default function EnrichmentEditorPage({
   const handleApprove = async () => {
     try {
       // First, save current changes
-      await update({ data: localEnrichmentData });
+      await update({ data: localEnrichmentData } as any);
 
       // Then approve
       await approve();
@@ -180,7 +180,7 @@ export default function EnrichmentEditorPage({
       setIsGeneratingAnalysis(true);
 
       // First, save current enrichment changes
-      await update({ data: localEnrichmentData });
+      await update({ data: localEnrichmentData } as any);
 
       // Then generate analysis
       await analysisApi.generate(submissionId);

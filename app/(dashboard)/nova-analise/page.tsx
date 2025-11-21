@@ -30,6 +30,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { useSubmissions } from '@/lib/hooks/use-submissions';
+import { dashboardRoutes } from '@/lib/config/site';
 
 // Form validation schema
 const formSchema = z.object({
@@ -95,38 +96,28 @@ export default function NovaAnalisePage() {
 
   async function onSubmit(data: FormValues) {
     try {
-      // Map form data to API format matching SubmissionFormData
+      // Map form data to new API format matching SubmissionFormData
       const submissionData = {
-        // Required fields from SubmissionFormData
+        // Required fields from new SubmissionFormData
         companyName: data.companyName,
-        email: data.contactEmail,
-        phone: data.contactPhone,
-        description: data.businessChallenge,
-        industry: data.companyIndustry,
-        // Additional nested data (optional based on Submission type)
-        personalInfo: {
-          fullName: data.contactName,
-          email: data.contactEmail,
-          phone: data.contactPhone || '',
-          document: '',
-        },
-        address: {
-          street: '',
-          city: data.companyLocation || '',
-          state: '',
-          zipCode: '',
-        },
-        notes: JSON.stringify({
-          companyName: data.companyName,
-          companyWebsite: data.companyWebsite,
-          companyIndustry: data.companyIndustry,
-          companySize: data.companySize,
+        cnpj: '00.000.000/0000-00', // TODO: Add CNPJ field to form
+        industry: data.companyIndustry || 'Não especificado',
+        companySize: data.companySize || 'Não especificado',
+        website: data.companyWebsite || undefined,
+        strategicGoal: data.businessChallenge, // Map challenge to strategic goal
+        currentChallenges: data.businessChallenge,
+        competitivePosition: 'Em análise', // TODO: Add competitive position field to form
+        // Additional info containing all extra form data
+        additionalInfo: JSON.stringify({
+          contactName: data.contactName,
+          contactEmail: data.contactEmail,
+          contactPhone: data.contactPhone,
           contactPosition: data.contactPosition,
+          companyLocation: data.companyLocation,
           targetMarket: data.targetMarket,
           annualRevenueMin: data.annualRevenueMin,
           annualRevenueMax: data.annualRevenueMax,
           fundingStage: data.fundingStage,
-          businessChallenge: data.businessChallenge,
           additionalNotes: data.additionalNotes,
           linkedinUrl: data.linkedinUrl,
           twitterHandle: data.twitterHandle,
@@ -141,7 +132,7 @@ export default function NovaAnalisePage() {
       });
 
       // Redirect to dashboard
-      router.push('/painel');
+      router.push(dashboardRoutes.main);
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({

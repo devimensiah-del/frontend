@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/FormField";
 import { Logo } from "@/components/ui/Logo";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
+import { siteConfig, authRoutes } from "@/lib/config/site";
 
 export default function ForgotPasswordPage() {
   const { sendPasswordReset } = useAuthContext();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -31,11 +33,21 @@ export default function ForgotPasswordPage() {
     try {
       await sendPasswordReset(email);
       setIsSuccess(true);
-      toast.success("Email de recuperação enviado!");
+
+      toast({
+        title: "Email Enviado",
+        description: "Verifique sua caixa de entrada.",
+        variant: "success",
+      });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao enviar email";
       setError(errorMessage);
-      toast.error(errorMessage);
+
+      toast({
+        title: "Erro",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +63,7 @@ export default function ForgotPasswordPage() {
         <div className="flex flex-col items-center mb-10">
           <Logo className="w-12 h-12 mb-4" />
           <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
-            IMENSIAH
+            {siteConfig.brand.name}
           </Heading>
           <Text variant="small" className="text-center mt-2 text-text-secondary">
             Recuperar Senha
@@ -68,7 +80,7 @@ export default function ForgotPasswordPage() {
             <Text variant="small" className="text-center text-text-tertiary">
               Verifique sua caixa de entrada e spam. O link expira em 1 hora.
             </Text>
-            <Link href="/login" className="block">
+            <Link href={authRoutes.login} className="block">
               <Button variant="architect" className="w-full">
                 Voltar ao Login
               </Button>
@@ -109,9 +121,9 @@ export default function ForgotPasswordPage() {
                 variant="architect"
                 type="submit"
                 className="w-full mt-8"
-                disabled={isLoading}
+                isLoading={isLoading}
               >
-                {isLoading ? "Enviando..." : "Enviar Link de Recuperação"}
+                Enviar Link de Recuperação
               </Button>
             </form>
 
@@ -119,7 +131,7 @@ export default function ForgotPasswordPage() {
             <div className="mt-8 text-center space-y-2">
               <Text variant="small" className="text-text-tertiary">
                 Lembrou sua senha?{" "}
-                <Link href="/login" className="text-gold-600 hover:text-gold-700 font-medium">
+                <Link href={authRoutes.login} className="text-gold-600 hover:text-gold-700 font-medium">
                   Fazer login
                 </Link>
               </Text>

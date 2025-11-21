@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return {
           id: profile.id,
           email: profile.email,
-          name: profile.name || profile.email,
+          fullName: profile.full_name || profile.email,
           role: profile.role || 'user',
           createdAt: profile.created_at,
           updatedAt: profile.updated_at,
@@ -122,7 +122,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Note: User needs to verify email before they can sign in
-    return data;
   };
 
   // Sign out

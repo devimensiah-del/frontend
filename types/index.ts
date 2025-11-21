@@ -1,76 +1,82 @@
 /**
  * Core TypeScript types for the application
+ *
+ * This file re-exports types from lib/types/index.ts which contains
+ * the correct type definitions matching the Go backend models.
+ *
+ * @deprecated Direct imports from '@/types' are maintained for backward compatibility.
+ * New code should import from '@/lib/types' instead.
  */
 
-// User types
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: 'admin' | 'user';
-  createdAt: string;
-  updatedAt: string;
-}
+// Re-export all types from lib/types (correct Go backend types)
+export type {
+  // Status and enum types
+  SubmissionStatus,
+  UserRole,
+  PaymentStatus,
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
+  // User types
+  User,
+  AuthState,
 
-export interface SignupData {
-  name: string;
-  email: string;
-  password: string;
-}
+  // Submission types
+  Submission,
 
-export interface ResetPasswordData {
-  token: string;
-  password: string;
-}
+  // Enrichment types (Strategic)
+  Enrichment,
+  StrategicProfile,
+  CompanyOverview,
+  MarketIntelligence,
+  CompetitiveLandscape,
+  FinancialMetrics,
+  OperationalCapabilities,
+  RiskAssessment,
 
-// Form data types for API calls
-export type LoginFormData = LoginCredentials;
-export type SignupFormData = SignupData;
-export type ResetPasswordFormData = Omit<ResetPasswordData, 'token'>;
+  // Analysis types
+  Analysis,
+  PESTELAnalysis,
+  PorterFiveForcesAnalysis,
+  SWOTAnalysis,
+  VRIOAnalysis,
+  ValueChainAnalysis,
+  BCGMatrixAnalysis,
+  AnsoffMatrixAnalysis,
+  BalancedScorecardAnalysis,
+  McKinsey7SAnalysis,
+  BlueOceanAnalysis,
+  CoreCompetenciesAnalysis,
 
-export interface SubmissionFormData {
-  companyName: string;
-  email: string;
-  phone?: string;
-  description?: string;
-  industry?: string;
-}
+  // Report types
+  Report,
+  ReportPage,
 
-// Submission types
-export interface Submission {
-  id: string;
-  userId: string;
-  companyName: string;
-  email: string;
-  phone?: string;
-  description?: string;
-  industry?: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  personalInfo?: {
-    fullName: string;
-    email: string;
-    phone: string;
-    document: string;
-  };
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  notes?: string;
-  attachments?: string[];
-  createdAt: string;
-  updatedAt: string;
-}
+  // API response types
+  ApiResponse,
+  PaginatedResponse,
 
-// Enrichment types
-export interface Enrichment {
+  // Form types
+  SubmissionFormData,
+  LoginFormData,
+  SignupFormData,
+  ResetPasswordFormData,
+  UpdatePasswordFormData,
+} from '@/lib/types';
+
+// Legacy type aliases for backward compatibility
+export type { Enrichment as EnrichmentData, Analysis as AnalysisData } from '@/lib/types';
+
+// ============================================================================
+// Legacy Personal Data Enrichment Types (Deprecated)
+// ============================================================================
+// These types were used in the old system for personal data enrichment.
+// They are kept for backward compatibility with existing UI components.
+// New code should use the strategic Enrichment types from lib/types instead.
+
+/**
+ * @deprecated Legacy type for personal data enrichment UI components.
+ * The new system uses strategic company analysis (Enrichment from lib/types).
+ */
+export interface PersonalEnrichmentData {
   id: string;
   submissionId: string;
   status: 'pending' | 'approved' | 'rejected';
@@ -106,84 +112,4 @@ export interface Enrichment {
   rejectionReason?: string;
   createdAt: string;
   updatedAt: string;
-}
-
-// Legacy type alias for backward compatibility
-export type EnrichmentData = Enrichment;
-
-// Analysis types
-export interface Analysis {
-  id: string;
-  submissionId: string;
-  status: 'pending' | 'completed' | 'failed';
-  swot?: {
-    strengths: string[];
-    weaknesses: string[];
-    opportunities: string[];
-    threats: string[];
-  };
-  pestel?: {
-    political: string[];
-    economic: string[];
-    social: string[];
-    technological: string[];
-    environmental: string[];
-    legal: string[];
-  };
-  porter?: {
-    competitiveRivalry: {
-      intensity: string;
-      factors: string[];
-    };
-    threatOfNewEntrants: {
-      intensity: string;
-      factors: string[];
-    };
-    bargainingPowerOfSuppliers: {
-      intensity: string;
-      factors: string[];
-    };
-    bargainingPowerOfBuyers: {
-      intensity: string;
-      factors: string[];
-    };
-    threatOfSubstitutes: {
-      intensity: string;
-      factors: string[];
-    };
-  };
-  summary?: string;
-  findings?: string[];
-  recommendations?: string[];
-  riskLevel?: 'low' | 'medium' | 'high';
-  confidenceScore?: number;
-  generatedAt?: string;
-  sentToUserAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Legacy type alias for backward compatibility
-export type AnalysisData = Analysis;
-
-// API Response types
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: {
-    currentPage: number;
-    pageSize: number;
-    totalItems: number;
-    totalPages: number;
-  };
-  total?: number; // Legacy support
-  page?: number; // Legacy support
-  limit?: number; // Legacy support
-  hasNext?: boolean; // Legacy support
-  hasPrev?: boolean; // Legacy support
 }

@@ -8,6 +8,7 @@ import { AdminInboxSkeleton } from "@/components/skeletons";
 import { toast } from "@/components/ui/use-toast";
 import { enrichmentApi, adminApi } from "@/lib/api/client";
 import { canStartEnrichment } from "@/lib/utils/workflow";
+import type { SubmissionStatus } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,14 +22,21 @@ import { MoreVertical } from "lucide-react";
    ADMIN DASHBOARD - Submissions Inbox
    ============================================ */
 
-// Mock Data - Matches Submission type
+// Mock Data - Matches new Submission type from lib/types
 const MOCK_SUBMISSIONS = [
   {
     id: "uuid-1",
     userId: "admin-1",
     companyName: "Acme Corp",
-    status: "completed" as const,
-    email: "ceo@acme.com",
+    cnpj: "12.345.678/0001-90",
+    industry: "Tecnologia",
+    companySize: "Médio Porte (50-250)",
+    website: "https://acmecorp.com",
+    strategicGoal: "Expandir mercado internacional",
+    currentChallenges: "Competição acirrada no setor",
+    competitivePosition: "Líder regional",
+    status: "concluido" as const,
+    paymentStatus: "aprovado" as const,
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-01-15T14:00:00Z",
   },
@@ -36,8 +44,15 @@ const MOCK_SUBMISSIONS = [
     id: "uuid-2",
     userId: "admin-1",
     companyName: "TechStart Inc",
-    status: "processing" as const,
-    email: "founder@techstart.io",
+    cnpj: "23.456.789/0001-01",
+    industry: "Software",
+    companySize: "Pequeno Porte (10-50)",
+    website: "https://techstart.io",
+    strategicGoal: "Crescer base de usuários",
+    currentChallenges: "Falta de recursos de marketing",
+    competitivePosition: "Entrante",
+    status: "em_enriquecimento" as const,
+    paymentStatus: "aprovado" as const,
     createdAt: "2025-01-18T10:00:00Z",
     updatedAt: "2025-01-18T12:00:00Z",
   },
@@ -45,8 +60,15 @@ const MOCK_SUBMISSIONS = [
     id: "uuid-3",
     userId: "admin-1",
     companyName: "Global Solutions",
-    status: "pending" as const,
-    email: "admin@globalsolutions.com",
+    cnpj: "34.567.890/0001-12",
+    industry: "Consultoria",
+    companySize: "Grande Porte (250+)",
+    website: "https://globalsolutions.com",
+    strategicGoal: "Diversificar serviços",
+    currentChallenges: "Retenção de talentos",
+    competitivePosition: "Desafiante",
+    status: "pendente" as const,
+    paymentStatus: "pendente" as const,
     createdAt: "2025-01-19T10:00:00Z",
     updatedAt: "2025-01-19T10:00:00Z",
   },
@@ -54,8 +76,14 @@ const MOCK_SUBMISSIONS = [
     id: "uuid-4",
     userId: "admin-1",
     companyName: "Innovate Labs",
-    status: "pending" as const,
-    email: "contact@innovatelabs.com",
+    cnpj: "45.678.901/0001-23",
+    industry: "P&D",
+    companySize: "Pequeno Porte (10-50)",
+    strategicGoal: "Lançar produto inovador",
+    currentChallenges: "Financiamento limitado",
+    competitivePosition: "Nicho",
+    status: "aguardando_pagamento" as const,
+    paymentStatus: "pendente" as const,
     createdAt: "2025-01-20T10:00:00Z",
     updatedAt: "2025-01-20T10:00:00Z",
   },
@@ -63,8 +91,15 @@ const MOCK_SUBMISSIONS = [
     id: "uuid-5",
     userId: "admin-1",
     companyName: "Future Dynamics",
-    status: "completed" as const,
-    email: "info@futuredynamics.com",
+    cnpj: "56.789.012/0001-34",
+    industry: "Energia Renovável",
+    companySize: "Médio Porte (50-250)",
+    website: "https://futuredynamics.com",
+    strategicGoal: "Sustentabilidade operacional",
+    currentChallenges: "Regulação governamental",
+    competitivePosition: "Inovador",
+    status: "concluido" as const,
+    paymentStatus: "aprovado" as const,
     createdAt: "2025-01-14T10:00:00Z",
     updatedAt: "2025-01-14T16:00:00Z",
   },
@@ -72,14 +107,19 @@ const MOCK_SUBMISSIONS = [
     id: "uuid-6",
     userId: "admin-1",
     companyName: "Quantum Ventures",
-    status: "processing" as const,
-    email: "team@quantumventures.io",
+    cnpj: "67.890.123/0001-45",
+    industry: "Investimentos",
+    companySize: "Pequeno Porte (10-50)",
+    website: "https://quantumventures.io",
+    strategicGoal: "Maximizar retornos",
+    currentChallenges: "Volatilidade do mercado",
+    competitivePosition: "Seguidor",
+    status: "em_analise" as const,
+    paymentStatus: "aprovado" as const,
     createdAt: "2025-01-21T10:00:00Z",
     updatedAt: "2025-01-21T11:00:00Z",
   },
 ];
-
-type SubmissionStatus = "completed" | "processing" | "action_required" | "pending";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -155,12 +195,12 @@ export default function AdminDashboard() {
               <StatsCard label="Total" value={MOCK_SUBMISSIONS.length} />
               <StatsCard
                 label="Pending"
-                value={MOCK_SUBMISSIONS.filter(s => s.status === "pending").length}
+                value={MOCK_SUBMISSIONS.filter(s => s.status === "pendente" || s.status === "aguardando_pagamento").length}
                 variant="warning"
               />
               <StatsCard
                 label="Completed"
-                value={MOCK_SUBMISSIONS.filter(s => s.status === "completed").length}
+                value={MOCK_SUBMISSIONS.filter(s => s.status === "concluido").length}
                 variant="success"
               />
             </div>
@@ -177,7 +217,7 @@ export default function AdminDashboard() {
               <TableHeader>Company Name</TableHeader>
             </div>
             <div className="col-span-3">
-              <TableHeader>Email</TableHeader>
+              <TableHeader>CNPJ</TableHeader>
             </div>
             <div className="col-span-2">
               <TableHeader>Status</TableHeader>
@@ -204,10 +244,10 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Email */}
+                {/* CNPJ */}
                 <div className="col-span-3 flex items-center">
-                  <div className="text-sm text-text-secondary">
-                    {submission.email}
+                  <div className="text-sm text-text-secondary font-mono">
+                    {submission.cnpj}
                   </div>
                 </div>
 
@@ -288,26 +328,56 @@ interface StatusBadgeProps {
 }
 
 function StatusBadge({ status }: StatusBadgeProps) {
-  const variants = {
-    completed: {
-      bg: "bg-gold-500/10",
-      text: "text-gold-600",
-      label: "Completed",
-    },
-    processing: {
-      bg: "bg-navy-900/10",
-      text: "text-navy-900",
-      label: "Processing",
-    },
-    action_required: {
-      bg: "bg-red-50",
-      text: "text-red-600",
-      label: "Action Required",
-    },
-    pending: {
+  const variants: Record<SubmissionStatus, { bg: string; text: string; label: string }> = {
+    pendente: {
       bg: "bg-gray-100",
       text: "text-gray-600",
-      label: "Pending",
+      label: "Pendente",
+    },
+    aguardando_pagamento: {
+      bg: "bg-yellow-50",
+      text: "text-yellow-600",
+      label: "Aguardando Pagamento",
+    },
+    em_enriquecimento: {
+      bg: "bg-blue-50",
+      text: "text-blue-600",
+      label: "Em Enriquecimento",
+    },
+    enriquecimento_completo: {
+      bg: "bg-indigo-50",
+      text: "text-indigo-600",
+      label: "Enriquecimento Completo",
+    },
+    em_analise: {
+      bg: "bg-purple-50",
+      text: "text-purple-600",
+      label: "Em Análise",
+    },
+    analise_completa: {
+      bg: "bg-teal-50",
+      text: "text-teal-600",
+      label: "Análise Completa",
+    },
+    em_geracao_relatorio: {
+      bg: "bg-cyan-50",
+      text: "text-cyan-600",
+      label: "Gerando Relatório",
+    },
+    concluido: {
+      bg: "bg-gold-500/10",
+      text: "text-gold-600",
+      label: "Concluído",
+    },
+    cancelado: {
+      bg: "bg-gray-200",
+      text: "text-gray-500",
+      label: "Cancelado",
+    },
+    erro: {
+      bg: "bg-red-50",
+      text: "text-red-600",
+      label: "Erro",
     },
   };
 

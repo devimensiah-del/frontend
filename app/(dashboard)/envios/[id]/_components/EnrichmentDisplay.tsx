@@ -1,10 +1,10 @@
 import { ExternalLink } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { Enrichment } from '@/types';
+import type { PersonalEnrichmentData } from '@/types';
 
 interface EnrichmentDisplayProps {
-  enrichment: Enrichment;
+  enrichment: PersonalEnrichmentData;
 }
 
 export function EnrichmentDisplay({ enrichment }: EnrichmentDisplayProps) {

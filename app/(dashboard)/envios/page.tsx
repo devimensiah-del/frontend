@@ -75,8 +75,8 @@ export default function EnviosPage() {
     const searchLower = searchQuery.toLowerCase();
     return (
       submission.id.toLowerCase().includes(searchLower) ||
-      submission.personalInfo?.fullName?.toLowerCase().includes(searchLower) ||
-      submission.personalInfo?.email?.toLowerCase().includes(searchLower)
+      submission.companyName?.toLowerCase().includes(searchLower) ||
+      submission.cnpj?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -179,14 +179,8 @@ export default function EnviosPage() {
             </TableHeader>
             <TableBody>
               {filteredSubmissions.map((submission) => {
-                // Extract company name from notes JSON
-                let companyName = 'N/A';
-                try {
-                  const notes = JSON.parse(submission.notes || '{}');
-                  companyName = notes.companyName || submission.personalInfo?.fullName || 'N/A';
-                } catch {
-                  companyName = submission.personalInfo?.fullName || 'N/A';
-                }
+                // Use company name directly from submission
+                const companyName = submission.companyName || 'N/A';
 
                 return (
                   <TableRow

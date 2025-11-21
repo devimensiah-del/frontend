@@ -241,9 +241,31 @@ export const workflowStages: WorkflowStage[] = [
 export const authRoutes = {
   login: '/login',
   signup: '/auth/signup',
+  forgotPassword: '/auth/forgot-password',
   resetPassword: '/auth/reset-password',
   updatePassword: '/auth/update-password',
+  verifyEmail: '/auth/verify-email',
   logout: '/api/auth/logout',
+} as const;
+
+export const dashboardRoutes = {
+  main: '/dashboard',
+  novaAnalise: '/dashboard/nova-analise',
+  envios: '/dashboard/envios',
+  perfil: '/dashboard/perfil',
+  configuracoes: '/account/settings',
+  payments: '/account/payments',
+} as const;
+
+export const adminRoutes = {
+  dashboard: '/admin/dashboard',
+  submissions: '/admin/submissions',
+  enriquecimento: '/admin/enriquecimento',
+  enrichment: '/admin/enrichment',
+  analysis: '/admin/analysis',
+  analytics: '/admin/analytics',
+  users: '/admin/users',
+  profile: '/admin/profile',
 } as const;
 
 export const protectedRoutes = {
@@ -255,6 +277,7 @@ export const publicRoutes = {
   home: '/',
   terms: '/termos',
   privacy: '/privacidade',
+  obrigado: '/obrigado',
 } as const;
 
 // ============================================================================

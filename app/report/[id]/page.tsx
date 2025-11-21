@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Download, Loader2 } from 'lucide-react';
+import { analysisApi } from '@/lib/api/client';
+import { useToast } from '@/components/ui/use-toast';
 
 // Mock data - same structure as the analysis preview
 const MOCK_ANALYSIS = {
@@ -259,6 +261,7 @@ const MOCK_ANALYSIS = {
 export default function ReportPage() {
   const params = useParams();
   const reportId = params.id as string;
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
 
@@ -271,23 +274,32 @@ export default function ReportPage() {
   const handleDownloadPDF = async () => {
     setDownloading(true);
     try {
-      // TODO: Implement actual PDF download
-      // const response = await fetch(`/api/reports/${reportId}/pdf`);
-      // const blob = await response.blob();
-      // const url = window.URL.createObjectURL(blob);
-      // const a = document.createElement('a');
-      // a.href = url;
-      // a.download = `imensiah-report-${reportId}.pdf`;
-      // document.body.appendChild(a);
-      // a.click();
-      // window.URL.revokeObjectURL(url);
-      // document.body.removeChild(a);
+      // Call the API to get the PDF blob
+      const blob = await analysisApi.getPdf(reportId);
 
-      // Mock delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('PDF download triggered for report:', reportId);
-    } catch (error) {
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `imensiah-report-${reportId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: 'PDF Baixado',
+        description: 'O relatório foi baixado com sucesso.',
+        variant: 'success',
+      });
+    } catch (error: any) {
       console.error('Error downloading PDF:', error);
+
+      toast({
+        title: 'Erro ao Baixar PDF',
+        description: error.message || 'Não foi possível baixar o PDF. Tente novamente.',
+        variant: 'destructive',
+      });
     } finally {
       setDownloading(false);
     }

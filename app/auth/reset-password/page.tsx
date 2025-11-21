@@ -9,12 +9,14 @@ import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/FormField";
 import { Logo } from "@/components/ui/Logo";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
+import { siteConfig, authRoutes } from "@/lib/config/site";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { updatePassword } = useAuthContext();
+  const { toast } = useToast();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -55,16 +57,26 @@ export default function ResetPasswordPage() {
     try {
       await updatePassword(password);
       setIsSuccess(true);
-      toast.success("Senha redefinida com sucesso!");
+
+      toast({
+        title: "Senha Redefinida",
+        description: "Você será redirecionado para o login.",
+        variant: "success",
+      });
 
       // Redirect to login after 2 seconds
       setTimeout(() => {
-        router.push("/login");
+        router.push(authRoutes.login);
       }, 2000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao redefinir senha";
       setError(errorMessage);
-      toast.error(errorMessage);
+
+      toast({
+        title: "Erro",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +91,7 @@ export default function ResetPasswordPage() {
           <div className="flex flex-col items-center mb-10">
             <Logo className="w-12 h-12 mb-4" />
             <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
-              IMENSIAH
+              {siteConfig.brand.name}
             </Heading>
           </div>
 
@@ -89,7 +101,7 @@ export default function ResetPasswordPage() {
                 Link inválido ou expirado. Por favor, solicite um novo link de recuperação.
               </Text>
             </div>
-            <Link href="/auth/forgot-password" className="block">
+            <Link href={authRoutes.forgotPassword} className="block">
               <Button variant="architect" className="w-full">
                 Solicitar Novo Link
               </Button>
@@ -110,7 +122,7 @@ export default function ResetPasswordPage() {
         <div className="flex flex-col items-center mb-10">
           <Logo className="w-12 h-12 mb-4" />
           <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
-            IMENSIAH
+            {siteConfig.brand.name}
           </Heading>
           <Text variant="small" className="text-center mt-2 text-text-secondary">
             Redefinir Senha
@@ -171,9 +183,9 @@ export default function ResetPasswordPage() {
                 variant="architect"
                 type="submit"
                 className="w-full mt-8"
-                disabled={isLoading}
+                isLoading={isLoading}
               >
-                {isLoading ? "Redefinindo..." : "Redefinir Senha"}
+                Redefinir Senha
               </Button>
             </form>
 
@@ -181,7 +193,7 @@ export default function ResetPasswordPage() {
             <div className="mt-8 text-center">
               <Text variant="small" className="text-text-tertiary">
                 Lembrou sua senha?{" "}
-                <Link href="/login" className="text-gold-600 hover:text-gold-700 font-medium">
+                <Link href={authRoutes.login} className="text-gold-600 hover:text-gold-700 font-medium">
                   Fazer login
                 </Link>
               </Text>

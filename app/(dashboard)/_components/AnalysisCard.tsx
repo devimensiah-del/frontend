@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useState } from 'react';
+import { analysisApi } from '@/lib/api/client';
+import { useToast } from '@/components/ui/use-toast';
 
 interface AnalysisData {
   id: string;
@@ -21,6 +23,7 @@ interface AnalysisCardProps {
 }
 
 export function AnalysisCard({ analysis }: AnalysisCardProps) {
+  const { toast } = useToast();
   const [downloading, setDownloading] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -34,13 +37,12 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
   };
 
   const handleDownloadPDF = async () => {
-    if (!analysis.pdfUrl) return;
-
     setDownloading(true);
     try {
-      // Mock download - in production, this would fetch from the backend
-      const response = await fetch(analysis.pdfUrl);
-      const blob = await response.blob();
+      // Call the API to get the PDF blob
+      const blob = await analysisApi.getPdf(analysis.id);
+
+      // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -49,9 +51,20 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
+
+      toast({
+        title: 'PDF Baixado',
+        description: 'O relatório foi baixado com sucesso.',
+        variant: 'success',
+      });
+    } catch (error: any) {
       console.error('Erro ao baixar PDF:', error);
-      alert('Erro ao baixar o relatório. Tente novamente.');
+
+      toast({
+        title: 'Erro ao Baixar',
+        description: error.message || 'Erro ao baixar o relatório. Tente novamente.',
+        variant: 'destructive',
+      });
     } finally {
       setDownloading(false);
     }

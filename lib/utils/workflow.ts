@@ -243,7 +243,7 @@ export function getWorkflowProgress(
     return 30;
   }
   if (stage === 3) {
-    if (submission.status === "completed") return 100;
+    if (submission.status === "concluido") return 100;
     if (analysis?.status === "completed") return 90;
     return 75;
   }

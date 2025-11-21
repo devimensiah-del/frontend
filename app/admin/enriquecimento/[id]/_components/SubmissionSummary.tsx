@@ -27,67 +27,44 @@ export function SubmissionSummary({ submission }: SubmissionSummaryProps) {
           <SectionTitle>Informações da Empresa</SectionTitle>
           <div className="space-y-3 mt-3">
             <DataRow label="Nome da Empresa" value={submission.companyName} />
-            <DataRow label="Email" value={submission.email} />
-            {submission.phone && (
-              <DataRow label="Telefone" value={submission.phone} />
-            )}
-            {submission.industry && (
-              <DataRow label="Setor" value={submission.industry} />
+            <DataRow label="CNPJ" value={submission.cnpj} />
+            <DataRow label="Setor" value={submission.industry} />
+            <DataRow label="Tamanho" value={submission.companySize} />
+            {submission.website && (
+              <DataRow label="Website" value={
+                <a href={submission.website} target="_blank" rel="noopener noreferrer" className="text-gold-500 hover:underline">
+                  {submission.website}
+                </a>
+              } />
             )}
           </div>
         </div>
 
-        {/* Description */}
-        {submission.description && (
+        {/* Strategic Context */}
+        <div>
+          <SectionTitle>Contexto Estratégico</SectionTitle>
+          <div className="space-y-3 mt-3">
+            <DataRow label="Objetivo Estratégico" value={submission.strategicGoal} />
+            <DataRow label="Posição Competitiva" value={submission.competitivePosition} />
+          </div>
+        </div>
+
+        {/* Current Challenges */}
+        {submission.currentChallenges && (
           <div>
-            <SectionTitle>Descrição</SectionTitle>
+            <SectionTitle>Desafios Atuais</SectionTitle>
             <p className="text-sm text-text-primary mt-2 whitespace-pre-wrap">
-              {submission.description}
+              {submission.currentChallenges}
             </p>
           </div>
         )}
 
-        {/* Personal Info (if available) */}
-        {submission.personalInfo && (
+        {/* Additional Information */}
+        {submission.additionalInfo && (
           <div>
-            <SectionTitle>Informações Pessoais</SectionTitle>
-            <div className="space-y-3 mt-3">
-              <DataRow
-                label="Nome Completo"
-                value={submission.personalInfo?.fullName || 'N/A'}
-              />
-              <DataRow
-                label="Documento"
-                value={submission.personalInfo?.document || 'N/A'}
-              />
-              <DataRow label="Email" value={submission.personalInfo?.email || 'N/A'} />
-              <DataRow
-                label="Telefone"
-                value={submission.personalInfo?.phone || 'N/A'}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Address (if available) */}
-        {submission.address && (
-          <div>
-            <SectionTitle>Endereço</SectionTitle>
-            <div className="space-y-3 mt-3">
-              <DataRow label="Rua" value={submission.address?.street || 'N/A'} />
-              <DataRow label="Cidade" value={submission.address?.city || 'N/A'} />
-              <DataRow label="Estado" value={submission.address?.state || 'N/A'} />
-              <DataRow label="CEP" value={submission.address?.zipCode || 'N/A'} />
-            </div>
-          </div>
-        )}
-
-        {/* Notes */}
-        {submission.notes && (
-          <div>
-            <SectionTitle>Notas</SectionTitle>
+            <SectionTitle>Informações Adicionais</SectionTitle>
             <p className="text-sm text-text-secondary mt-2 whitespace-pre-wrap">
-              {submission.notes}
+              {submission.additionalInfo}
             </p>
           </div>
         )}

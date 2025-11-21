@@ -13,7 +13,7 @@ import type { Enrichment } from "@/types";
 
 interface EnrichmentFormProps {
   enrichment: Enrichment | null;
-  onChange: (data: Partial<Enrichment["data"]>) => void;
+  onChange: (data: Partial<Record<string, any>>) => void;
   disabled?: boolean;
 }
 
@@ -22,11 +22,11 @@ export function EnrichmentForm({
   onChange,
   disabled = false,
 }: EnrichmentFormProps) {
-  const [formData, setFormData] = useState(enrichment?.data || {});
+  const [formData, setFormData] = useState<Record<string, any>>((enrichment as any)?.data || {});
 
   useEffect(() => {
-    if (enrichment?.data) {
-      setFormData(enrichment.data);
+    if ((enrichment as any)?.data) {
+      setFormData((enrichment as any).data);
     }
   }, [enrichment]);
 

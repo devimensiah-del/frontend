@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Container } from "@/components/ui/Grid";
 import { Heading, Text } from "@/components/ui/Typography";
@@ -9,11 +9,14 @@ import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/FormField";
 import { Logo } from "@/components/ui/Logo";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
+import { siteConfig, authRoutes, adminRoutes } from "@/lib/config/site";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn } = useAuthContext();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,14 +29,25 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
-      toast.success("Login realizado com sucesso!");
 
-      // Redirect based on user role (you can enhance this)
-      router.push("/admin/dashboard");
+      toast({
+        title: "Bem-vindo de volta",
+        description: "Login realizado com sucesso.",
+        variant: "success",
+      });
+
+      // Dynamic redirect based on URL param or default to admin dashboard
+      const redirectPath = searchParams.get("redirect") || adminRoutes.dashboard;
+      router.push(redirectPath);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao fazer login";
       setError(errorMessage);
-      toast.error(errorMessage);
+
+      toast({
+        title: "Erro de Acesso",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +63,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center mb-10">
           <Logo className="w-12 h-12 mb-4" />
           <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
-            IMENSIAH
+            {siteConfig.brand.name}
           </Heading>
           <Text variant="small" className="text-center mt-2 text-text-secondary">
             Acesso Administrativo
@@ -71,7 +85,7 @@ export default function LoginPage() {
             label="Email"
             id="email"
             type="email"
-            placeholder="admin@imensiah.com"
+            placeholder="seu@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -90,7 +104,7 @@ export default function LoginPage() {
           />
 
           <div className="flex justify-end">
-            <Link href="/auth/forgot-password" className="text-sm text-gold-600 hover:text-gold-700">
+            <Link href={authRoutes.forgotPassword} className="text-sm text-gold-600 hover:text-gold-700">
               Esqueceu sua senha?
             </Link>
           </div>
@@ -99,9 +113,9 @@ export default function LoginPage() {
             variant="architect"
             type="submit"
             className="w-full mt-8"
-            disabled={isLoading}
+            isLoading={isLoading}
           >
-            {isLoading ? "Entrando..." : "Entrar"}
+            Entrar
           </Button>
         </form>
 
@@ -109,7 +123,7 @@ export default function LoginPage() {
         <div className="mt-8 text-center space-y-2">
           <Text variant="small" className="text-text-tertiary">
             Não tem uma conta?{" "}
-            <Link href="/auth/signup" className="text-gold-600 hover:text-gold-700 font-medium">
+            <Link href={authRoutes.signup} className="text-gold-600 hover:text-gold-700 font-medium">
               Criar conta
             </Link>
           </Text>

@@ -509,7 +509,7 @@ export const mockEnrichments: Enrichment[] = [
     },
     operationalCapabilities: {
       productionCapacity: 'N/A (varejo)',
-      technologyInfrastructura: [
+      technologyInfrastructure: [
         'Plataforma de e-commerce proprietária',
         'App mobile avançado',
         'Sistema de marketplace',
@@ -526,7 +526,7 @@ export const mockEnrichments: Enrichment[] = [
       digitalMaturity: 'Muito alta - empresa digital-first',
     },
     riskAssessment: {
-      strategicRiscos: [
+      strategicRisks: [
         {
           risk: 'Competição intensa com Mercado Livre e Amazon',
           severity: 'alta',

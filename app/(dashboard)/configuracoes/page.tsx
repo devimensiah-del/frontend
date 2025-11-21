@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Save, Trash2, Eye, EyeOff } from 'lucide-react';
 
@@ -19,8 +20,13 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { authApi } from '@/lib/api/client';
+import { useToast } from '@/components/ui/use-toast';
+import { dashboardRoutes, publicRoutes } from '@/lib/config/site';
 
 export default function ConfiguracoesPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+
   // Password change state
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -47,24 +53,6 @@ export default function ConfiguracoesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
-  // Toast state
-  const [toast, setToast] = useState<{
-    show: boolean;
-    type: 'success' | 'error';
-    message: string;
-  }>({
-    show: false,
-    type: 'success',
-    message: '',
-  });
-
-  const showToast = (type: 'success' | 'error', message: string) => {
-    setToast({ show: true, type, message });
-    setTimeout(() => {
-      setToast({ show: false, type: 'success', message: '' });
-    }, 3000);
-  };
-
   // Handle password change
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +74,12 @@ export default function ConfiguracoesPage() {
     try {
       await authApi.updatePassword(passwordForm.currentPassword, passwordForm.newPassword);
 
-      showToast('success', 'Senha alterada com sucesso!');
+      toast({
+        title: 'Senha Alterada',
+        description: 'Sua senha foi alterada com sucesso!',
+        variant: 'success',
+      });
+
       setPasswordForm({
         currentPassword: '',
         newPassword: '',
@@ -107,9 +100,17 @@ export default function ConfiguracoesPage() {
       // TODO: Call API to save notification preferences
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      showToast('success', 'Preferências salvas com sucesso!');
+      toast({
+        title: 'Preferências Salvas',
+        description: 'Suas preferências foram atualizadas com sucesso!',
+        variant: 'success',
+      });
     } catch (error) {
-      showToast('error', 'Erro ao salvar preferências. Tente novamente.');
+      toast({
+        title: 'Erro',
+        description: 'Erro ao salvar preferências. Tente novamente.',
+        variant: 'destructive',
+      });
     } finally {
       setNotificationsLoading(false);
     }
@@ -127,9 +128,13 @@ export default function ConfiguracoesPage() {
 
       // Logout and redirect
       await authApi.logout();
-      window.location.href = '/';
+      router.push(publicRoutes.home);
     } catch (error) {
-      showToast('error', 'Erro ao excluir conta. Tente novamente.');
+      toast({
+        title: 'Erro',
+        description: 'Erro ao excluir conta. Tente novamente.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -137,7 +142,7 @@ export default function ConfiguracoesPage() {
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Breadcrumb */}
       <div className="flex items-center space-x-2 text-sm text-gray-600">
-        <Link href="/painel" className="hover:text-[#00a859]">
+        <Link href={dashboardRoutes.main} className="hover:text-[#00a859]">
           Dashboard
         </Link>
         <span>/</span>
@@ -436,44 +441,6 @@ export default function ConfiguracoesPage() {
           </Dialog>
         </div>
       </Card>
-
-      {/* Toast Notification */}
-      {toast.show && (
-        <div
-          className={`fixed bottom-4 right-4 max-w-md p-4 rounded-lg shadow-lg border ${
-            toast.type === 'success'
-              ? 'bg-green-50 border-green-300'
-              : 'bg-red-50 border-red-300'
-          } animate-in slide-in-from-bottom-5 duration-300`}
-        >
-          <div className="flex items-start space-x-3">
-            <div>
-              <p
-                className={`text-sm font-medium ${
-                  toast.type === 'success' ? 'text-green-900' : 'text-red-900'
-                }`}
-              >
-                {toast.message}
-              </p>
-            </div>
-            <button
-              onClick={() => setToast({ show: false, type: 'success', message: '' })}
-              className={`flex-shrink-0 ${
-                toast.type === 'success' ? 'text-green-600' : 'text-red-600'
-              } hover:opacity-75`}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

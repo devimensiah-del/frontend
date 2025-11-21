@@ -303,7 +303,7 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
         isGeneratingPDF={isGeneratingPDF}
         isSending={isSending}
         submissionId={submissionId}
-        userEmail={submission.email}
+        userEmail={submission.email || ''}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 /**
  * API Client with Real HTTP Calls to Go Backend
- * All functions make real requests to http://localhost:8080/api/v1
+ * All functions make real requests to the backend
  */
 
 import type {

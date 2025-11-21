@@ -87,7 +87,7 @@ export default function EnrichmentListPage() {
       filtered = filtered.filter(
         (s) =>
           s.companyName.toLowerCase().includes(query) ||
-          s.email.toLowerCase().includes(query)
+          s.email?.toLowerCase().includes(query)
       );
     }
 

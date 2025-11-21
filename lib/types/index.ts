@@ -64,6 +64,7 @@ export interface Submission {
   industry: string;
   companySize: string;
   website?: string;
+  email?: string; // Contact email for the submission
 
   // Strategic Context
   strategicGoal: string;
@@ -197,6 +198,9 @@ export interface Enrichment {
   financialMetrics: FinancialMetrics;
   operationalCapabilities: OperationalCapabilities;
   riskAssessment: RiskAssessment;
+
+  // Status (for UI workflows)
+  status?: 'pending' | 'approved' | 'rejected';
 
   // Metadata
   dataQualityScore: number; // 0-100
@@ -504,6 +508,7 @@ export interface Analysis {
   // 11 Strategic Analysis Frameworks
   pestel: PESTELAnalysis;
   porterFiveForces: PorterFiveForcesAnalysis;
+  porter?: PorterFiveForcesAnalysis; // Alias for backward compatibility
   swot: SWOTAnalysis;
   vrio: VRIOAnalysis;
   valueChain: ValueChainAnalysis;
@@ -513,6 +518,9 @@ export interface Analysis {
   mckinsey7S: McKinsey7SAnalysis;
   blueOcean: BlueOceanAnalysis;
   coreCompetencies: CoreCompetenciesAnalysis;
+
+  // Status (for UI workflows)
+  status?: 'pending' | 'completed' | 'in_progress';
 
   // Overall Strategic Assessment
   strategicRecommendations: string[];
