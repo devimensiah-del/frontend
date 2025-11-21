@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils/cn";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   variant?: "editorial" | "default";
-  "aria-describedby"?: string;
-  "aria-invalid"?: boolean;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
