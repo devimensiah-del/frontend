@@ -97,7 +97,7 @@ export default function PerfilPage() {
               value={mockUser.email}
               disabled
               className="bg-gray-50 text-gray-500 cursor-not-allowed"
-              helpText="E-mail não pode ser alterado"
+              helperText="E-mail não pode ser alterado"
             />
 
             <FormField
@@ -106,7 +106,7 @@ export default function PerfilPage() {
               value={mockUser.organization}
               disabled
               className="bg-gray-50 text-gray-500 cursor-not-allowed"
-              helpText="Organização não pode ser alterada"
+              helperText="Organização não pode ser alterada"
             />
           </div>
 
