@@ -70,51 +70,44 @@ export default function PerfilPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Editable Fields */}
           <FormField
+            id="fullName"
             label="Nome Completo"
             required
+            value={formData.fullName}
+            onChange={(e) => handleChange('fullName', e.target.value)}
+            placeholder="Seu nome completo"
             error={formData.fullName.length < 2 ? 'Nome muito curto' : undefined}
-          >
-            <Input
-              value={formData.fullName}
-              onChange={(e) => handleChange('fullName', e.target.value)}
-              placeholder="Seu nome completo"
-              className="w-full"
-            />
-          </FormField>
+          />
 
           <FormField
+            id="jobTitle"
             label="Cargo"
             required
+            value={formData.jobTitle}
+            onChange={(e) => handleChange('jobTitle', e.target.value)}
+            placeholder="Seu cargo na organização"
             error={formData.jobTitle.length < 2 ? 'Cargo muito curto' : undefined}
-          >
-            <Input
-              value={formData.jobTitle}
-              onChange={(e) => handleChange('jobTitle', e.target.value)}
-              placeholder="Seu cargo na organização"
-              className="w-full"
-            />
-          </FormField>
+          />
 
           {/* Read-only Fields */}
           <div className="pt-6 border-t border-gray-200 space-y-6">
-            <FormField label="E-mail" helpText="E-mail não pode ser alterado">
-              <Input
-                value={mockUser.email}
-                disabled
-                className="w-full bg-gray-50 text-gray-500 cursor-not-allowed"
-              />
-            </FormField>
+            <FormField
+              id="email"
+              label="E-mail"
+              value={mockUser.email}
+              disabled
+              className="bg-gray-50 text-gray-500 cursor-not-allowed"
+              helpText="E-mail não pode ser alterado"
+            />
 
             <FormField
+              id="organization"
               label="Organização"
+              value={mockUser.organization}
+              disabled
+              className="bg-gray-50 text-gray-500 cursor-not-allowed"
               helpText="Organização não pode ser alterada"
-            >
-              <Input
-                value={mockUser.organization}
-                disabled
-                className="w-full bg-gray-50 text-gray-500 cursor-not-allowed"
-              />
-            </FormField>
+            />
           </div>
 
           {/* Save Button */}
