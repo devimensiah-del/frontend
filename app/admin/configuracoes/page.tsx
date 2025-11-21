@@ -5,7 +5,7 @@ import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/FormField";
 import { toast } from "@/components/ui/use-toast";
-import { adminApi } from "@/lib/api/client";
+import { userApi } from "@/lib/api/client";
 
 /* ============================================
    ADMIN CONFIGURAÇÕES - Profile Settings
@@ -31,7 +31,7 @@ export default function AdminConfiguracoes() {
 
     try {
       // Update user profile (name only)
-      await adminApi.updateProfile({ name });
+      await userApi.updateProfile({ fullName: name });
 
       toast({
         title: "Perfil Atualizado",
