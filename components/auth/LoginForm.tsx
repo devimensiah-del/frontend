@@ -10,7 +10,6 @@ import { Logo } from "@/components/ui/Logo";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
 import { siteConfig, authRoutes, adminRoutes, dashboardRoutes } from "@/lib/config/site";
-import { getUserProfile } from "@/lib/utils/supabase-client";
 
 export function LoginForm() {
   const router = useRouter();
@@ -28,7 +27,7 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      const data = await signIn(email, password);
+      await signIn(email, password);
 
       toast({
         title: "Bem-vindo de volta",
@@ -36,14 +35,13 @@ export function LoginForm() {
         variant: "success",
       });
 
-      // Get user profile to determine role-based routing
-      const profile = await getUserProfile(data.user.id);
-
-      // Redirect based on user role
-      const redirectPath = searchParams.get("redirect") ||
-        (profile?.role === 'admin' ? adminRoutes.dashboard : dashboardRoutes.main);
-
-      router.push(redirectPath);
+      // Wait for auth context to update with user profile from backend
+      // The AuthProvider will fetch the user profile automatically
+      setTimeout(() => {
+        // Redirect based on user role (will be available from useAuthContext after update)
+        const redirectPath = searchParams.get("redirect") || dashboardRoutes.main;
+        router.push(redirectPath);
+      }, 100);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao fazer login";
       setError(errorMessage);

@@ -2,12 +2,14 @@
 
 /**
  * Authentication Provider
- * Manages user authentication state with Supabase
+ * Hybrid approach: Supabase for auth, Backend API for data
+ * - Supabase handles: signIn, signUp, signOut, password reset
+ * - Backend API handles: user profile data, authorization
  */
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
-import { supabase, getUserProfile } from '@/lib/utils/supabase-client';
+import { supabase } from '@/lib/utils/supabase-client';
 import type { User } from '@/types';
 
 interface AuthContextType {
@@ -32,21 +34,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch user profile from database
-  const fetchUserProfile = async (userId: string): Promise<User | null> => {
+  // Fetch user profile from backend API (not direct DB query)
+  const fetchUserProfile = async (session: Session): Promise<User | null> => {
     try {
-      const profile = await getUserProfile(userId);
-      if (profile) {
-        return {
-          id: profile.id,
-          email: profile.email,
-          fullName: profile.full_name || profile.email,
-          role: profile.role || 'user',
-          createdAt: profile.created_at,
-          updatedAt: profile.updated_at,
-        };
+      // Get Supabase JWT token
+      const token = session.access_token;
+
+      // Call backend API with Supabase token for verification
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/auth/me`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error('Failed to fetch user profile:', response.statusText);
+        return null;
       }
-      return null;
+
+      const data = await response.json();
+      return data.user;
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return null;
@@ -60,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setSupabaseUser(session?.user ?? null);
 
-      if (session?.user) {
-        fetchUserProfile(session.user.id).then(setUser);
+      if (session) {
+        fetchUserProfile(session).then(setUser);
       }
 
       setIsLoading(false);
@@ -74,8 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setSupabaseUser(session?.user ?? null);
 
-      if (session?.user) {
-        const profile = await fetchUserProfile(session.user.id);
+      if (session) {
+        const profile = await fetchUserProfile(session);
         setUser(profile);
       } else {
         setUser(null);
@@ -98,10 +109,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(error.message);
     }
 
-    if (data.user) {
-      const profile = await fetchUserProfile(data.user.id);
+    if (data.session) {
+      const profile = await fetchUserProfile(data.session);
       setUser(profile);
     }
+
+    return data;
   };
 
   // Sign up
@@ -160,8 +173,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Refetch user profile
   const refetch = async () => {
-    if (supabaseUser) {
-      const profile = await fetchUserProfile(supabaseUser.id);
+    if (session) {
+      const profile = await fetchUserProfile(session);
       setUser(profile);
     }
   };

@@ -1,6 +1,14 @@
 /**
  * Supabase Client Utilities
- * Browser and server-side Supabase clients
+ * ⚠️ AUTHENTICATION ONLY - NO DIRECT DATABASE QUERIES
+ *
+ * This client should ONLY be used for:
+ * - Authentication (signIn, signUp, signOut)
+ * - Session management
+ * - Password reset flows
+ *
+ * ❌ DO NOT use for data operations (queries, inserts, updates)
+ * ✅ Use backend API instead (see lib/api/client.ts)
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -127,28 +135,12 @@ export async function updatePassword(newPassword: string) {
   }
 }
 
-/**
- * Get user profile from database
- */
-export async function getUserProfile(userId: string) {
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
-
-  if (error) {
-    console.error('Error fetching user profile:', error);
-    return null;
-  }
-
-  return data;
-}
-
-/**
- * Check if user has admin role
- */
-export async function isAdmin(userId: string): Promise<boolean> {
-  const profile = await getUserProfile(userId);
-  return profile?.role === 'admin';
-}
+// ============================================================================
+// REMOVED: Direct database query functions
+// ============================================================================
+// ❌ getUserProfile() - Use apiClient.auth.getCurrentUser() instead
+// ❌ isAdmin() - User role is returned from backend API
+//
+// All data operations should go through the backend API (lib/api/client.ts)
+// This ensures proper authorization and eliminates direct database access
+// ============================================================================
