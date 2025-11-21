@@ -132,7 +132,7 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
     parsedNotes = {};
   }
 
-  const companyName = parsedNotes.companyName || submission.personalInfo.fullName;
+  const companyName = parsedNotes.companyName || submission.personalInfo?.fullName || 'N/A';
   const hasEnrichment = !!enrichment;
   const hasAnalysis = submission.status === 'completed';
 
