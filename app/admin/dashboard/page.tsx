@@ -21,49 +21,61 @@ import { MoreVertical } from "lucide-react";
    ADMIN DASHBOARD - Submissions Inbox
    ============================================ */
 
-// Mock Data
+// Mock Data - Matches Submission type
 const MOCK_SUBMISSIONS = [
   {
     id: "uuid-1",
+    userId: "admin-1",
     companyName: "Acme Corp",
     status: "completed" as const,
-    submittedAt: "2025-01-15",
     email: "ceo@acme.com",
+    createdAt: "2025-01-15T10:00:00Z",
+    updatedAt: "2025-01-15T14:00:00Z",
   },
   {
     id: "uuid-2",
+    userId: "admin-1",
     companyName: "TechStart Inc",
     status: "processing" as const,
-    submittedAt: "2025-01-18",
     email: "founder@techstart.io",
+    createdAt: "2025-01-18T10:00:00Z",
+    updatedAt: "2025-01-18T12:00:00Z",
   },
   {
     id: "uuid-3",
+    userId: "admin-1",
     companyName: "Global Solutions",
-    status: "action_required" as const,
-    submittedAt: "2025-01-19",
+    status: "pending" as const,
     email: "admin@globalsolutions.com",
+    createdAt: "2025-01-19T10:00:00Z",
+    updatedAt: "2025-01-19T10:00:00Z",
   },
   {
     id: "uuid-4",
+    userId: "admin-1",
     companyName: "Innovate Labs",
     status: "pending" as const,
-    submittedAt: "2025-01-20",
     email: "contact@innovatelabs.com",
+    createdAt: "2025-01-20T10:00:00Z",
+    updatedAt: "2025-01-20T10:00:00Z",
   },
   {
     id: "uuid-5",
+    userId: "admin-1",
     companyName: "Future Dynamics",
     status: "completed" as const,
-    submittedAt: "2025-01-14",
     email: "info@futuredynamics.com",
+    createdAt: "2025-01-14T10:00:00Z",
+    updatedAt: "2025-01-14T16:00:00Z",
   },
   {
     id: "uuid-6",
+    userId: "admin-1",
     companyName: "Quantum Ventures",
     status: "processing" as const,
-    submittedAt: "2025-01-21",
     email: "team@quantumventures.io",
+    createdAt: "2025-01-21T10:00:00Z",
+    updatedAt: "2025-01-21T11:00:00Z",
   },
 ];
 
@@ -207,7 +219,7 @@ export default function AdminDashboard() {
                 {/* Date */}
                 <div className="col-span-2 flex items-center">
                   <div className="text-sm text-text-secondary">
-                    {formatDate(submission.submittedAt)}
+                    {formatDate(submission.createdAt)}
                   </div>
                 </div>
 
