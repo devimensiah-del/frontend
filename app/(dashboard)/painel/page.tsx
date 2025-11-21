@@ -36,11 +36,11 @@ export default function PainelPage() {
         setError(null);
 
         // Fetch user's submissions
-        const submissions = await submissionsApi.getAll();
+        const response = await submissionsApi.getAll();
 
-        if (submissions && submissions.length > 0) {
+        if (response && response.submissions && response.submissions.length > 0) {
           // Get the most recent submission
-          const latestSubmission = submissions[0];
+          const latestSubmission = response.submissions[0];
           setSubmission(latestSubmission);
 
           // Try to fetch enrichment data
