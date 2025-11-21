@@ -24,7 +24,7 @@ export default function DashboardLayout({
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href="/painel" className="flex items-center">
-              <ImensiahLogo size="sm" />
+              <ImensiahLogo className="w-32 h-8" showText={true} />
             </Link>
 
             {/* Desktop Navigation */}
