@@ -5,7 +5,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
-import type { SubmissionStatus } from '@/types';
+import type { SubmissionStatus } from '@/lib/types';
 
 interface WorkflowCounts {
   stage1: number; // Envios (pending, submitted)
