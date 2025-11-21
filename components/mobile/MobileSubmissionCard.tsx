@@ -45,7 +45,6 @@ export function MobileSubmissionCard({
           {companyName}
         </Heading>
         <Badge
-          variant={statusConfig.color}
           className={`${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor} border flex-shrink-0`}
         >
           {statusConfig.label}
