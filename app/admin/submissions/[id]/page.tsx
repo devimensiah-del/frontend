@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { use, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useAnalysis } from "@/lib/hooks/use-analysis";
 import { submissionsApi, adminApi } from "@/lib/api/client";
@@ -71,13 +71,13 @@ function convertAnalysisToWarRoomFormat(analysis: Analysis | null, submission?: 
 }
 
 interface WarRoomPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function WarRoomPage({ params }: WarRoomPageProps) {
-  const submissionId = params.id;
+  const { id: submissionId } = use(params);
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [localAnalysis, setLocalAnalysis] = useState<any>(null);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);

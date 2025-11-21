@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { use, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEnrichment } from "@/lib/hooks/use-enrichment";
@@ -18,16 +18,16 @@ import type { Submission, Enrichment } from "@/types";
    ============================================ */
 
 interface EnrichmentEditorPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EnrichmentEditorPage({
   params,
 }: EnrichmentEditorPageProps) {
+  const { id: submissionId } = use(params);
   const router = useRouter();
-  const submissionId = params.id;
 
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [localEnrichmentData, setLocalEnrichmentData] = useState<
