@@ -97,6 +97,13 @@ export default function NovaAnalisePage() {
     try {
       // Map form data to API format
       const submissionData = {
+        // Required top-level fields for SubmissionFormData
+        companyName: data.companyName,
+        email: data.contactEmail,
+        phone: data.contactPhone,
+        description: data.businessChallenge,
+        industry: data.companyIndustry,
+        // Additional nested data
         personalInfo: {
           fullName: data.contactName,
           email: data.contactEmail,
