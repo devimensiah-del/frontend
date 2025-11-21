@@ -21,7 +21,7 @@ export default function AdminConfiguracoes() {
   useEffect(() => {
     if (user) {
       setEmail(user.email || "");
-      setName(user.user_metadata?.name || "");
+      setName(user.fullName || "");
     }
   }, [user]);
 
@@ -104,7 +104,7 @@ export default function AdminConfiguracoes() {
                 variant="outline"
                 onClick={() => {
                   if (user) {
-                    setName(user.user_metadata?.name || "");
+                    setName(user.fullName || "");
                   }
                 }}
                 disabled={isSaving}
