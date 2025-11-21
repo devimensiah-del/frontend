@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Container } from "@/components/ui/Grid";
@@ -12,7 +12,7 @@ import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
 import { siteConfig, authRoutes } from "@/lib/config/site";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { updatePassword } = useAuthContext();
@@ -202,5 +202,30 @@ export default function ResetPasswordPage() {
         )}
       </div>
     </Container>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <Container className="min-h-screen flex items-center justify-center bg-surface-paper">
+          <div className="max-w-md w-full bg-white p-12 border border-line shadow-sm relative">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gold-500" />
+            <div className="flex flex-col items-center mb-10">
+              <Logo className="w-12 h-12 mb-4" />
+              <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
+                {siteConfig.brand.name}
+              </Heading>
+            </div>
+            <div className="text-center">
+              <Text className="text-text-secondary">Carregando...</Text>
+            </div>
+          </div>
+        </Container>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
