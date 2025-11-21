@@ -258,7 +258,7 @@ export default function EnrichmentEditorPage({
           {/* Right Panel: Enrichment Editor */}
           <div className="col-span-8">
             <EnrichmentForm
-              enrichment={enrichment}
+              enrichment={enrichment || null}
               onChange={handleEnrichmentChange}
               disabled={isUpdating || isApproving || isRejecting || isGeneratingAnalysis}
             />
