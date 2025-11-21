@@ -95,20 +95,20 @@ export default function NovaAnalisePage() {
 
   async function onSubmit(data: FormValues) {
     try {
-      // Map form data to API format
+      // Map form data to API format matching SubmissionFormData
       const submissionData = {
-        // Required top-level fields for SubmissionFormData
+        // Required fields from SubmissionFormData
         companyName: data.companyName,
         email: data.contactEmail,
         phone: data.contactPhone,
         description: data.businessChallenge,
         industry: data.companyIndustry,
-        // Additional nested data
+        // Additional nested data (optional based on Submission type)
         personalInfo: {
           fullName: data.contactName,
           email: data.contactEmail,
           phone: data.contactPhone || '',
-          document: '', // Not collected in this form
+          document: '',
         },
         address: {
           street: '',

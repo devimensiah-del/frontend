@@ -60,29 +60,29 @@ export const ImensiahLogo = ({ className = "w-full h-full", showText = true }: L
       {/* --- TEXT --- */}
       {showText && (
         <g transform="translate(0, 210)">
-          {/* IMENSI (Navy) */}
-          <text 
-            x="20" 
-            y="0" 
-            fill="var(--navy-900)" 
-            fontFamily="var(--font-heading), sans-serif" 
-            fontWeight="800" 
+          {/* IMENS (Navy) */}
+          <text
+            x="20"
+            y="0"
+            fill="var(--navy-900)"
+            fontFamily="var(--font-heading), sans-serif"
+            fontWeight="800"
             fontSize="38"
             letterSpacing="0.05em"
           >
-            IMENSI
+            IMENS
           </text>
-          {/* AH (Gold) */}
-          <text 
-            x="172" 
-            y="0" 
-            fill="var(--gold-500)" 
-            fontFamily="var(--font-heading), sans-serif" 
-            fontWeight="800" 
+          {/* IAH (Gold/Yellow) */}
+          <text
+            x="152"
+            y="0"
+            fill="var(--gold-500)"
+            fontFamily="var(--font-heading), sans-serif"
+            fontWeight="800"
             fontSize="38"
             letterSpacing="0.05em"
           >
-            AH
+            IAH
           </text>
         </g>
       )}

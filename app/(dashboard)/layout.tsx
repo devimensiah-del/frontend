@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { ImensiahLogo } from '@/components/ImensiahLogo';
 import { Button } from '@/components/ui/button';
 import { SkipToContent } from '@/components/a11y/SkipToContent';
@@ -8,11 +11,17 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const handleLogout = () => {
     // Mock logout - clear auth and redirect
-    localStorage.removeItem('auth_token');
-    window.location.href = '/login';
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      window.location.href = '/login';
+    }
   };
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -62,7 +71,7 @@ export default function DashboardLayout({
             </nav>
 
             {/* User Menu */}
-            <div className="flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-4">
               <Button
                 onClick={handleLogout}
                 variant="outline"
@@ -74,9 +83,10 @@ export default function DashboardLayout({
 
             {/* Mobile Menu Button */}
             <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold-500)]"
               aria-label="Abrir menu de navegação"
-              aria-expanded="false"
+              aria-expanded={isMobileMenuOpen}
             >
               <svg
                 className="h-6 w-6"
@@ -85,49 +95,74 @@ export default function DashboardLayout({
                 stroke="currentColor"
                 aria-hidden="true"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                {isMobileMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
               </svg>
             </button>
           </div>
 
           {/* Mobile Navigation */}
-          <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
-            <Link
-              href="/painel"
-              className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              Painel
-            </Link>
-            <Link
-              href="/envios"
-              className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              Envios
-            </Link>
-            <Link
-              href="/nova-analise"
-              className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              Nova Análise
-            </Link>
-            <Link
-              href="/perfil"
-              className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              Perfil
-            </Link>
-            <Link
-              href="/configuracoes"
-              className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              Configurações
-            </Link>
-          </div>
+          {isMobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
+              <Link
+                href="/painel"
+                onClick={closeMobileMenu}
+                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+              >
+                Painel
+              </Link>
+              <Link
+                href="/envios"
+                onClick={closeMobileMenu}
+                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+              >
+                Envios
+              </Link>
+              <Link
+                href="/nova-analise"
+                onClick={closeMobileMenu}
+                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+              >
+                Nova Análise
+              </Link>
+              <Link
+                href="/perfil"
+                onClick={closeMobileMenu}
+                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+              >
+                Perfil
+              </Link>
+              <Link
+                href="/configuracoes"
+                onClick={closeMobileMenu}
+                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+              >
+                Configurações
+              </Link>
+              <div className="border-t border-gray-200 pt-2">
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="w-full text-sm"
+                >
+                  Sair
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 

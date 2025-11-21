@@ -19,6 +19,8 @@ export default function AdminLayout({
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
   return (
     <div className="flex h-screen bg-surface-paper">
       {/* --- MOBILE MENU BUTTON --- */}
@@ -90,13 +92,13 @@ export default function AdminLayout({
               Tools
             </div>
             <div className="space-y-1">
-              <NavItem href="/admin/dashboard" icon="📊">
+              <NavItem href="/admin/dashboard" icon="📊" onClick={closeMobileMenu}>
                 Dashboard Overview
               </NavItem>
-              <NavItem href="/admin/analytics" icon="📈">
+              <NavItem href="/admin/analytics" icon="📈" onClick={closeMobileMenu}>
                 Analytics
               </NavItem>
-              <NavItem href="/admin/settings" icon="⚙️">
+              <NavItem href="/admin/settings" icon="⚙️" onClick={closeMobileMenu}>
                 Settings
               </NavItem>
             </div>
@@ -127,7 +129,9 @@ export default function AdminLayout({
 
       {/* --- MAIN CONTENT AREA --- */}
       <main className="flex-1 overflow-auto">
-        {children}
+        <div className="max-w-7xl mx-auto">
+          {children}
+        </div>
       </main>
 
       {/* Toast Notifications */}
@@ -144,15 +148,17 @@ interface NavItemProps {
   href: string;
   icon: string;
   children: React.ReactNode;
+  onClick?: () => void;
 }
 
-function NavItem({ href, icon, children }: NavItemProps) {
+function NavItem({ href, icon, children, onClick }: NavItemProps) {
   const pathname = usePathname();
   const isActive = pathname === href;
 
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={cn(
         "flex items-center gap-3 px-3 py-2.5 rounded transition-colors text-sm font-medium",
         isActive
