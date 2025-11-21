@@ -19,7 +19,7 @@ export const siteConfig = {
 
   navigation: {
     logoSize: "w-20 h-20", // Tailwind classes for logo size
-    items: [], // No middle nav items
+    items: [] as { label: string; href: string }[], // No middle nav items
     cta: {
       text: "Login",
       href: "/login",
