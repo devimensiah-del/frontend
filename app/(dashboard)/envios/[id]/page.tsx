@@ -195,16 +195,16 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
                 <dl className="space-y-2 text-sm">
                   <div>
                     <dt className="font-medium text-gray-700">Nome:</dt>
-                    <dd className="text-gray-600">{submission.personalInfo.fullName}</dd>
+                    <dd className="text-gray-600">{submission.personalInfo?.fullName || 'N/A'}</dd>
                   </div>
                   <div>
                     <dt className="font-medium text-gray-700">Email:</dt>
-                    <dd className="text-gray-600">{submission.personalInfo.email}</dd>
+                    <dd className="text-gray-600">{submission.personalInfo?.email || 'N/A'}</dd>
                   </div>
-                  {submission.personalInfo.phone && (
+                  {submission.personalInfo?.phone && (
                     <div>
                       <dt className="font-medium text-gray-700">Telefone:</dt>
-                      <dd className="text-gray-600">{submission.personalInfo.phone}</dd>
+                      <dd className="text-gray-600">{submission.personalInfo?.phone}</dd>
                     </div>
                   )}
                   {parsedNotes.contactPosition && (
