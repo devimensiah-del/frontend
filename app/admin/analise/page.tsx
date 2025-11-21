@@ -54,11 +54,11 @@ export default function AdminAnalise() {
   const handleGeneratePdf = async (submissionId: string) => {
     try {
       setGeneratingPdf(submissionId);
-      // Call PDF generation API
-      await adminApi.generateReport(submissionId);
+      // Update submission status to trigger report generation
+      await adminApi.updateSubmissionStatus(submissionId, 'em_geracao_relatorio');
       toast({
-        title: "PDF Gerado",
-        description: "O relatório foi gerado com sucesso.",
+        title: "Gerando PDF",
+        description: "O processo de geração do relatório foi iniciado.",
         variant: "success",
       });
       // Refresh submissions
@@ -73,8 +73,8 @@ export default function AdminAnalise() {
       ));
     } catch (error) {
       toast({
-        title: "Erro ao Gerar PDF",
-        description: "Não foi possível gerar o relatório.",
+        title: "Erro ao Iniciar Geração",
+        description: "Não foi possível iniciar a geração do relatório.",
         variant: "destructive",
       });
     } finally {
