@@ -54,16 +54,16 @@ export function SubmissionSummary({ submission }: SubmissionSummaryProps) {
             <div className="space-y-3 mt-3">
               <DataRow
                 label="Nome Completo"
-                value={submission.personalInfo.fullName}
+                value={submission.personalInfo?.fullName || 'N/A'}
               />
               <DataRow
                 label="Documento"
-                value={submission.personalInfo.document}
+                value={submission.personalInfo?.document || 'N/A'}
               />
-              <DataRow label="Email" value={submission.personalInfo.email} />
+              <DataRow label="Email" value={submission.personalInfo?.email || 'N/A'} />
               <DataRow
                 label="Telefone"
-                value={submission.personalInfo.phone}
+                value={submission.personalInfo?.phone || 'N/A'}
               />
             </div>
           </div>

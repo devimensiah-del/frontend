@@ -75,8 +75,8 @@ export default function EnviosPage() {
     const searchLower = searchQuery.toLowerCase();
     return (
       submission.id.toLowerCase().includes(searchLower) ||
-      submission.personalInfo.fullName.toLowerCase().includes(searchLower) ||
-      submission.personalInfo.email.toLowerCase().includes(searchLower)
+      submission.personalInfo?.fullName?.toLowerCase().includes(searchLower) ||
+      submission.personalInfo?.email?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -183,9 +183,9 @@ export default function EnviosPage() {
                 let companyName = 'N/A';
                 try {
                   const notes = JSON.parse(submission.notes || '{}');
-                  companyName = notes.companyName || submission.personalInfo.fullName;
+                  companyName = notes.companyName || submission.personalInfo?.fullName || 'N/A';
                 } catch {
-                  companyName = submission.personalInfo.fullName;
+                  companyName = submission.personalInfo?.fullName || 'N/A';
                 }
 
                 return (
