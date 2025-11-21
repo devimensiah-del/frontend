@@ -3,20 +3,17 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ImensiahLogo } from "@/components/ImensiahLogo";
+import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils/cn";
 import { Toaster } from "@/components/ui/toaster";
-import { WorkflowProgress } from "@/components/admin/WorkflowProgress";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { siteConfig, adminNav } from "@/lib/config/site";
 import {
   LayoutDashboard,
   FileText,
   Database,
-  User,
-  Users,
-  TrendingUp,
-  BarChart
+  BarChart,
+  Settings
 } from "lucide-react";
 
 /* ============================================
@@ -29,9 +26,7 @@ const iconMap: Record<string, React.ReactNode> = {
   FileText: <FileText className="w-4 h-4" />,
   Database: <Database className="w-4 h-4" />,
   BarChart: <BarChart className="w-4 h-4" />,
-  User: <User className="w-4 h-4" />,
-  Users: <Users className="w-4 h-4" />,
-  TrendingUp: <TrendingUp className="w-4 h-4" />,
+  Settings: <Settings className="w-4 h-4" />,
 };
 
 export default function AdminLayout({
@@ -87,11 +82,7 @@ export default function AdminLayout({
         {/* Logo & Branding */}
         <div className="p-6 border-b border-navy-800">
           <div className="flex items-center gap-3">
-            <ImensiahLogo
-              className="w-10 h-10"
-              showText={false}
-              variant="white"
-            />
+            <Logo className="w-10 h-10" />
             <div>
               <div className="font-heading font-bold text-sm tracking-widest">
                 {siteConfig.brand.name}
@@ -105,21 +96,13 @@ export default function AdminLayout({
 
         {/* Navigation Links */}
         <nav className="flex-1 p-4 overflow-y-auto">
-          {/* WORKFLOW SECTION */}
-          <div className="mb-8">
-            <div className="text-xs uppercase tracking-widest text-gray-500 mb-3 px-3 font-heading font-bold">
-              Workflow
-            </div>
-            <WorkflowProgress />
-          </div>
-
           {/* NAVIGATION SECTIONS */}
           {adminNav.map((section) => (
-            <div key={section.title} className="pt-6 border-t border-navy-800">
-              <div className="text-xs uppercase tracking-widest text-gray-500 mb-3 px-3 font-heading font-bold">
+            <div key={section.title} className="mb-6">
+              <div className="text-xs uppercase tracking-widest text-gray-500 mb-4 px-3 font-heading font-bold">
                 {section.title}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {section.items.map((item) => (
                   <NavItem
                     key={item.href}

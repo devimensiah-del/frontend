@@ -16,8 +16,8 @@ interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<any>;
+  signUp: (email: string, password: string, name: string) => Promise<any>;
   signOut: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           name,
         },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify`,
+        // Email confirmation disabled - users can login immediately
       },
     });
 
@@ -121,7 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(error.message);
     }
 
-    // Note: User needs to verify email before they can sign in
+    // User can sign in immediately without email verification
+    return data;
   };
 
   // Sign out

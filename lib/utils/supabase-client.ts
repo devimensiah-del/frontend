@@ -132,7 +132,7 @@ export async function updatePassword(newPassword: string) {
  */
 export async function getUserProfile(userId: string) {
   const { data, error } = await supabase
-    .from('users')
+    .from('user_profiles')
     .select('*')
     .eq('id', userId)
     .single();

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ImensiahLogo } from '@/components/ImensiahLogo';
+import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/button';
 import { SkipToContent } from '@/components/a11y/SkipToContent';
 import Link from 'next/link';
@@ -33,38 +33,20 @@ export default function DashboardLayout({
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href="/painel" className="flex items-center">
-              <ImensiahLogo className="w-32 h-8" showText={true} />
+              <Logo className="w-32 h-8" />
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8" role="navigation" aria-label="Navegação do painel">
               <Link
                 href="/painel"
-                className="text-sm font-medium text-gray-700 hover:text-[#00a859] transition-colors"
+                className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
               >
                 Painel
               </Link>
               <Link
-                href="/envios"
-                className="text-sm font-medium text-gray-700 hover:text-[#00a859] transition-colors"
-              >
-                Envios
-              </Link>
-              <Link
-                href="/nova-analise"
-                className="text-sm font-medium text-gray-700 hover:text-[#00a859] transition-colors"
-              >
-                Nova Análise
-              </Link>
-              <Link
-                href="/perfil"
-                className="text-sm font-medium text-gray-700 hover:text-[#00a859] transition-colors"
-              >
-                Perfil
-              </Link>
-              <Link
-                href="/configuracoes"
-                className="text-sm font-medium text-gray-700 hover:text-[#00a859] transition-colors"
+                href="/painel/configuracoes"
+                className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
               >
                 Configurações
               </Link>
@@ -125,28 +107,7 @@ export default function DashboardLayout({
                 Painel
               </Link>
               <Link
-                href="/envios"
-                onClick={closeMobileMenu}
-                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-              >
-                Envios
-              </Link>
-              <Link
-                href="/nova-analise"
-                onClick={closeMobileMenu}
-                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-              >
-                Nova Análise
-              </Link>
-              <Link
-                href="/perfil"
-                onClick={closeMobileMenu}
-                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-              >
-                Perfil
-              </Link>
-              <Link
-                href="/configuracoes"
+                href="/painel/configuracoes"
                 onClick={closeMobileMenu}
                 className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
               >

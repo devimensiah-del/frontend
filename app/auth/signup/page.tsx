@@ -10,7 +10,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Logo } from "@/components/ui/Logo";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
-import { siteConfig, authRoutes } from "@/lib/config/site";
+import { siteConfig, authRoutes, dashboardRoutes } from "@/lib/config/site";
 import { Check, X } from "lucide-react";
 
 interface PasswordRequirement {
@@ -117,12 +117,13 @@ export default function SignupPage() {
       await signUp(email, password, name);
 
       toast({
-        title: "Conta Criada",
-        description: "Verifique seu email para confirmar.",
+        title: "Conta Criada com Sucesso",
+        description: "Você já pode fazer login e acessar sua conta.",
         variant: "success",
       });
 
-      router.push(authRoutes.verifyEmail);
+      // Redirect to user dashboard (all new signups are regular users)
+      router.push(dashboardRoutes.main);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao criar conta";
       setError(errorMessage);

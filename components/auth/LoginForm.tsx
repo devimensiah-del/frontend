@@ -9,7 +9,8 @@ import { FormField } from "@/components/ui/FormField";
 import { Logo } from "@/components/ui/Logo";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
-import { siteConfig, authRoutes, adminRoutes } from "@/lib/config/site";
+import { siteConfig, authRoutes, adminRoutes, dashboardRoutes } from "@/lib/config/site";
+import { getUserProfile } from "@/lib/utils/supabase-client";
 
 export function LoginForm() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      await signIn(email, password);
+      const data = await signIn(email, password);
 
       toast({
         title: "Bem-vindo de volta",
@@ -35,8 +36,13 @@ export function LoginForm() {
         variant: "success",
       });
 
-      // Dynamic redirect based on URL param or default to admin dashboard
-      const redirectPath = searchParams.get("redirect") || adminRoutes.dashboard;
+      // Get user profile to determine role-based routing
+      const profile = await getUserProfile(data.user.id);
+
+      // Redirect based on user role
+      const redirectPath = searchParams.get("redirect") ||
+        (profile?.role === 'admin' ? adminRoutes.dashboard : dashboardRoutes.main);
+
       router.push(redirectPath);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao fazer login";

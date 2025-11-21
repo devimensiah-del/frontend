@@ -91,7 +91,7 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/admin')) {
       // Get user profile to check role
       const { data: profile } = await supabase
-        .from('users')
+        .from('user_profiles')
         .select('role')
         .eq('id', user.id)
         .single();

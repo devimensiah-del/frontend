@@ -69,7 +69,7 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     const { data: profile } = await supabase
-      .from('users')
+      .from('user_profiles')
       .select('role')
       .eq('id', userId)
       .single();

@@ -82,56 +82,16 @@ export const dashboardNav: NavSection[] = [
     title: 'Principal',
     items: [
       {
-        title: 'Dashboard',
-        href: '/dashboard',
+        title: 'Painel',
+        href: '/painel',
         icon: 'LayoutDashboard',
         description: 'Visão geral dos seus envios',
       },
       {
-        title: 'Nova Análise',
-        href: '/dashboard/nova-analise',
-        icon: 'PlusCircle',
-        description: 'Solicitar novo relatório estratégico',
-      },
-    ],
-  },
-  {
-    title: 'Envios',
-    items: [
-      {
-        title: 'Todos os Envios',
-        href: '/dashboard/envios',
-        icon: 'FileText',
-        description: 'Ver histórico completo',
-      },
-      {
-        title: 'Em Andamento',
-        href: '/dashboard/envios?status=em_andamento',
-        icon: 'Clock',
-        description: 'Análises em processamento',
-      },
-      {
-        title: 'Concluídos',
-        href: '/dashboard/envios?status=concluido',
-        icon: 'CheckCircle',
-        description: 'Relatórios finalizados',
-      },
-    ],
-  },
-  {
-    title: 'Conta',
-    items: [
-      {
         title: 'Configurações',
-        href: '/account/settings',
+        href: '/painel/configuracoes',
         icon: 'Settings',
-        description: 'Gerenciar sua conta',
-      },
-      {
-        title: 'Pagamentos',
-        href: '/account/payments',
-        icon: 'CreditCard',
-        description: 'Histórico e métodos de pagamento',
+        description: 'Configurações do perfil',
       },
     ],
   },
@@ -140,53 +100,31 @@ export const dashboardNav: NavSection[] = [
 // Admin Navigation
 export const adminNav: NavSection[] = [
   {
-    title: 'Administração',
-    items: [
-      {
-        title: 'Dashboard',
-        href: '/admin/dashboard',
-        icon: 'LayoutDashboard',
-        description: 'Visão geral do sistema',
-      },
-    ],
-  },
-  {
-    title: 'Gestão',
+    title: 'Principal',
     items: [
       {
         title: 'Envios',
-        href: '/admin/dashboard',
+        href: '/admin/envios',
         icon: 'FileText',
-        description: 'Gerenciar todos os envios',
+        description: 'Ver envios com dados do formulário',
       },
       {
         title: 'Enriquecimento',
         href: '/admin/enriquecimento',
         icon: 'Database',
-        description: 'Aprovação de dados enriquecidos',
+        description: 'Aprovar dados enriquecidos',
       },
       {
-        title: 'Perfil',
-        href: '/admin/profile',
-        icon: 'User',
-        description: 'Gerenciar perfil admin',
-      },
-    ],
-  },
-  {
-    title: 'Sistema',
-    items: [
-      {
-        title: 'Usuários',
-        href: '/admin/users',
-        icon: 'Users',
-        description: 'Gerenciar usuários',
+        title: 'Análise',
+        href: '/admin/analise',
+        icon: 'BarChart',
+        description: 'Editar análise e gerar PDF',
       },
       {
-        title: 'Analytics',
-        href: '/admin/analytics',
-        icon: 'TrendingUp',
-        description: 'Métricas e relatórios',
+        title: 'Configurações',
+        href: '/admin/configuracoes',
+        icon: 'Settings',
+        description: 'Configurações do perfil',
       },
     ],
   },
@@ -243,23 +181,16 @@ export const authRoutes = {
 } as const;
 
 export const dashboardRoutes = {
-  main: '/dashboard',
-  novaAnalise: '/dashboard/nova-analise',
-  envios: '/dashboard/envios',
-  perfil: '/dashboard/perfil',
-  configuracoes: '/account/settings',
-  payments: '/account/payments',
+  main: '/painel',
+  configuracoes: '/painel/configuracoes',
 } as const;
 
 export const adminRoutes = {
-  dashboard: '/admin/dashboard',
-  submissions: '/admin/submissions',
+  dashboard: '/admin/envios', // Default admin landing page
+  envios: '/admin/envios',
   enriquecimento: '/admin/enriquecimento',
-  enrichment: '/admin/enrichment',
-  analysis: '/admin/analysis',
-  analytics: '/admin/analytics',
-  users: '/admin/users',
-  profile: '/admin/profile',
+  analise: '/admin/analise',
+  configuracoes: '/admin/configuracoes',
 } as const;
 
 export const protectedRoutes = {

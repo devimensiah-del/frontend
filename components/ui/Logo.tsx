@@ -3,19 +3,23 @@ import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 
 /* ============================================
-   LOGO COMPONENT
+   LOGO COMPONENT - Uses imensiah_logo.png
    ============================================ */
 
 interface LogoProps {
   className?: string;
   grayscale?: boolean;
   alt?: string;
+  showText?: boolean; // For backward compatibility (ignored since PNG includes text)
+  variant?: 'default' | 'white'; // For backward compatibility (ignored for PNG)
 }
 
 export const Logo: React.FC<LogoProps> = ({
   className,
   grayscale = false,
   alt = "IMENSIAH",
+  showText, // Ignored - PNG always includes text
+  variant, // Ignored - PNG is always default variant
 }) => {
   return (
     <div className={cn("relative inline-block", className)}>
