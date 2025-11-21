@@ -151,7 +151,7 @@ const AlertIcon = ({ variant }: { variant: AlertProps["variant"] }) => {
 };
 
 /* Alert Title */
-interface AlertTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {}
+type AlertTitleProps = React.HTMLAttributes<HTMLHeadingElement>
 
 export const AlertTitle = React.forwardRef<HTMLHeadingElement, AlertTitleProps>(
   ({ className, ...props }, ref) => {
@@ -171,7 +171,7 @@ export const AlertTitle = React.forwardRef<HTMLHeadingElement, AlertTitleProps>(
 AlertTitle.displayName = "AlertTitle";
 
 /* Alert Description */
-interface AlertDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
+type AlertDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
 
 export const AlertDescription = React.forwardRef<HTMLParagraphElement, AlertDescriptionProps>(
   ({ className, ...props }, ref) => {
