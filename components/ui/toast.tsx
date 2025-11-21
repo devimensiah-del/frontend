@@ -5,7 +5,7 @@ export interface ToastProps {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
-  variant?: "default" | "success" | "error" | "warning" | "info"
+  variant?: "default" | "destructive" | "success" | "error" | "warning" | "info"
   onClose?: () => void
   open?: boolean
 }
@@ -37,6 +37,28 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
         iconColor: "",
         textColor: "text-[var(--text-primary)]",
         titleColor: "text-[var(--navy-900)]",
+      },
+      destructive: {
+        bg: "bg-red-50",
+        border: "border-red-300",
+        icon: (
+          <svg
+            className="w-5 h-5 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        ),
+        iconColor: "text-red-600",
+        textColor: "text-red-800",
+        titleColor: "text-red-900",
       },
       success: {
         bg: "bg-green-50",
