@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Container } from "@/components/ui/Grid";
@@ -11,6 +11,13 @@ import { Logo } from "@/components/ui/Logo";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
 import { siteConfig, authRoutes } from "@/lib/config/site";
+import { Check, X } from "lucide-react";
+
+interface PasswordRequirement {
+  label: string;
+  validator: (password: string) => boolean;
+  met: boolean;
+}
 
 export default function SignupPage() {
   const router = useRouter();
@@ -22,6 +29,55 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
+
+  // Password requirements state
+  const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirement[]>([
+    {
+      label: "Mínimo de 8 caracteres",
+      validator: (pwd) => pwd.length >= 8,
+      met: false,
+    },
+    {
+      label: "Pelo menos uma letra minúscula (a-z)",
+      validator: (pwd) => /[a-z]/.test(pwd),
+      met: false,
+    },
+    {
+      label: "Pelo menos uma letra maiúscula (A-Z)",
+      validator: (pwd) => /[A-Z]/.test(pwd),
+      met: false,
+    },
+    {
+      label: "Pelo menos um número (0-9)",
+      validator: (pwd) => /[0-9]/.test(pwd),
+      met: false,
+    },
+    {
+      label: "Pelo menos um símbolo (!@#$%^&*)",
+      validator: (pwd) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd),
+      met: false,
+    },
+  ]);
+
+  // Update password requirements in real-time
+  useEffect(() => {
+    if (password) {
+      setShowPasswordRequirements(true);
+      setPasswordRequirements((prev) =>
+        prev.map((req) => ({
+          ...req,
+          met: req.validator(password),
+        }))
+      );
+    } else {
+      setShowPasswordRequirements(false);
+    }
+  }, [password]);
+
+  const isPasswordValid = (): boolean => {
+    return passwordRequirements.every((req) => req.met);
+  };
 
   const validateForm = (): boolean => {
     if (!name.trim()) {
@@ -34,8 +90,8 @@ export default function SignupPage() {
       return false;
     }
 
-    if (password.length < 6) {
-      setError("Senha deve ter pelo menos 6 caracteres");
+    if (!isPasswordValid()) {
+      setError("A senha não atende aos requisitos de segurança");
       return false;
     }
 
@@ -82,7 +138,7 @@ export default function SignupPage() {
   };
 
   return (
-    <Container className="min-h-screen flex items-center justify-center bg-surface-paper">
+    <Container className="min-h-screen flex items-center justify-center bg-surface-paper py-12">
       <div className="max-w-md w-full bg-white p-12 border border-line shadow-sm relative">
         {/* Gold Accent Top */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gold-500" />
@@ -100,7 +156,7 @@ export default function SignupPage() {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200">
             <Text variant="small" className="text-red-600">
               {error}
             </Text>
@@ -131,16 +187,44 @@ export default function SignupPage() {
             disabled={isLoading}
           />
 
-          <FormField
-            label="Senha"
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={isLoading}
-          />
+          <div>
+            <FormField
+              label="Senha"
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+
+            {/* Password Requirements Checklist */}
+            {showPasswordRequirements && (
+              <div className="mt-3 p-4 bg-surface-paper border border-line">
+                <Text variant="small" className="font-bold text-navy-900 mb-2 uppercase tracking-wider">
+                  Requisitos de Senha:
+                </Text>
+                <div className="space-y-2">
+                  {passwordRequirements.map((req, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      {req.met ? (
+                        <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <X className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                      )}
+                      <Text
+                        variant="small"
+                        className={req.met ? "text-green-700" : "text-text-secondary"}
+                      >
+                        {req.label}
+                      </Text>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           <FormField
             label="Confirmar Senha"
@@ -153,11 +237,21 @@ export default function SignupPage() {
             disabled={isLoading}
           />
 
+          {confirmPassword && password !== confirmPassword && (
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200">
+              <X className="w-4 h-4 text-yellow-600 flex-shrink-0" />
+              <Text variant="small" className="text-yellow-700">
+                As senhas não coincidem
+              </Text>
+            </div>
+          )}
+
           <Button
             variant="architect"
             type="submit"
             className="w-full mt-8"
             isLoading={isLoading}
+            disabled={isLoading || (password && !isPasswordValid())}
           >
             Criar Conta
           </Button>

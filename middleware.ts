@@ -97,8 +97,8 @@ export async function middleware(request: NextRequest) {
         .single();
 
       if (!profile || profile.role !== 'admin') {
-        // Not an admin, redirect to dashboard or home
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+        // Not an admin, redirect to user dashboard
+        return NextResponse.redirect(new URL('/painel', request.url));
       }
     }
 

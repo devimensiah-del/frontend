@@ -21,7 +21,7 @@ export default function EditorialPage() {
           </h1>
 
           <p className="text-lg text-[var(--text-secondary)] max-w-lg leading-relaxed mb-12 font-light">
-            Unimos a velocidade da Inteligência Artificial com a sabedoria da Inteligência Humana. Transformamos dados em decisões estratégicas em 24 horas.
+            Unimos a velocidade da Inteligência Artificial com a sabedoria da Inteligência Humana. Transformamos dados em decisões estratégicas em 48 horas.
           </p>
 
           <div className="flex flex-wrap gap-6">
@@ -50,7 +50,7 @@ export default function EditorialPage() {
 
           {/* Bottom Statistic */}
           <div className="flex-1 p-12 flex flex-col justify-end">
-            <div className="text-6xl font-light mb-2 font-heading text-[var(--gold-500)]">24h</div>
+            <div className="text-6xl font-light mb-2 font-heading text-[var(--gold-500)]">48h</div>
             <div className="text-xs uppercase tracking-[0.2em] text-gray-400">Tempo de Entrega</div>
           </div>
         </div>

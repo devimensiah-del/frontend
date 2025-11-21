@@ -9,7 +9,9 @@ import { toast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
 import { EnrichmentListSkeleton } from "@/components/skeletons";
+import { Calendar, Mail, Building2, ChevronRight } from "lucide-react";
 import type { Submission, Enrichment } from "@/types";
 
 /* ============================================
@@ -118,10 +120,10 @@ export default function EnrichmentListPage() {
     <div className="min-h-screen bg-surface-paper">
       {/* --- PAGE HEADER --- */}
       <header className="bg-white border-b border-line">
-        <div className="px-8 py-6">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-8 py-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="font-heading text-3xl font-medium tracking-tight text-navy-900">
+              <h1 className="font-heading text-2xl sm:text-3xl font-medium tracking-tight text-navy-900">
                 Enriquecimento de Dados
               </h1>
               <p className="text-sm text-text-secondary mt-1">
@@ -129,7 +131,8 @@ export default function EnrichmentListPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-4">
+            {/* Stats Cards - Responsive Grid */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:flex">
               <StatsCard label="Total" value={stats.total} />
               <StatsCard
                 label="Pendentes"
@@ -147,41 +150,44 @@ export default function EnrichmentListPage() {
       </header>
 
       {/* --- FILTERS & SEARCH --- */}
-      <div className="p-8 pb-4">
-        <div className="flex items-center gap-4">
+      <div className="p-4 sm:p-8 pb-4">
+        {/* Mobile: Stack filters vertically */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           {/* Status Filter */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <span className="text-sm font-medium text-text-secondary">
               Filtrar:
             </span>
-            <FilterButton
-              active={statusFilter === "all"}
-              onClick={() => setStatusFilter("all")}
-            >
-              Todos ({stats.total})
-            </FilterButton>
-            <FilterButton
-              active={statusFilter === "pending"}
-              onClick={() => setStatusFilter("pending")}
-            >
-              Pendentes ({stats.pending})
-            </FilterButton>
-            <FilterButton
-              active={statusFilter === "approved"}
-              onClick={() => setStatusFilter("approved")}
-            >
-              Aprovados ({stats.approved})
-            </FilterButton>
-            <FilterButton
-              active={statusFilter === "rejected"}
-              onClick={() => setStatusFilter("rejected")}
-            >
-              Rejeitados ({stats.rejected})
-            </FilterButton>
+            <div className="flex flex-wrap gap-2">
+              <FilterButton
+                active={statusFilter === "all"}
+                onClick={() => setStatusFilter("all")}
+              >
+                Todos ({stats.total})
+              </FilterButton>
+              <FilterButton
+                active={statusFilter === "pending"}
+                onClick={() => setStatusFilter("pending")}
+              >
+                Pendentes ({stats.pending})
+              </FilterButton>
+              <FilterButton
+                active={statusFilter === "approved"}
+                onClick={() => setStatusFilter("approved")}
+              >
+                Aprovados ({stats.approved})
+              </FilterButton>
+              <FilterButton
+                active={statusFilter === "rejected"}
+                onClick={() => setStatusFilter("rejected")}
+              >
+                Rejeitados ({stats.rejected})
+              </FilterButton>
+            </div>
           </div>
 
           {/* Search */}
-          <div className="ml-auto w-80">
+          <div className="sm:ml-auto w-full sm:w-80">
             <Input
               type="text"
               placeholder="Buscar por empresa ou email..."
@@ -203,88 +209,164 @@ export default function EnrichmentListPage() {
         </div>
       </div>
 
-      {/* --- ENRICHMENT TABLE --- */}
-      <div className="px-8 pb-8">
+      {/* --- ENRICHMENT CONTENT --- */}
+      <div className="px-4 sm:px-8 pb-8">
         {filteredSubmissions.length === 0 ? (
           <EmptyState searchQuery={searchQuery} statusFilter={statusFilter} />
         ) : (
-          <div className="bg-white border border-line shadow-sm overflow-hidden">
-            {/* Table Header */}
-            <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-surface-paper border-b border-line">
-              <div className="col-span-3">
-                <TableHeader>Empresa</TableHeader>
+          <>
+            {/* Desktop Table View - Hidden on Mobile */}
+            <div className="hidden lg:block bg-white border border-line shadow-sm overflow-hidden">
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-surface-paper border-b border-line">
+                <div className="col-span-3">
+                  <TableHeader>Empresa</TableHeader>
+                </div>
+                <div className="col-span-3">
+                  <TableHeader>Email</TableHeader>
+                </div>
+                <div className="col-span-2">
+                  <TableHeader>Status</TableHeader>
+                </div>
+                <div className="col-span-2">
+                  <TableHeader>Última Atualização</TableHeader>
+                </div>
+                <div className="col-span-2">
+                  <TableHeader>Ações</TableHeader>
+                </div>
               </div>
-              <div className="col-span-3">
-                <TableHeader>Email</TableHeader>
-              </div>
-              <div className="col-span-2">
-                <TableHeader>Status</TableHeader>
-              </div>
-              <div className="col-span-2">
-                <TableHeader>Última Atualização</TableHeader>
-              </div>
-              <div className="col-span-2">
-                <TableHeader>Ações</TableHeader>
+
+              {/* Table Body */}
+              <div className="divide-y divide-line">
+                {filteredSubmissions.map((submission) => (
+                  <Link
+                    key={submission.id}
+                    href={`/admin/enriquecimento/${submission.id}`}
+                    className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-surface-paper transition-colors cursor-pointer group"
+                  >
+                    {/* Company Name */}
+                    <div className="col-span-3 flex items-center">
+                      <div className="font-medium text-navy-900 group-hover:text-gold-500 transition-colors">
+                        {submission.companyName}
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="col-span-3 flex items-center">
+                      <div className="text-sm text-text-secondary">
+                        {submission.email}
+                      </div>
+                    </div>
+
+                    {/* Status */}
+                    <div className="col-span-2 flex items-center">
+                      <EnrichmentStatusBadge
+                        status={submission.enrichment?.status || "pending"}
+                      />
+                    </div>
+
+                    {/* Last Updated */}
+                    <div className="col-span-2 flex items-center">
+                      <div className="text-sm text-text-secondary">
+                        {submission.enrichment?.updatedAt
+                          ? formatDate(submission.enrichment.updatedAt)
+                          : formatDate(submission.updatedAt)}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          router.push(`/admin/enriquecimento/${submission.id}`);
+                        }}
+                        className="text-xs uppercase tracking-wider font-medium text-navy-900 hover:text-gold-500 transition-colors"
+                      >
+                        Editar →
+                      </button>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
 
-            {/* Table Body */}
-            <div className="divide-y divide-line">
+            {/* Mobile Card View - Visible Only on Mobile */}
+            <div className="lg:hidden space-y-4">
               {filteredSubmissions.map((submission) => (
-                <Link
+                <EnrichmentCard
                   key={submission.id}
-                  href={`/admin/enriquecimento/${submission.id}`}
-                  className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-surface-paper transition-colors cursor-pointer group"
-                >
-                  {/* Company Name */}
-                  <div className="col-span-3 flex items-center">
-                    <div className="font-medium text-navy-900 group-hover:text-gold-500 transition-colors">
-                      {submission.companyName}
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="col-span-3 flex items-center">
-                    <div className="text-sm text-text-secondary">
-                      {submission.email}
-                    </div>
-                  </div>
-
-                  {/* Status */}
-                  <div className="col-span-2 flex items-center">
-                    <EnrichmentStatusBadge
-                      status={submission.enrichment?.status || "pending"}
-                    />
-                  </div>
-
-                  {/* Last Updated */}
-                  <div className="col-span-2 flex items-center">
-                    <div className="text-sm text-text-secondary">
-                      {submission.enrichment?.updatedAt
-                        ? formatDate(submission.enrichment.updatedAt)
-                        : formatDate(submission.updatedAt)}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="col-span-2 flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        router.push(`/admin/enriquecimento/${submission.id}`);
-                      }}
-                      className="text-xs uppercase tracking-wider font-medium text-navy-900 hover:text-gold-500 transition-colors"
-                    >
-                      Editar →
-                    </button>
-                  </div>
-                </Link>
+                  submission={submission}
+                />
               ))}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
+  );
+}
+
+/* ============================================
+   MOBILE ENRICHMENT CARD COMPONENT
+   ============================================ */
+
+interface EnrichmentCardProps {
+  submission: SubmissionWithEnrichment;
+}
+
+function EnrichmentCard({ submission }: EnrichmentCardProps) {
+  return (
+    <Link href={`/admin/enriquecimento/${submission.id}`}>
+      <div className="bg-white border border-line p-4 hover:shadow-md transition-shadow">
+        {/* Header with Company Name and Status */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1 min-w-0 mr-2">
+            <h3 className="font-medium text-navy-900 truncate text-lg">
+              {submission.companyName}
+            </h3>
+          </div>
+          <EnrichmentStatusBadge
+            status={submission.enrichment?.status || "pending"}
+          />
+        </div>
+
+        {/* Metadata */}
+        <div className="space-y-2 text-xs text-text-secondary mb-4">
+          {submission.email && (
+            <div className="flex items-center gap-2">
+              <Mail className="w-3 h-3 flex-shrink-0" />
+              <span className="truncate">{submission.email}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <Calendar className="w-3 h-3 flex-shrink-0" />
+            <span>
+              Atualizado:{" "}
+              {submission.enrichment?.updatedAt
+                ? formatDate(submission.enrichment.updatedAt)
+                : formatDate(submission.updatedAt)}
+            </span>
+          </div>
+          {submission.industry && (
+            <div className="flex items-center gap-2">
+              <Building2 className="w-3 h-3 flex-shrink-0" />
+              <span>{submission.industry}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Action */}
+        <Button
+          variant="architect"
+          size="sm"
+          className="w-full"
+        >
+          <span>Editar Enriquecimento</span>
+          <ChevronRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
+    </Link>
   );
 }
 
@@ -333,8 +415,8 @@ function StatsCard({ label, value, variant = "default" }: StatsCardProps) {
   };
 
   return (
-    <div className={cn("border px-4 py-2 bg-white", variants[variant])}>
-      <div className="text-2xl font-light font-heading">{value}</div>
+    <div className={cn("border px-3 py-2 bg-white", variants[variant])}>
+      <div className="text-xl sm:text-2xl font-light font-heading">{value}</div>
       <div className="text-xs uppercase tracking-widest text-text-secondary mt-0.5">
         {label}
       </div>
@@ -353,7 +435,7 @@ function FilterButton({ active, onClick, children }: FilterButtonProps) {
     <button
       onClick={onClick}
       className={cn(
-        "px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors",
+        "px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors whitespace-nowrap",
         active
           ? "bg-navy-900 text-white"
           : "bg-white text-text-secondary border border-line hover:bg-surface-paper"
@@ -371,12 +453,12 @@ interface EmptyStateProps {
 
 function EmptyState({ searchQuery, statusFilter }: EmptyStateProps) {
   return (
-    <Card className="bg-white p-12 text-center">
+    <Card className="bg-white p-8 sm:p-12 text-center">
       <div className="max-w-md mx-auto">
         <h3 className="font-heading text-xl font-medium text-navy-900 mb-2">
           Nenhum resultado encontrado
         </h3>
-        <p className="text-text-secondary mb-6">
+        <p className="text-text-secondary mb-6 text-sm">
           {searchQuery
             ? `Não foram encontradas submissões com "${searchQuery}".`
             : statusFilter !== "all"

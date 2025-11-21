@@ -3,16 +3,36 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Logo } from "@/components/ui/Logo";
+import { ImensiahLogo } from "@/components/ImensiahLogo";
 import { cn } from "@/lib/utils/cn";
 import { Toaster } from "@/components/ui/toaster";
 import { WorkflowProgress } from "@/components/admin/WorkflowProgress";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { siteConfig, adminNav } from "@/lib/config/site";
+import {
+  LayoutDashboard,
+  FileText,
+  Database,
+  User,
+  Users,
+  TrendingUp,
+  BarChart
+} from "lucide-react";
 
 /* ============================================
    ADMIN LAYOUT - The Workspace
    ============================================ */
+
+// Icon mapping for navigation
+const iconMap: Record<string, React.ReactNode> = {
+  LayoutDashboard: <LayoutDashboard className="w-4 h-4" />,
+  FileText: <FileText className="w-4 h-4" />,
+  Database: <Database className="w-4 h-4" />,
+  BarChart: <BarChart className="w-4 h-4" />,
+  User: <User className="w-4 h-4" />,
+  Users: <Users className="w-4 h-4" />,
+  TrendingUp: <TrendingUp className="w-4 h-4" />,
+};
 
 export default function AdminLayout({
   children,
@@ -67,7 +87,11 @@ export default function AdminLayout({
         {/* Logo & Branding */}
         <div className="p-6 border-b border-navy-800">
           <div className="flex items-center gap-3">
-            <Logo className="w-10 h-10 text-white" />
+            <ImensiahLogo
+              className="w-10 h-10"
+              showText={false}
+              variant="white"
+            />
             <div>
               <div className="font-heading font-bold text-sm tracking-widest">
                 {siteConfig.brand.name}
@@ -100,7 +124,7 @@ export default function AdminLayout({
                   <NavItem
                     key={item.href}
                     href={item.href}
-                    icon={item.icon || "•"}
+                    icon={item.icon || "FileText"}
                     onClick={closeMobileMenu}
                   >
                     {item.title}
@@ -172,7 +196,7 @@ function NavItem({ href, icon, children, onClick }: NavItemProps) {
           : "text-gray-300 hover:bg-navy-800 hover:text-white"
       )}
     >
-      <span className="text-lg">{icon}</span>
+      <span className="flex-shrink-0">{iconMap[icon] || iconMap.FileText}</span>
       <span className="uppercase tracking-wider text-xs">{children}</span>
     </Link>
   );

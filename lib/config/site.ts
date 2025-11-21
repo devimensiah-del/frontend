@@ -155,21 +155,15 @@ export const adminNav: NavSection[] = [
     items: [
       {
         title: 'Envios',
-        href: '/admin/submissions',
+        href: '/admin/dashboard',
         icon: 'FileText',
         description: 'Gerenciar todos os envios',
       },
       {
         title: 'Enriquecimento',
-        href: '/admin/enrichment',
+        href: '/admin/enriquecimento',
         icon: 'Database',
         description: 'Aprovação de dados enriquecidos',
-      },
-      {
-        title: 'Análise',
-        href: '/admin/analysis',
-        icon: 'BarChart',
-        description: 'Revisão de análises estratégicas',
       },
       {
         title: 'Perfil',
