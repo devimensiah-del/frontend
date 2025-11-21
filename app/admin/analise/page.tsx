@@ -7,6 +7,9 @@ import { toast } from "@/components/ui/use-toast";
 import { adminApi } from "@/lib/api/client";
 import type { SubmissionStatus, Submission } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Text } from "@/components/ui/Typography";
 import { FileText, Download, Edit, Check } from "lucide-react";
 
 /* ============================================
@@ -108,8 +111,8 @@ export default function AdminAnalise() {
     <div className="min-h-screen bg-surface-paper">
       {/* --- PAGE HEADER --- */}
       <header className="bg-white border-b border-line">
-        <div className="px-8 py-6">
-          <h1 className="font-heading text-3xl font-medium tracking-tight text-navy-900">
+        <div className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+          <h1 className="font-heading text-2xl sm:text-3xl font-medium tracking-tight text-navy-900">
             Análise
           </h1>
           <p className="text-sm text-text-secondary mt-1">
@@ -119,65 +122,132 @@ export default function AdminAnalise() {
       </header>
 
       {/* --- SUBMISSIONS CONTENT --- */}
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {submissions.length === 0 ? (
-          <div className="bg-white border border-line p-12 text-center">
+          <div className="bg-white border border-line p-8 sm:p-12 text-center">
             <p className="text-text-secondary">
               Nenhum envio pronto para análise.
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-line shadow-sm overflow-hidden">
-            {/* Table Header */}
-            <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-surface-paper border-b border-line">
-              <div className="col-span-3">
-                <TableHeader>Empresa</TableHeader>
+          <>
+            {/* Desktop Table View (lg and up) */}
+            <div className="hidden lg:block bg-white border border-line shadow-sm overflow-hidden">
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-surface-paper border-b border-line">
+                <div className="col-span-3">
+                  <TableHeader>Empresa</TableHeader>
+                </div>
+                <div className="col-span-2">
+                  <TableHeader>Status</TableHeader>
+                </div>
+                <div className="col-span-2">
+                  <TableHeader>Análise</TableHeader>
+                </div>
+                <div className="col-span-2">
+                  <TableHeader>Relatório</TableHeader>
+                </div>
+                <div className="col-span-3">
+                  <TableHeader>Ações</TableHeader>
+                </div>
               </div>
-              <div className="col-span-2">
-                <TableHeader>Status</TableHeader>
-              </div>
-              <div className="col-span-2">
-                <TableHeader>Análise</TableHeader>
-              </div>
-              <div className="col-span-2">
-                <TableHeader>Relatório</TableHeader>
-              </div>
-              <div className="col-span-3">
-                <TableHeader>Ações</TableHeader>
+
+              {/* Table Body */}
+              <div className="divide-y divide-line">
+                {submissions.map((submission) => (
+                  <div
+                    key={submission.id}
+                    className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-surface-paper transition-colors"
+                  >
+                    <div className="col-span-3 flex items-center">
+                      <div className="font-medium text-navy-900">
+                        {submission.companyName}
+                      </div>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <StatusBadge status={submission.status} />
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <AnalysisStatus status={submission.status} />
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <ReportStatus status={submission.status} />
+                    </div>
+                    <div className="col-span-3 flex items-center gap-2">
+                      <Link href={`/admin/analise/${submission.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4 mr-2" />
+                          Editar
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="architect"
+                        size="sm"
+                        onClick={() => handleGeneratePdf(submission.id)}
+                        disabled={
+                          generatingPdf === submission.id ||
+                          submission.status === 'concluido'
+                        }
+                      >
+                        {generatingPdf === submission.id ? (
+                          "Gerando..."
+                        ) : submission.status === 'concluido' ? (
+                          <>
+                            <Check className="w-4 h-4 mr-2" />
+                            Gerado
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4 mr-2" />
+                            Gerar PDF
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Table Body */}
-            <div className="divide-y divide-line">
+            {/* Mobile Card View (below lg) */}
+            <div className="lg:hidden space-y-4">
               {submissions.map((submission) => (
-                <div
-                  key={submission.id}
-                  className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-surface-paper transition-colors"
-                >
-                  <div className="col-span-3 flex items-center">
-                    <div className="font-medium text-navy-900">
+                <Card key={submission.id} className="p-4 border border-line hover:border-gold-500/30 transition-colors">
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <h3 className="font-semibold text-navy-900 text-base line-clamp-2 flex-1">
                       {submission.companyName}
-                    </div>
-                  </div>
-                  <div className="col-span-2 flex items-center">
+                    </h3>
                     <StatusBadge status={submission.status} />
                   </div>
-                  <div className="col-span-2 flex items-center">
-                    <AnalysisStatus status={submission.status} />
+
+                  {/* Status Grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                      <Text variant="small" className="text-text-tertiary mb-1">
+                        Análise
+                      </Text>
+                      <AnalysisStatus status={submission.status} />
+                    </div>
+                    <div>
+                      <Text variant="small" className="text-text-tertiary mb-1">
+                        Relatório
+                      </Text>
+                      <ReportStatus status={submission.status} />
+                    </div>
                   </div>
-                  <div className="col-span-2 flex items-center">
-                    <ReportStatus status={submission.status} />
-                  </div>
-                  <div className="col-span-3 flex items-center gap-2">
-                    <Link href={`/admin/analise/${submission.id}`}>
-                      <Button variant="outline" size="sm">
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <Link href={`/admin/analise/${submission.id}`} className="flex-1">
+                      <Button variant="outline" className="w-full justify-center">
                         <Edit className="w-4 h-4 mr-2" />
                         Editar
                       </Button>
                     </Link>
                     <Button
                       variant="architect"
-                      size="sm"
+                      className="flex-1 justify-center"
                       onClick={() => handleGeneratePdf(submission.id)}
                       disabled={
                         generatingPdf === submission.id ||
@@ -194,15 +264,15 @@ export default function AdminAnalise() {
                       ) : (
                         <>
                           <Download className="w-4 h-4 mr-2" />
-                          Gerar PDF
+                          PDF
                         </>
                       )}
                     </Button>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

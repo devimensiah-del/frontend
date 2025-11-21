@@ -20,6 +20,7 @@ import {
 import { Skeleton, SkeletonText } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSubmissions } from '@/lib/hooks/use-submissions';
+import { MobileSubmissionCard } from '@/components/mobile';
 
 // Status badge variant mapping
 const getStatusVariant = (status: string): 'default' | 'primary' | 'success' | 'warning' | 'error' => {
@@ -92,15 +93,15 @@ export default function EnviosPage() {
       </div>
 
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Meus Envios</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Meus Envios</h1>
           <p className="text-gray-600 mt-2">
             Acompanhe todas as suas análises solicitadas.
           </p>
         </div>
-        <Link href="/nova-analise">
-          <Button className="bg-[#00a859] hover:bg-[#008a47] text-white">
+        <Link href="/nova-analise" className="w-full sm:w-auto">
+          <Button className="bg-[#00a859] hover:bg-[#008a47] text-white w-full sm:w-auto justify-center">
             <Plus className="w-4 h-4 mr-2" />
             Nova Análise
           </Button>
@@ -164,9 +165,9 @@ export default function EnviosPage() {
         </Card>
       )}
 
-      {/* Submissions Table */}
+      {/* Desktop Table View (lg and up) */}
       {!isLoading && !error && filteredSubmissions.length > 0 && (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden hidden lg:block">
           <Table>
             <TableHeader>
               <TableRow>
@@ -218,6 +219,23 @@ export default function EnviosPage() {
             </TableBody>
           </Table>
         </Card>
+      )}
+
+      {/* Mobile Card View (below lg) */}
+      {!isLoading && !error && filteredSubmissions.length > 0 && (
+        <div className="lg:hidden space-y-4">
+          {filteredSubmissions.map((submission) => (
+            <MobileSubmissionCard
+              key={submission.id}
+              id={submission.id}
+              companyName={submission.companyName || 'N/A'}
+              status={submission.status as any}
+              createdAt={submission.createdAt}
+              href={`/envios/${submission.id}`}
+              actionLabel="Ver Detalhes"
+            />
+          ))}
+        </div>
       )}
 
       {/* Results Count */}

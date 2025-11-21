@@ -9,12 +9,12 @@ import { FormField } from "@/components/ui/FormField";
 import { Logo } from "@/components/ui/Logo";
 import { useAuthContext } from "@/lib/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
-import { siteConfig, authRoutes, adminRoutes, dashboardRoutes } from "@/lib/config/site";
+import { siteConfig, authRoutes, getDefaultRouteByRole } from "@/lib/config/site";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signIn } = useAuthContext();
+  const { signIn, user } = useAuthContext();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,10 +38,10 @@ export function LoginForm() {
       // Wait for auth context to update with user profile from backend
       // The AuthProvider will fetch the user profile automatically
       setTimeout(() => {
-        // Redirect based on user role (will be available from useAuthContext after update)
-        const redirectPath = searchParams.get("redirect") || dashboardRoutes.main;
+        // Check if there's a redirect param, otherwise use role-based default
+        const redirectPath = searchParams.get("redirect") || getDefaultRouteByRole(user?.role);
         router.push(redirectPath);
-      }, 100);
+      }, 500); // Increased timeout to ensure user profile is loaded
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao fazer login";
       setError(errorMessage);

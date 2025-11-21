@@ -422,3 +422,21 @@ export function isProcessingStatus(status: SubmissionStatus): boolean {
 export function isPendingPayment(status: SubmissionStatus): boolean {
   return status === 'aguardando_pagamento';
 }
+
+/**
+ * Get default route based on user role
+ * @param role - User role ('admin', 'user', 'super_admin')
+ * @returns Default landing page for the role
+ */
+export function getDefaultRouteByRole(role: string | undefined): string {
+  if (!role) return dashboardRoutes.main;
+
+  switch (role) {
+    case 'admin':
+    case 'super_admin':
+      return adminRoutes.dashboard; // /admin/envios
+    case 'user':
+    default:
+      return dashboardRoutes.main; // /painel
+  }
+}

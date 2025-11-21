@@ -22,6 +22,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "IMENSIAH | Estratégia Privada",
   description: "Consultoria de alto nível amplificada por inteligência artificial.",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
 };
 
 export default function RootLayout({
