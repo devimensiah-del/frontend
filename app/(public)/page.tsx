@@ -90,6 +90,14 @@ export default function EditorialPage() {
         ))}
       </section>
 
+      {/* --- THE FORM SECTION --- */}
+      <section id="diagnostico" className="p-12 lg:p-24 flex flex-col items-center justify-center bg-[var(--surface-paper)]">
+        <div className="max-w-3xl w-full">
+          {/* Render the dedicated form component here */}
+          <SubmissionForm />
+        </div>
+      </section>
+
       {/* --- TESTIMONIALS: Quem confia na IMENSIAH --- */}
       <section className="border-b border-grid bg-white">
         <div className="p-12 lg:p-24">
@@ -206,14 +214,6 @@ export default function EditorialPage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* --- THE FORM SECTION --- */}
-      <section id="diagnostico" className="p-12 lg:p-24 flex flex-col items-center justify-center bg-[var(--surface-paper)]">
-        <div className="max-w-3xl w-full">
-          {/* Render the dedicated form component here */}
-          <SubmissionForm />
         </div>
       </section>
     </>
