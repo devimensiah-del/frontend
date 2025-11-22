@@ -89,17 +89,33 @@ export function SubmissionForm() {
   async function onSubmit(data: FormValues) {
     setIsSubmitting(true)
     try {
-      // Prepare submission data for backend
+      // Bundle additional information into JSON string
+      const additionalInfoData = {
+        contactName: data.contactName,
+        contactEmail: data.contactEmail,
+        contactPhone: data.contactPhone || "",
+        contactPosition: data.contactPosition || "",
+        companyLocation: data.companyLocation || "",
+        targetMarket: data.targetMarket || "",
+        annualRevenueMin: data.annualRevenueMin?.toString() || "",
+        annualRevenueMax: data.annualRevenueMax?.toString() || "",
+        fundingStage: data.fundingStage || "",
+        additionalNotes: data.additionalNotes || "",
+        linkedinUrl: data.linkedinUrl || "",
+        twitterHandle: data.twitterHandle || "",
+      }
+
+      // Prepare submission data for backend (camelCase format)
       const submissionData = {
-        company_name: data.companyName,
-        industry_name: data.companyIndustry || "Não especificado",
-        website_url: data.companyWebsite || "",
-        annual_revenue: data.annualRevenueMax ? parseFloat(data.annualRevenueMax.toString()) : null,
-        employee_count: data.companySize ? parseInt(data.companySize) : null,
-        location: data.companyLocation || "",
-        description: data.businessChallenge || "",
-        email: data.contactEmail,
-        phone_number: data.contactPhone || "",
+        companyName: data.companyName,
+        cnpj: "",
+        industry: data.companyIndustry || "",
+        companySize: data.companySize || "",
+        website: data.companyWebsite || "",
+        strategicGoal: data.businessChallenge,
+        currentChallenges: "",
+        competitivePosition: "",
+        additionalInfo: JSON.stringify(additionalInfoData),
       }
 
       // Call backend API
