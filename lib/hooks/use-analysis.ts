@@ -24,10 +24,26 @@ export function useAnalysis(submissionId: string, options?: UseAnalysisOptions) 
     refetch,
   } = useQuery({
     queryKey: ['analysis', submissionId],
-    queryFn: () => analysisApi.getBySubmissionId(submissionId),
+    queryFn: async () => {
+      try {
+        return await analysisApi.getBySubmissionId(submissionId);
+      } catch (err: any) {
+        // Gracefully handle 404 - analysis doesn't exist yet
+        if (err?.response?.status === 404 || err?.status === 404) {
+          return null;
+        }
+        throw err;
+      }
+    },
     enabled: options?.enabled !== false && !!submissionId,
     refetchInterval: options?.refetchInterval,
-    retry: 2,
+    retry: (failureCount, error: any) => {
+      // Don't retry on 404 - analysis simply doesn't exist yet
+      if (error?.response?.status === 404 || error?.status === 404) {
+        return false;
+      }
+      return failureCount < 2;
+    },
     staleTime: 30000, // 30 seconds
   });
 
@@ -54,9 +70,13 @@ export function useAnalysis(submissionId: string, options?: UseAnalysisOptions) 
     },
   });
 
-  // Generate PDF
+  // Publish report and generate PDF
   const generatePDFMutation = useMutation({
-    mutationFn: () => analysisApi.getPdf(submissionId),
+    mutationFn: () => analysisApi.publishReport(submissionId),
+    onSuccess: () => {
+      // Invalidate submission to update report_id and pdf_url
+      queryClient.invalidateQueries({ queryKey: ['submission', submissionId] });
+    },
   });
 
   // Send to user
