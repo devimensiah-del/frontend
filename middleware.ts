@@ -96,7 +96,8 @@ export async function middleware(request: NextRequest) {
         .eq('id', user.id)
         .single();
 
-      if (!profile || profile.role !== 'admin') {
+      // Allow both 'admin' and 'super_admin' roles to access admin routes
+      if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
         // Not an admin, redirect to user dashboard
         return NextResponse.redirect(new URL('/painel', request.url));
       }
