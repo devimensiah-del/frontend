@@ -32,7 +32,7 @@ export default function AdminEnvios() {
         setIsLoading(true);
         setError(null);
         const data = await adminApi.getAllSubmissions();
-        setSubmissions(data.data);
+        setSubmissions(data.data || []); // Ensure always an array
       } catch (err) {
         console.error("Error fetching submissions:", err);
         setError("Erro ao carregar envios. Por favor, tente novamente.");
@@ -69,10 +69,10 @@ export default function AdminEnvios() {
     );
   }
 
-  const pendingStatuses = new Set<string>(["pending", "processing"]);
-  const completedStatuses = new Set<string>(["completed"]);
-  const pendingCount = submissions.filter(s => pendingStatuses.has(s.status)).length;
-  const completedCount = submissions.filter(s => completedStatuses.has(s.status)).length;
+  // NEW ARCHITECTURE: All submissions have status 'received'
+  // Show total count for now (can be enhanced with enrichment/analysis status later)
+  const pendingCount = 0; // All are received, none truly "pending"
+  const completedCount = 0; // Would need to check analysis status = 'sent'
 
   return (
     <div className="min-h-screen bg-surface-paper">
@@ -188,23 +188,12 @@ interface StatusBadgeProps {
 }
 
 function StatusBadge({ status }: StatusBadgeProps) {
-  const variants = {
-    pending: { bg: "bg-gray-100", text: "text-gray-600", label: "Pendente" },
-    processing: { bg: "bg-blue-50", text: "text-blue-600", label: "Processando" },
-    enriching: { bg: "bg-blue-50", text: "text-blue-600", label: "Em Enriquecimento" },
-    enriched: { bg: "bg-indigo-50", text: "text-indigo-600", label: "Enriquecimento Completo" },
-    analyzing: { bg: "bg-purple-50", text: "text-purple-600", label: "Em Análise" },
-    analyzed: { bg: "bg-teal-50", text: "text-teal-600", label: "Análise Completa" },
-    ready_for_review: { bg: "bg-purple-50", text: "text-purple-600", label: "Revisão Final" },
-    generating_report: { bg: "bg-cyan-50", text: "text-cyan-600", label: "Gerando Relatório" },
-    completed: { bg: "bg-gold-500/10", text: "text-gold-600", label: "Concluído" },
-    enrichment_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro Enriq." },
-    analysis_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro Análise" },
-    report_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro PDF" },
-    failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro" },
-  } as const;
+  // NEW ARCHITECTURE: All submissions have status 'received'
+  const variants: Record<string, { bg: string; text: string; label: string }> = {
+    received: { bg: "bg-green-100", text: "text-green-600", label: "Recebido" },
+  };
 
-  const variant = variants[status as keyof typeof variants] || { bg: "bg-gray-100", text: "text-gray-600", label: status || "Desconhecido" };
+  const variant = variants[status] || variants.received;
 
   return (
     <span className={cn("inline-flex items-center px-2 py-1 text-xs font-bold uppercase tracking-wider", variant.bg, variant.text)}>
