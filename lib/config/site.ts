@@ -206,7 +206,7 @@ export const publicRoutes = {
 } as const;
 
 // ============================================================================
-// Status Configuration
+// Status Configuration (FIXED: Matches Go Backend)
 // ============================================================================
 
 export interface StatusConfig {
@@ -219,62 +219,79 @@ export interface StatusConfig {
   description: string;
 }
 
+// Matches backend_v3/domain/submission/model.go
 export const statusConfig: Record<SubmissionStatus, StatusConfig> = {
-  pendente: {
+  // 1. Pending
+  pending: {
     label: 'Pendente',
-    color: 'gray',
-    bgColor: 'bg-gray-50',
-    textColor: 'text-gray-700',
-    borderColor: 'border-gray-200',
-    icon: 'Clock',
-    description: 'Aguardando revisão inicial',
-  },
-  aguardando_pagamento: {
-    label: 'Aguardando Pagamento',
     color: 'yellow',
     bgColor: 'bg-yellow-50',
     textColor: 'text-yellow-700',
     borderColor: 'border-yellow-200',
-    icon: 'CreditCard',
-    description: 'Pagamento pendente',
+    icon: 'Clock',
+    description: 'Aguardando processamento inicial',
   },
-  em_enriquecimento: {
-    label: 'Em Enriquecimento',
+
+  // 2. Processing (Generic)
+  processing: {
+    label: 'Processando',
+    color: 'blue',
+    bgColor: 'bg-blue-50',
+    textColor: 'text-blue-700',
+    borderColor: 'border-blue-200',
+    icon: 'Loader2',
+    description: 'Sistema em operação',
+  },
+
+  // 3. Enrichment Phase
+  enriching: {
+    label: 'Enriquecendo',
     color: 'blue',
     bgColor: 'bg-blue-50',
     textColor: 'text-blue-700',
     borderColor: 'border-blue-200',
     icon: 'Database',
-    description: 'Coletando e enriquecendo dados',
+    description: 'Coletando dados públicos',
   },
-  enriquecimento_completo: {
-    label: 'Enriquecimento Completo',
+  enriched: {
+    label: 'Enriquecido',
     color: 'purple',
     bgColor: 'bg-purple-50',
     textColor: 'text-purple-700',
     borderColor: 'border-purple-200',
     icon: 'CheckCircle',
-    description: 'Dados enriquecidos, pronto para análise',
+    description: 'Dados coletados, aguardando análise',
   },
-  em_analise: {
+
+  // 4. Analysis Phase
+  analyzing: {
     label: 'Em Análise',
-    color: 'blue',
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-700',
-    borderColor: 'border-blue-200',
+    color: 'orange',
+    bgColor: 'bg-orange-50',
+    textColor: 'text-orange-700',
+    borderColor: 'border-orange-200',
     icon: 'BarChart',
-    description: 'Análise estratégica em andamento',
+    description: 'IA gerando frameworks estratégicos',
   },
-  analise_completa: {
-    label: 'Análise Completa',
+  analyzed: {
+    label: 'Análise Pronta',
     color: 'purple',
     bgColor: 'bg-purple-50',
     textColor: 'text-purple-700',
     borderColor: 'border-purple-200',
-    icon: 'CheckCircle',
-    description: 'Análise concluída, gerando relatório',
+    icon: 'FileText',
+    description: 'Análise concluída internamente',
   },
-  em_geracao_relatorio: {
+  ready_for_review: {
+    label: 'Revisão Final',
+    color: 'purple',
+    bgColor: 'bg-purple-50',
+    textColor: 'text-purple-700',
+    borderColor: 'border-purple-200',
+    icon: 'Eye',
+    description: 'Aguardando aprovação do consultor',
+  },
+  generating_report: {
     label: 'Gerando Relatório',
     color: 'orange',
     bgColor: 'bg-orange-50',
@@ -283,34 +300,56 @@ export const statusConfig: Record<SubmissionStatus, StatusConfig> = {
     icon: 'FileText',
     description: 'Compilando relatório final',
   },
-  concluido: {
+
+  // 5. Completed
+  completed: {
     label: 'Concluído',
     color: 'green',
     bgColor: 'bg-green-50',
     textColor: 'text-green-700',
     borderColor: 'border-green-200',
     icon: 'CheckCircle',
-    description: 'Relatório disponível',
+    description: 'Relatório disponível para download',
   },
-  cancelado: {
-    label: 'Cancelado',
-    color: 'gray',
-    bgColor: 'bg-gray-50',
-    textColor: 'text-gray-700',
-    borderColor: 'border-gray-200',
-    icon: 'XCircle',
-    description: 'Envio cancelado',
-  },
-  erro: {
-    label: 'Erro',
+
+  // 6. Errors
+  failed: {
+    label: 'Falhou',
     color: 'red',
     bgColor: 'bg-red-50',
     textColor: 'text-red-700',
     borderColor: 'border-red-200',
     icon: 'AlertCircle',
-    description: 'Erro no processamento',
+    description: 'Erro genérico no processamento',
   },
-} as const;
+  enrichment_failed: {
+    label: 'Erro no Enriquecimento',
+    color: 'red',
+    bgColor: 'bg-red-50',
+    textColor: 'text-red-700',
+    borderColor: 'border-red-200',
+    icon: 'AlertTriangle',
+    description: 'Falha ao coletar dados externos',
+  },
+  analysis_failed: {
+    label: 'Erro na Análise',
+    color: 'red',
+    bgColor: 'bg-red-50',
+    textColor: 'text-red-700',
+    borderColor: 'border-red-200',
+    icon: 'AlertTriangle',
+    description: 'Falha na geração de insights',
+  },
+  report_failed: {
+    label: 'Erro no Relatório',
+    color: 'red',
+    bgColor: 'bg-red-50',
+    textColor: 'text-red-700',
+    borderColor: 'border-red-200',
+    icon: 'FileWarning',
+    description: 'Falha na geração do PDF',
+  },
+};
 
 // ============================================================================
 // Industry & Company Size Options
@@ -391,36 +430,28 @@ export const features = {
 // Helper Functions
 // ============================================================================
 
-export function getStatusConfig(status: SubmissionStatus): StatusConfig {
-  return statusConfig[status];
+export function getStatusConfig(status: string): StatusConfig {
+  // Normalize to lowercase and handle unknown statuses
+  const s = (status?.toLowerCase() || 'pending') as SubmissionStatus;
+  return statusConfig[s] || statusConfig.pending;
 }
 
-export function getStatusLabel(status: SubmissionStatus): string {
-  return statusConfig[status].label;
+export function getStatusLabel(status: string): string {
+  return getStatusConfig(status).label;
 }
 
-export function getStatusColor(status: SubmissionStatus): string {
-  return statusConfig[status].color;
+export function isCompletedStatus(status: string): boolean {
+  return status === 'completed';
 }
 
-export function isCompletedStatus(status: SubmissionStatus): boolean {
-  return status === 'concluido';
-}
-
-export function isErrorStatus(status: SubmissionStatus): boolean {
-  return status === 'erro' || status === 'cancelado';
-}
-
-export function isProcessingStatus(status: SubmissionStatus): boolean {
+export function isProcessingStatus(status: string): boolean {
   return [
-    'em_enriquecimento',
-    'em_analise',
-    'em_geracao_relatorio',
-  ].includes(status);
-}
-
-export function isPendingPayment(status: SubmissionStatus): boolean {
-  return status === 'aguardando_pagamento';
+    'enriching',
+    'analyzing',
+    'analyzed',
+    'ready_for_review',
+    'processing'
+  ].includes(status || '');
 }
 
 /**

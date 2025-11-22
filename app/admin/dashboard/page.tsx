@@ -112,9 +112,9 @@ export default function AdminDashboard() {
   }
 
   const pendingCount = submissions.filter(
-    s => s.status === "pendente" || s.status === "aguardando_pagamento"
+    s => s.status === "pending"
   ).length;
-  const completedCount = submissions.filter(s => s.status === "concluido").length;
+  const completedCount = submissions.filter(s => s.status === "completed").length;
 
   return (
     <div className="min-h-screen bg-surface-paper">
@@ -364,52 +364,67 @@ interface StatusBadgeProps {
 
 function StatusBadge({ status }: StatusBadgeProps) {
   const variants: Record<SubmissionStatus, { bg: string; text: string; label: string }> = {
-    pendente: {
+    pending: {
       bg: "bg-gray-100",
       text: "text-gray-600",
       label: "Pendente",
     },
-    aguardando_pagamento: {
-      bg: "bg-yellow-50",
-      text: "text-yellow-600",
-      label: "Aguardando Pagamento",
+    processing: {
+      bg: "bg-blue-50",
+      text: "text-blue-600",
+      label: "Processando",
     },
-    em_enriquecimento: {
+    enriching: {
       bg: "bg-blue-50",
       text: "text-blue-600",
       label: "Em Enriquecimento",
     },
-    enriquecimento_completo: {
+    enriched: {
       bg: "bg-indigo-50",
       text: "text-indigo-600",
       label: "Enriquecimento Completo",
     },
-    em_analise: {
+    analyzing: {
       bg: "bg-purple-50",
       text: "text-purple-600",
       label: "Em Análise",
     },
-    analise_completa: {
+    analyzed: {
       bg: "bg-teal-50",
       text: "text-teal-600",
       label: "Análise Completa",
     },
-    em_geracao_relatorio: {
+    ready_for_review: {
+      bg: "bg-purple-50",
+      text: "text-purple-600",
+      label: "Revisão Final",
+    },
+    generating_report: {
       bg: "bg-cyan-50",
       text: "text-cyan-600",
       label: "Gerando Relatório",
     },
-    concluido: {
+    completed: {
       bg: "bg-gold-500/10",
       text: "text-gold-600",
       label: "Concluído",
     },
-    cancelado: {
-      bg: "bg-gray-200",
-      text: "text-gray-500",
-      label: "Cancelado",
+    enrichment_failed: {
+      bg: "bg-red-50",
+      text: "text-red-600",
+      label: "Erro no Enriquecimento",
     },
-    erro: {
+    analysis_failed: {
+      bg: "bg-red-50",
+      text: "text-red-600",
+      label: "Erro na Análise",
+    },
+    report_failed: {
+      bg: "bg-red-50",
+      text: "text-red-600",
+      label: "Erro no Relatório",
+    },
+    failed: {
       bg: "bg-red-50",
       text: "text-red-600",
       label: "Erro",

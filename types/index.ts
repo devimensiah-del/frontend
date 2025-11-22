@@ -13,45 +13,38 @@ export type {
   // Status and enum types
   SubmissionStatus,
   UserRole,
-  PaymentStatus,
 
   // User types
   User,
-  AuthState,
 
   // Submission types
   Submission,
 
-  // Enrichment types (Strategic)
+  // Enrichment types
   Enrichment,
-  StrategicProfile,
-  CompanyOverview,
-  MarketIntelligence,
-  CompetitiveLandscape,
-  FinancialMetrics,
-  OperationalCapabilities,
-  RiskAssessment,
 
   // Analysis types
   Analysis,
   PESTELAnalysis,
-  PorterFiveForcesAnalysis,
+  PorterAnalysis,
+  TamSamSomAnalysis,
   SWOTAnalysis,
-  VRIOAnalysis,
-  ValueChainAnalysis,
-  BCGMatrixAnalysis,
-  AnsoffMatrixAnalysis,
-  BalancedScorecardAnalysis,
-  McKinsey7SAnalysis,
+  BenchmarkingAnalysis,
   BlueOceanAnalysis,
-  CoreCompetenciesAnalysis,
+  GrowthHackingAnalysis,
+  ScenariosAnalysis,
+  OKRsAnalysis,
+  OKRItem,
+  BSCAnalysis,
+  DecisionMatrixAnalysis,
+  Synthesis,
 
   // Report types
   Report,
-  ReportPage,
 
   // API response types
   ApiResponse,
+  AuthResponse,
   PaginatedResponse,
 
   // Form types

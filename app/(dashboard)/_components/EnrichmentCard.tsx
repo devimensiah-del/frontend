@@ -46,73 +46,21 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
         </div>
 
         {/* Company Overview */}
-        {enrichment.companyOverview && (
+        {enrichment.data?.overview && (
           <div className="pt-4 border-t border-gray-200">
             <p className="text-sm font-medium text-gray-700 mb-3">Visão Geral da Empresa</p>
             <div className="space-y-3">
               <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">Nome Legal</p>
-                <p className="text-sm text-gray-900">{enrichment.companyOverview.legalName}</p>
+                <p className="text-sm text-gray-900 leading-relaxed">{enrichment.data.overview.description}</p>
               </div>
-              {enrichment.companyOverview.headquarters && (
+              {enrichment.data.overview.sources && enrichment.data.overview.sources.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Sede</p>
-                  <p className="text-sm text-gray-900">{enrichment.companyOverview.headquarters}</p>
-                </div>
-              )}
-              {enrichment.companyOverview.numberOfEmployees && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Funcionários</p>
-                  <p className="text-sm text-gray-900">{enrichment.companyOverview.numberOfEmployees}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Strategic Profile */}
-        {enrichment.strategicProfile && enrichment.strategicProfile.keyCompetencies.length > 0 && (
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-2">Competências-Chave</p>
-            <div className="flex flex-wrap gap-2">
-              {enrichment.strategicProfile.keyCompetencies.map((competency, index) => (
-                <Badge
-                  key={index}
-                  variant="default"
-                  className="bg-blue-50 text-blue-700 border-blue-200"
-                >
-                  {competency}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Market Intelligence */}
-        {enrichment.marketIntelligence && (
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">Inteligência de Mercado</p>
-            <div className="space-y-3">
-              {enrichment.marketIntelligence.industryOverview && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Visão da Indústria</p>
-                  <p className="text-sm text-gray-900 leading-relaxed">{enrichment.marketIntelligence.industryOverview}</p>
-                </div>
-              )}
-              {enrichment.marketIntelligence.marketSize && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Tamanho do Mercado</p>
-                  <p className="text-sm text-gray-900">{enrichment.marketIntelligence.marketSize}</p>
-                </div>
-              )}
-              {enrichment.marketIntelligence.keyTrends.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Tendências-Chave</p>
+                  <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Fontes</p>
                   <ul className="space-y-1">
-                    {enrichment.marketIntelligence.keyTrends.map((trend, index) => (
-                      <li key={index} className="text-sm text-gray-900 flex items-start">
+                    {enrichment.data.overview.sources.map((source, index) => (
+                      <li key={index} className="text-xs text-gray-600 flex items-start">
                         <span className="text-[#00a859] mr-2">•</span>
-                        {trend}
+                        {source}
                       </li>
                     ))}
                   </ul>
@@ -122,56 +70,126 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
           </div>
         )}
 
-        {/* Competitive Landscape */}
-        {enrichment.competitiveLandscape && enrichment.competitiveLandscape.mainCompetitors.length > 0 && (
+        {/* Digital Presence */}
+        {enrichment.data?.digitalPresence && (
           <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">Principais Concorrentes</p>
+            <p className="text-sm font-medium text-gray-700 mb-3">Presença Digital</p>
             <div className="space-y-3">
-              {enrichment.competitiveLandscape.mainCompetitors.map((competitor, index) => (
-                <div key={index} className="bg-gray-50 p-3 rounded">
-                  <p className="text-sm font-semibold text-gray-900">{competitor.name}</p>
-                  {competitor.marketShare && (
-                    <p className="text-xs text-gray-600 mt-1">Market Share: {competitor.marketShare}</p>
-                  )}
+              <div>
+                <p className="text-xs font-semibold text-gray-600 uppercase">Website</p>
+                <a
+                  href={enrichment.data.digitalPresence.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-[#00a859] hover:underline"
+                >
+                  {enrichment.data.digitalPresence.websiteUrl}
+                </a>
+              </div>
+              {enrichment.data.digitalPresence.recentNews && enrichment.data.digitalPresence.recentNews.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Notícias Recentes</p>
+                  <ul className="space-y-1">
+                    {enrichment.data.digitalPresence.recentNews.map((news, index) => (
+                      <li key={index} className="text-sm text-gray-900 flex items-start">
+                        <span className="text-[#00a859] mr-2">•</span>
+                        {news}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
 
-        {/* Financial Metrics */}
-        {enrichment.financialMetrics && (
+        {/* Market Position */}
+        {enrichment.data?.marketPosition && (
           <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">Métricas Financeiras</p>
-            <div className="grid grid-cols-2 gap-3">
-              {enrichment.financialMetrics.revenue && (
+            <p className="text-sm font-medium text-gray-700 mb-3">Posição de Mercado</p>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-semibold text-gray-600 uppercase">Indústria</p>
+                <p className="text-sm text-gray-900">{enrichment.data.marketPosition.industry}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-600 uppercase">Diferencial-Chave</p>
+                <p className="text-sm text-gray-900 leading-relaxed">{enrichment.data.marketPosition.keyDifferentiator}</p>
+              </div>
+              {enrichment.data.marketPosition.competitors && enrichment.data.marketPosition.competitors.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Receita</p>
-                  <p className="text-sm text-gray-900">{enrichment.financialMetrics.revenue}</p>
-                </div>
-              )}
-              {enrichment.financialMetrics.profitMargin && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Margem de Lucro</p>
-                  <p className="text-sm text-gray-900">{enrichment.financialMetrics.profitMargin}</p>
+                  <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Principais Concorrentes</p>
+                  <div className="flex flex-wrap gap-2">
+                    {enrichment.data.marketPosition.competitors.map((competitor, index) => (
+                      <Badge
+                        key={index}
+                        variant="default"
+                        className="bg-orange-50 text-orange-700 border-orange-200"
+                      >
+                        {competitor}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Data Quality Score */}
-        <div className="pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-700">Qualidade dos Dados</p>
-            <div className="flex items-center space-x-2">
-              <div className="text-sm font-bold text-gray-900">{enrichment.dataQualityScore}/100</div>
-              <Badge variant="default" className="bg-indigo-50 text-indigo-700 border-indigo-200">
-                {enrichment.sourceReliability}
-              </Badge>
+        {/* Strategic Inference */}
+        {enrichment.data?.strategicInference && (
+          <div className="pt-4 border-t border-gray-200">
+            <p className="text-sm font-medium text-gray-700 mb-3">Inferência Estratégica</p>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">Tom da Marca</p>
+                  <p className="text-sm text-gray-900">{enrichment.data.strategicInference.brandTone}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">Maturidade Digital</p>
+                  <p className="text-sm text-gray-900">{enrichment.data.strategicInference.digitalMaturity}/10</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">Arquétipo de Valor</p>
+                  <p className="text-sm text-gray-900">{enrichment.data.strategicInference.valueArchetype}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">Segmento de Cliente</p>
+                  <p className="text-sm text-gray-900">{enrichment.data.strategicInference.customerSegment}</p>
+                </div>
+              </div>
+
+              {enrichment.data.strategicInference.strengths && enrichment.data.strategicInference.strengths.length > 0 && (
+                <div className="bg-green-50 p-3 rounded">
+                  <p className="text-xs font-semibold text-green-700 uppercase mb-2">Forças</p>
+                  <ul className="space-y-1">
+                    {enrichment.data.strategicInference.strengths.map((strength, index) => (
+                      <li key={index} className="text-sm text-gray-900 flex items-start">
+                        <span className="text-green-600 mr-2">→</span>
+                        {strength}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {enrichment.data.strategicInference.weaknesses && enrichment.data.strategicInference.weaknesses.length > 0 && (
+                <div className="bg-red-50 p-3 rounded">
+                  <p className="text-xs font-semibold text-red-700 uppercase mb-2">Fraquezas</p>
+                  <ul className="space-y-1">
+                    {enrichment.data.strategicInference.weaknesses.map((weakness, index) => (
+                      <li key={index} className="text-sm text-gray-900 flex items-start">
+                        <span className="text-red-600 mr-2">→</span>
+                        {weakness}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </Card>
   );

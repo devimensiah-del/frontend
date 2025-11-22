@@ -5,19 +5,19 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
-import type { SubmissionStatus } from '@/lib/types';
+import type { SubmissionStatus, Submission } from '@/lib/types';
 
 interface WorkflowCounts {
-  stage1: number; // Envios (pending, submitted)
+  stage1: number; // Envios (pending)
   stage2: number; // Enriquecimento (enriching, enriched)
-  stage3: number; // Análise (analyzing, analyzed, generating_report)
+  stage3: number; // Análise (analyzing, analyzed, generating_report, completed)
 }
 
 // Map statuses to workflow stages
 const STAGE_STATUS_MAP: Record<1 | 2 | 3, SubmissionStatus[]> = {
-  1: ['pendente', 'aguardando_pagamento'],
-  2: ['em_enriquecimento', 'enriquecimento_completo'],
-  3: ['em_analise', 'analise_completa', 'em_geracao_relatorio'],
+  1: ['pending'],
+  2: ['enriching', 'enriched'],
+  3: ['analyzing', 'analyzed', 'generating_report', 'completed'],
 };
 
 async function fetchWorkflowCounts(): Promise<WorkflowCounts> {
@@ -33,7 +33,7 @@ async function fetchWorkflowCounts(): Promise<WorkflowCounts> {
       stage3: 0,
     };
 
-    submissions.forEach((submission) => {
+    submissions.forEach((submission: Submission) => {
       if (STAGE_STATUS_MAP[1].includes(submission.status)) {
         counts.stage1++;
       } else if (STAGE_STATUS_MAP[2].includes(submission.status)) {

@@ -31,11 +31,11 @@ export default function AdminAnalise() {
         // Filter submissions that are ready for analysis (enrichment complete or later stages)
         const analysisReadySubmissions = data.data.filter(
           (s: Submission) =>
-            s.status === 'enriquecimento_completo' ||
-            s.status === 'em_analise' ||
-            s.status === 'analise_completa' ||
-            s.status === 'em_geracao_relatorio' ||
-            s.status === 'concluido'
+            s.status === 'enriched' ||
+            s.status === 'analyzing' ||
+            s.status === 'analyzed' ||
+            s.status === 'generating_report' ||
+            s.status === 'completed'
         );
         setSubmissions(analysisReadySubmissions);
       } catch (err) {
@@ -58,7 +58,7 @@ export default function AdminAnalise() {
     try {
       setGeneratingPdf(submissionId);
       // Update submission status to trigger report generation
-      await adminApi.updateSubmissionStatus(submissionId, 'em_geracao_relatorio');
+      await adminApi.updateSubmissionStatus(submissionId, 'generating_report');
       toast({
         title: "Gerando PDF",
         description: "O processo de geração do relatório foi iniciado.",
@@ -68,11 +68,11 @@ export default function AdminAnalise() {
       const data = await adminApi.getAllSubmissions();
       setSubmissions(data.data.filter(
         (s: Submission) =>
-          s.status === 'enriquecimento_completo' ||
-          s.status === 'em_analise' ||
-          s.status === 'analise_completa' ||
-          s.status === 'em_geracao_relatorio' ||
-          s.status === 'concluido'
+          s.status === 'enriched' ||
+          s.status === 'analyzing' ||
+          s.status === 'analyzed' ||
+          s.status === 'generating_report' ||
+          s.status === 'completed'
       ));
     } catch (error) {
       toast({
@@ -186,12 +186,12 @@ export default function AdminAnalise() {
                         onClick={() => handleGeneratePdf(submission.id)}
                         disabled={
                           generatingPdf === submission.id ||
-                          submission.status === 'concluido'
+                          submission.status === 'completed'
                         }
                       >
                         {generatingPdf === submission.id ? (
                           "Gerando..."
-                        ) : submission.status === 'concluido' ? (
+                        ) : submission.status === 'completed' ? (
                           <>
                             <Check className="w-4 h-4 mr-2" />
                             Gerado
@@ -251,12 +251,12 @@ export default function AdminAnalise() {
                       onClick={() => handleGeneratePdf(submission.id)}
                       disabled={
                         generatingPdf === submission.id ||
-                        submission.status === 'concluido'
+                        submission.status === 'completed'
                       }
                     >
                       {generatingPdf === submission.id ? (
                         "Gerando..."
-                      ) : submission.status === 'concluido' ? (
+                      ) : submission.status === 'completed' ? (
                         <>
                           <Check className="w-4 h-4 mr-2" />
                           Gerado
@@ -297,16 +297,19 @@ interface StatusBadgeProps {
 
 function StatusBadge({ status }: StatusBadgeProps) {
   const variants: Record<SubmissionStatus, { bg: string; text: string; label: string }> = {
-    pendente: { bg: "bg-gray-100", text: "text-gray-600", label: "Pendente" },
-    aguardando_pagamento: { bg: "bg-yellow-50", text: "text-yellow-600", label: "Aguardando Pag" },
-    em_enriquecimento: { bg: "bg-blue-50", text: "text-blue-600", label: "Enriquecendo" },
-    enriquecimento_completo: { bg: "bg-indigo-50", text: "text-indigo-600", label: "Enriq. Completo" },
-    em_analise: { bg: "bg-purple-50", text: "text-purple-600", label: "Em Análise" },
-    analise_completa: { bg: "bg-teal-50", text: "text-teal-600", label: "Análise Completa" },
-    em_geracao_relatorio: { bg: "bg-cyan-50", text: "text-cyan-600", label: "Gerando PDF" },
-    concluido: { bg: "bg-gold-500/10", text: "text-gold-600", label: "Concluído" },
-    cancelado: { bg: "bg-gray-200", text: "text-gray-500", label: "Cancelado" },
-    erro: { bg: "bg-red-50", text: "text-red-600", label: "Erro" },
+    pending: { bg: "bg-gray-100", text: "text-gray-600", label: "Pendente" },
+    processing: { bg: "bg-blue-50", text: "text-blue-600", label: "Processando" },
+    enriching: { bg: "bg-blue-50", text: "text-blue-600", label: "Enriquecendo" },
+    enriched: { bg: "bg-indigo-50", text: "text-indigo-600", label: "Enriq. Completo" },
+    analyzing: { bg: "bg-purple-50", text: "text-purple-600", label: "Em Análise" },
+    analyzed: { bg: "bg-teal-50", text: "text-teal-600", label: "Análise Completa" },
+    ready_for_review: { bg: "bg-purple-50", text: "text-purple-600", label: "Revisão Final" },
+    generating_report: { bg: "bg-cyan-50", text: "text-cyan-600", label: "Gerando PDF" },
+    completed: { bg: "bg-gold-500/10", text: "text-gold-600", label: "Concluído" },
+    enrichment_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro Enriq." },
+    analysis_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro Análise" },
+    report_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro PDF" },
+    failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro" },
   };
 
   const variant = variants[status];
@@ -314,17 +317,17 @@ function StatusBadge({ status }: StatusBadgeProps) {
 }
 
 function AnalysisStatus({ status }: { status: SubmissionStatus }) {
-  if (status === 'em_analise' || status === 'analise_completa' || status === 'em_geracao_relatorio' || status === 'concluido') {
+  if (status === 'analyzing' || status === 'analyzed' || status === 'ready_for_review' || status === 'generating_report' || status === 'completed') {
     return <span className="text-sm text-green-600 font-medium">✓ Completa</span>;
   }
   return <span className="text-sm text-gray-500">Pendente</span>;
 }
 
 function ReportStatus({ status }: { status: SubmissionStatus }) {
-  if (status === 'concluido') {
+  if (status === 'completed') {
     return <span className="text-sm text-green-600 font-medium">✓ Disponível</span>;
   }
-  if (status === 'em_geracao_relatorio') {
+  if (status === 'generating_report') {
     return <span className="text-sm text-blue-600">Gerando...</span>;
   }
   return <span className="text-sm text-gray-500">Não gerado</span>;

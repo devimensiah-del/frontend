@@ -53,6 +53,7 @@ export function PreviewPanel({ analysis }: PreviewPanelProps) {
       <html lang="pt-BR">
         <head>
           <meta charset="UTF-8">
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
           <style>
             * {
               margin: 0;

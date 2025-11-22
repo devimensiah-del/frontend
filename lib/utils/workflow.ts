@@ -26,15 +26,14 @@ export function getWorkflowStage(submission: Submission): WorkflowStage {
   const status = submission.status?.toLowerCase();
 
   // Stage 1: Initial submission
-  if (status === "pending" || status === "submitted") {
+  if (status === "pending") {
     return 1;
   }
 
   // Stage 2: Enrichment phase
   if (
     status === "enriching" ||
-    status === "enriched" ||
-    status === "pending_approval"
+    status === "enriched"
   ) {
     return 2;
   }
@@ -43,7 +42,7 @@ export function getWorkflowStage(submission: Submission): WorkflowStage {
   if (
     status === "analyzing" ||
     status === "analyzed" ||
-    status === "ready" ||
+    status === "generating_report" ||
     status === "completed"
   ) {
     return 3;
@@ -62,7 +61,7 @@ export function canStartEnrichment(submission: Submission): {
 } {
   const status = submission.status?.toLowerCase();
 
-  if (status === "pending" || status === "submitted") {
+  if (status === "pending") {
     return { allowed: true };
   }
 
@@ -236,16 +235,23 @@ export function getWorkflowProgress(
   analysis?: Analysis | null
 ): number {
   const stage = getWorkflowStage(submission);
+  const status = submission.status?.toLowerCase();
 
-  if (stage === 1) return 0;
+  if (stage === 1) return 10; // Received
+  
   if (stage === 2) {
+    // Stage 2: Enrichment
     if (enrichment?.status === "approved") return 60;
-    return 30;
+    if (enrichment?.status === "rejected") return 30; // Stuck
+    return 40; // In progress
   }
+  
   if (stage === 3) {
-    if (submission.status === "concluido") return 100;
+    // Stage 3: Analysis
+    if (status === "completed") return 100;
+    if (status === "generating_report") return 90;
     if (analysis?.status === "completed") return 90;
-    return 75;
+    return 75; // Analyzing
   }
 
   return 0;

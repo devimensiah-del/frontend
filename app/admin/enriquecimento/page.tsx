@@ -45,7 +45,7 @@ export default function EnrichmentListPage() {
 
         // Fetch enrichment data for each submission
         const submissionsWithEnrichment = await Promise.all(
-          submissionsData.map(async (submission) => {
+          submissionsData.map(async (submission: Submission) => {
             try {
               const enrichment = await enrichmentApi.getBySubmissionId(submission.id);
               return { ...submission, enrichment };

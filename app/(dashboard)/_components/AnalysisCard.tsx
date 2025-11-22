@@ -23,23 +23,13 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
     if (analysis.status === 'completed') {
       return <Badge className="bg-green-100 text-green-800 border border-green-300">Concluído</Badge>;
     }
-    if (analysis.status === 'in_progress') {
+    if (analysis.status === 'processing') {
       return <Badge className="bg-blue-100 text-blue-800 border border-blue-300">Em Progresso</Badge>;
     }
+    if (analysis.status === 'failed') {
+      return <Badge className="bg-red-100 text-red-800 border border-red-300">Falhou</Badge>;
+    }
     return <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-300">Pendente</Badge>;
-  };
-
-  const getConfidenceBadge = () => {
-    const variants = {
-      alta: 'bg-green-50 text-green-700 border-green-200',
-      média: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-      baixa: 'bg-red-50 text-red-700 border-red-200',
-    };
-    return (
-      <Badge variant="default" className={variants[analysis.confidenceLevel]}>
-        Confiança: {analysis.confidenceLevel}
-      </Badge>
-    );
   };
 
   return (
@@ -57,100 +47,49 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
           </div>
           <div className="flex flex-col items-end gap-2">
             {getStatusBadge()}
-            {getConfidenceBadge()}
           </div>
         </div>
 
-        {/* Analysis Quality Score */}
-        <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-700">Pontuação de Qualidade</p>
-            <div className="flex items-baseline space-x-2 mt-1">
-              <span className="text-3xl font-bold text-[#00a859]">
-                {analysis.analysisQualityScore}
-              </span>
-              <span className="text-sm text-gray-500">/ 100</span>
-            </div>
+        {/* Executive Summary */}
+        {analysis.synthesis?.executiveSummary && (
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm font-medium text-gray-700 mb-2">Sumário Executivo</p>
+            <p className="text-sm text-gray-900 leading-relaxed">{analysis.synthesis.executiveSummary}</p>
           </div>
-          <div className="w-20 h-20">
-            <svg viewBox="0 0 100 100" className="transform -rotate-90">
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                fill="none"
-                stroke="#e5e7eb"
-                strokeWidth="8"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                fill="none"
-                stroke="#00a859"
-                strokeWidth="8"
-                strokeDasharray={`${(analysis.analysisQualityScore / 100) * 251} 251`}
-              />
-            </svg>
-          </div>
-        </div>
+        )}
 
-        {/* Strategic Recommendations */}
-        {analysis.strategicRecommendations && analysis.strategicRecommendations.length > 0 && (
+        {/* Key Findings */}
+        {analysis.synthesis?.keyFindings && analysis.synthesis.keyFindings.length > 0 && (
           <div className="pt-4 border-t border-gray-200">
             <p className="text-sm font-medium text-gray-700 mb-3">
-              Recomendações Estratégicas
+              Principais Descobertas
             </p>
             <ul className="space-y-2">
-              {analysis.strategicRecommendations.map((recommendation, index) => (
+              {analysis.synthesis.keyFindings.map((finding, index) => (
                 <li
                   key={index}
                   className="flex items-start space-x-2 text-sm text-gray-900"
                 >
                   <span className="text-[#00a859] mt-1">→</span>
-                  <span className="leading-relaxed">{recommendation}</span>
+                  <span className="leading-relaxed">{finding}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        {/* Priority Actions */}
-        {analysis.priorityActions && analysis.priorityActions.length > 0 && (
+        {/* Strategic Priorities */}
+        {analysis.synthesis?.strategicPriorities && analysis.synthesis.strategicPriorities.length > 0 && (
           <div className="pt-4 border-t border-gray-200">
             <p className="text-sm font-medium text-gray-700 mb-3">
-              Ações Prioritárias
+              Prioridades Estratégicas
             </p>
-            <div className="space-y-3">
-              {analysis.priorityActions.map((action, index) => {
-                const priorityColors = {
-                  crítica: 'bg-red-50 border-red-200 text-red-900',
-                  alta: 'bg-orange-50 border-orange-200 text-orange-900',
-                  média: 'bg-yellow-50 border-yellow-200 text-yellow-900',
-                  baixa: 'bg-blue-50 border-blue-200 text-blue-900',
-                };
-
-                const timeframeLabels = {
-                  curto_prazo: 'Curto Prazo',
-                  médio_prazo: 'Médio Prazo',
-                  longo_prazo: 'Longo Prazo',
-                };
-
-                return (
-                  <div
-                    key={index}
-                    className={`p-3 border rounded ${priorityColors[action.priority]}`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <span className="text-sm font-semibold">{action.action}</span>
-                      <Badge variant="default" className="text-xs uppercase">
-                        {timeframeLabels[action.timeframe]}
-                      </Badge>
-                    </div>
-                    <p className="text-xs leading-relaxed">{action.expectedImpact}</p>
-                  </div>
-                );
-              })}
+            <div className="space-y-2">
+              {analysis.synthesis.strategicPriorities.map((priority, index) => (
+                <div key={index} className="p-3 bg-blue-50 border border-blue-200 rounded">
+                  <span className="text-sm text-blue-900">{priority}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -185,16 +124,16 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
           <p className="text-sm font-medium text-gray-700 mb-3">Frameworks Aplicados</p>
           <div className="grid grid-cols-2 gap-2">
             <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">PESTEL</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Porter 5 Forças</Badge>
+            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Porter</Badge>
             <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">SWOT</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">VRIO</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Cadeia de Valor</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">BCG Matrix</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Ansoff Matrix</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Balanced Scorecard</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">McKinsey 7S</Badge>
+            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">TAM-SAM-SOM</Badge>
+            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Benchmarking</Badge>
             <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Blue Ocean</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Core Competencies</Badge>
+            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Growth Hacking</Badge>
+            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Scenarios</Badge>
+            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">OKRs</Badge>
+            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">BSC</Badge>
+            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Decision Matrix</Badge>
           </div>
         </div>
       </div>

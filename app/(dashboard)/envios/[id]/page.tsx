@@ -18,17 +18,26 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useSubmission } from '@/lib/hooks/use-submission';
 import { useEnrichment } from '@/lib/hooks/use-enrichment';
 import { EnrichmentDisplay } from './_components/EnrichmentDisplay';
+import { useToast } from '@/components/ui/use-toast';
 
-// Status badge variant mapping
+// --- FIXED: Status Mapping to match Go Backend (English Keys) ---
 const getStatusVariant = (status: string): 'default' | 'primary' | 'success' | 'warning' | 'error' => {
   switch (status) {
     case 'completed':
       return 'success';
-    case 'processing':
-      return 'primary';
+    case 'enriching':
+    case 'enriched':
+    case 'analyzing':
+    case 'analyzed':
+    case 'ready_for_review':
+    case 'generating_report':
+      return 'primary'; // Blue/Indigo for "In Progress"
     case 'pending':
       return 'warning';
     case 'failed':
+    case 'enrichment_failed':
+    case 'analysis_failed':
+    case 'report_failed':
       return 'error';
     default:
       return 'default';
@@ -37,18 +46,21 @@ const getStatusVariant = (status: string): 'default' | 'primary' | 'success' | '
 
 // Status label mapping
 const getStatusLabel = (status: string): string => {
-  switch (status) {
-    case 'completed':
-      return 'Concluído';
-    case 'processing':
-      return 'Processando';
-    case 'pending':
-      return 'Pendente';
-    case 'failed':
-      return 'Falhou';
-    default:
-      return status;
-  }
+  const map: Record<string, string> = {
+    pending: 'Pendente',
+    enriching: 'Em Enriquecimento',
+    enriched: 'Enriquecido',
+    analyzing: 'Em Análise',
+    analyzed: 'Análise Concluída',
+    ready_for_review: 'Aguardando Publicação',
+    generating_report: 'Gerando Relatório',
+    completed: 'Concluído',
+    failed: 'Falhou',
+    enrichment_failed: 'Falha no Enriquecimento',
+    analysis_failed: 'Falha na Análise',
+    report_failed: 'Falha no Relatório'
+  };
+  return map[status] || status;
 };
 
 // Format date to Brazilian format
@@ -65,8 +77,30 @@ const formatDate = (dateString: string): string => {
 
 export default function EnvioDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
+  const { toast } = useToast();
   const { submission, isLoading, error } = useSubmission(resolvedParams.id);
   const { enrichment, isLoading: enrichmentLoading } = useEnrichment(resolvedParams.id);
+
+  // --- NEW: Handler for PDF Download ---
+  const handleDownloadPDF = () => {
+    // The backend API returns pdf_url (or pdfUrl via camelCase mapper) in the submission details
+    const url = (submission as any)?.pdfUrl || (submission as any)?.pdf_url;
+
+    if (url) {
+      window.open(url, '_blank');
+      toast({
+        title: "PDF Aberto",
+        description: "O relatório foi aberto em uma nova guia.",
+        variant: "default"
+      });
+    } else {
+      toast({
+        title: "PDF Não Disponível",
+        description: "O PDF ainda não está disponível. Tente recarregar a página.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Loading State
   if (isLoading) {
@@ -127,7 +161,9 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
   // Use submission fields directly (new structure)
   const companyName = submission.companyName || 'N/A';
   const hasEnrichment = !!enrichment;
-  const hasAnalysis = submission.status === 'concluido'; // Portuguese status
+
+  // --- FIXED: Check for correct backend status ---
+  const hasAnalysis = submission.status === 'completed';
 
   return (
     <div className="space-y-6">
@@ -333,7 +369,11 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
                   </AlertDescription>
                 </Alert>
 
-                <Button className="w-full bg-[#00a859] hover:bg-[#008a47] text-white">
+                {/* --- FIXED: Added onClick Handler --- */}
+                <Button
+                  onClick={handleDownloadPDF}
+                  className="w-full bg-[#00a859] hover:bg-[#008a47] text-white"
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Baixar Relatório PDF
                 </Button>
