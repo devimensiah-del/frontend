@@ -70,8 +70,9 @@ export default function AdminEnvios() {
   }
 
   const pendingStatuses = new Set<string>(["pending", "processing"]);
+  const completedStatuses = new Set<string>(["completed"]);
   const pendingCount = submissions.filter(s => pendingStatuses.has(s.status)).length;
-  const completedCount = submissions.filter(s => s.status === "completed").length;
+  const completedCount = submissions.filter(s => completedStatuses.has(s.status)).length;
 
   return (
     <div className="min-h-screen bg-surface-paper">
