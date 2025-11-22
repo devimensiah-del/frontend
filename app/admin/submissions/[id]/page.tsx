@@ -216,9 +216,9 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
         variant: "default"
       });
 
-      // 2. Generate PDF (Backend returns { pdf_url: string })
+      // 2. Generate PDF (Backend returns { pdf_url: string, report_id: string })
       // NOTE: Ensure your useAnalysis/api client returns the raw JSON response, not a Blob!
-      const response = await generatePDF();
+      const response = await generatePDF() as { pdf_url: string; report_id: string };
 
       // 3. Handle the URL
       if (response && response.pdf_url) {
