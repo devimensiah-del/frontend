@@ -204,7 +204,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
     failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro" },
   };
 
-  const variant = variants[status];
+  const variant = variants[status] || { bg: "bg-gray-100", text: "text-gray-600", label: status || "Desconhecido" };
 
   return (
     <span className={cn("inline-flex items-center px-2 py-1 text-xs font-bold uppercase tracking-wider", variant.bg, variant.text)}>
