@@ -188,7 +188,7 @@ interface StatusBadgeProps {
 }
 
 function StatusBadge({ status }: StatusBadgeProps) {
-  const variants: Record<SubmissionStatus, { bg: string; text: string; label: string }> = {
+  const variants = {
     pending: { bg: "bg-gray-100", text: "text-gray-600", label: "Pendente" },
     processing: { bg: "bg-blue-50", text: "text-blue-600", label: "Processando" },
     enriching: { bg: "bg-blue-50", text: "text-blue-600", label: "Em Enriquecimento" },
@@ -202,9 +202,9 @@ function StatusBadge({ status }: StatusBadgeProps) {
     analysis_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro Análise" },
     report_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro PDF" },
     failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro" },
-  };
+  } as const;
 
-  const variant = variants[status] || { bg: "bg-gray-100", text: "text-gray-600", label: status || "Desconhecido" };
+  const variant = variants[status as keyof typeof variants] || { bg: "bg-gray-100", text: "text-gray-600", label: status || "Desconhecido" };
 
   return (
     <span className={cn("inline-flex items-center px-2 py-1 text-xs font-bold uppercase tracking-wider", variant.bg, variant.text)}>
