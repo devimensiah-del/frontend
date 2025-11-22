@@ -49,7 +49,7 @@ export default function EnrichmentListPage() {
             try {
               const enrichment = await enrichmentApi.getBySubmissionId(submission.id);
               return { ...submission, enrichment };
-            } catch (error) {
+            } catch (_error) {
               // No enrichment data yet
               return { ...submission, enrichment: undefined };
             }
@@ -58,10 +58,10 @@ export default function EnrichmentListPage() {
 
         setSubmissions(submissionsWithEnrichment);
         setFilteredSubmissions(submissionsWithEnrichment);
-      } catch (error: any) {
+      } catch (_error: any) {
         toast({
           title: "Erro ao carregar dados",
-          description: error.message || "Não foi possível carregar as submissões.",
+          description: _error.message || "Não foi possível carregar as submissões.",
           variant: "destructive",
         });
       } finally {

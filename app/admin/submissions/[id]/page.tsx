@@ -3,7 +3,7 @@
 import { use, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useAnalysis } from "@/lib/hooks/use-analysis";
-import { submissionsApi, adminApi } from "@/lib/api/client";
+import { adminApi } from "@/lib/api/client";
 import { toast } from "@/components/ui/use-toast";
 import { WarRoomShell } from "./_components/WarRoomShell";
 import { WarRoomSkeleton } from "@/components/skeletons";
@@ -104,7 +104,7 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
       try {
         const data = await adminApi.getSubmission(submissionId);
         setSubmission(data);
-      } catch (error) {
+      } catch {
         toast({
           title: "Erro ao carregar submissão",
           description: "Não foi possível carregar os dados da submissão.",
@@ -136,6 +136,7 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
     }, 30000); // Auto-save after 30 seconds of inactivity
 
     setAutoSaveTimer(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoSaveTimer, localAnalysis]);
 
   // Clean up timer on unmount

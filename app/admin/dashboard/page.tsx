@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { AdminInboxSkeleton } from "@/components/skeletons";
 import { toast } from "@/components/ui/use-toast";
-import { enrichmentApi, adminApi } from "@/lib/api/client";
+import { adminApi } from "@/lib/api/client";
 import { canStartEnrichment } from "@/lib/utils/workflow";
 import type { SubmissionStatus, Submission } from "@/types";
 import {

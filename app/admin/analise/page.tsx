@@ -8,9 +8,8 @@ import { adminApi } from "@/lib/api/client";
 import type { SubmissionStatus, Submission } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Text } from "@/components/ui/Typography";
-import { FileText, Download, Edit, Check } from "lucide-react";
+import { Download, Edit, Check } from "lucide-react";
 
 /* ============================================
    ADMIN ANÁLISE - Edit AI Analysis & Generate PDF
@@ -74,7 +73,7 @@ export default function AdminAnalise() {
           s.status === 'generating_report' ||
           s.status === 'completed'
       ));
-    } catch (error) {
+    } catch {
       toast({
         title: "Erro ao Iniciar Geração",
         description: "Não foi possível iniciar a geração do relatório.",

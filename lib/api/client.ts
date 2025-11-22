@@ -13,7 +13,6 @@ import type {
   ResetPasswordFormData,
   SubmissionFormData,
   PaginatedResponse,
-  ApiResponse,
 } from '@/types';
 
 import { handleApiError, handleNetworkError } from './error-handler';
@@ -143,7 +142,7 @@ export const authApi = {
     try {
       const response = await apiRequest<{ user: User }>('/auth/me');
       return response.user;
-    } catch (error) {
+    } catch {
       // If unauthorized, remove invalid token
       removeAuthToken();
       return null;

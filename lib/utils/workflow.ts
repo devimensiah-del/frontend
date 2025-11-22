@@ -7,7 +7,7 @@
  * - Analysis: pending → processing → completed → approved → sent
  */
 
-import type { Submission, Enrichment, Analysis, EnrichmentStatus, AnalysisStatus } from "@/types";
+import type { Enrichment, Analysis } from "@/types";
 
 export type WorkflowStage = 'submission' | 'enrichment' | 'analysis' | 'complete';
 

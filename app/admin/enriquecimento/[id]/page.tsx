@@ -10,7 +10,7 @@ import { EnrichmentEditorSkeleton } from "@/components/skeletons";
 import { SubmissionSummary } from "./_components/SubmissionSummary";
 import { EnrichmentForm } from "./_components/EnrichmentForm";
 import { EnrichmentActions } from "./_components/EnrichmentActions";
-import type { Submission, Enrichment } from "@/types";
+import type { Submission } from "@/types";
 
 /* ============================================
    ENRICHMENT EDITOR PAGE - Stage 2 Editor
@@ -86,6 +86,7 @@ export default function EnrichmentEditorPage({
     }, 30000); // Auto-save after 30 seconds of inactivity
 
     setAutoSaveTimer(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoSaveTimer, localEnrichmentData]);
 
   // Clean up timer on unmount
