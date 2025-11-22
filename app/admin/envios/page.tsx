@@ -69,9 +69,8 @@ export default function AdminEnvios() {
     );
   }
 
-  const pendingCount = submissions.filter(
-    s => s.status === "pending" || s.status === "processing"
-  ).length;
+  const pendingStatuses: SubmissionStatus[] = ["pending", "processing"];
+  const pendingCount = submissions.filter(s => pendingStatuses.includes(s.status)).length;
   const completedCount = submissions.filter(s => s.status === "completed").length;
 
   return (
