@@ -1,203 +1,369 @@
 /**
- * Workflow Status Utility - Imensiah Admin Workflow
+ * Workflow Utility - NEW ARCHITECTURE
  *
- * Manages the 3-stage workflow:
- * Stage 1: /admin/dashboard - Submissions inbox
- * Stage 2: /admin/enriquecimento/[id] - Enrichment editor
- * Stage 3: /admin/submissions/[id] - War Room analysis
+ * Workflow based on Enrichment and Analysis statuses:
+ * - Submission: Always 'received'
+ * - Enrichment: pending → processing → finished → approved
+ * - Analysis: pending → processing → completed → approved → sent
  */
 
-import type { Submission, Enrichment, Analysis } from "@/types";
+import type { Submission, Enrichment, Analysis, EnrichmentStatus, AnalysisStatus } from "@/types";
 
-export type WorkflowStage = 1 | 2 | 3;
+export type WorkflowStage = 'submission' | 'enrichment' | 'analysis' | 'complete';
 
 export interface WorkflowAction {
   label: string;
   description: string;
-  route: string;
+  route?: string;
+  action?: string; // API action identifier
   enabled: boolean;
   disabledReason?: string;
 }
 
 /**
- * Get current workflow stage based on submission status
+ * Get current workflow stage based on enrichment and analysis statuses
  */
-export function getWorkflowStage(submission: Submission): WorkflowStage {
-  const status = submission.status?.toLowerCase();
-
-  // Stage 1: Initial submission
-  if (status === "pending") {
-    return 1;
+export function getWorkflowStage(
+  enrichment?: Enrichment | null,
+  analysis?: Analysis | null
+): WorkflowStage {
+  // Stage 4: Complete (analysis sent)
+  if (analysis?.status === 'sent') {
+    return 'complete';
   }
 
-  // Stage 2: Enrichment phase
+  // Stage 3: Analysis (enrichment approved, analysis in progress)
   if (
-    status === "enriching" ||
-    status === "enriched"
+    enrichment?.status === 'approved' &&
+    (analysis?.status === 'pending' ||
+     analysis?.status === 'processing' ||
+     analysis?.status === 'completed' ||
+     analysis?.status === 'approved')
   ) {
-    return 2;
+    return 'analysis';
   }
 
-  // Stage 3: Analysis phase
-  if (
-    status === "analyzing" ||
-    status === "analyzed" ||
-    status === "generating_report" ||
-    status === "completed"
-  ) {
-    return 3;
+  // Stage 2: Enrichment (has enrichment data)
+  if (enrichment) {
+    return 'enrichment';
   }
 
-  // Default to stage 1
-  return 1;
+  // Stage 1: Submission received
+  return 'submission';
 }
 
 /**
- * Check if can start enrichment (move to Stage 2)
+ * Get enrichment workflow actions based on current status
  */
-export function canStartEnrichment(submission: Submission): {
-  allowed: boolean;
-  reason?: string;
-} {
-  const status = submission.status?.toLowerCase();
-
-  if (status === "pending") {
-    return { allowed: true };
-  }
-
-  if (status === "enriching" || status === "enriched") {
-    return {
-      allowed: false,
-      reason: "Enriquecimento já iniciado",
-    };
-  }
-
-  return {
-    allowed: false,
-    reason: "Status inválido para iniciar enriquecimento",
-  };
-}
-
-/**
- * Check if can generate analysis (move to Stage 3)
- */
-export function canGenerateAnalysis(enrichment: Enrichment | null): {
-  allowed: boolean;
-  reason?: string;
+export function getEnrichmentActions(enrichment: Enrichment | null): {
+  canEdit: boolean;
+  canApprove: boolean;
+  canReject: boolean;
+  canGenerateAnalysis: boolean;
+  message?: string;
 } {
   if (!enrichment) {
     return {
-      allowed: false,
-      reason: "Enriquecimento não encontrado",
+      canEdit: false,
+      canApprove: false,
+      canReject: false,
+      canGenerateAnalysis: false,
+      message: 'Enriquecimento não encontrado',
     };
   }
 
-  const status = enrichment.status?.toLowerCase();
+  const status = enrichment.status;
 
-  if (status === "approved") {
-    return { allowed: true };
+  switch (status) {
+    case 'pending':
+      return {
+        canEdit: true,
+        canApprove: false,
+        canReject: false,
+        canGenerateAnalysis: false,
+        message: 'Aguardando worker processar',
+      };
+
+    case 'processing':
+      return {
+        canEdit: false,
+        canApprove: false,
+        canReject: false,
+        canGenerateAnalysis: false,
+        message: 'Worker está enriquecendo dados',
+      };
+
+    case 'finished':
+      return {
+        canEdit: true,
+        canApprove: true,
+        canReject: true,
+        canGenerateAnalysis: false,
+        message: 'Pronto para revisão e aprovação',
+      };
+
+    case 'approved':
+      return {
+        canEdit: false,
+        canApprove: false,
+        canReject: false,
+        canGenerateAnalysis: true,
+        message: 'Aprovado - Pode gerar análise',
+      };
+
+    case 'rejected':
+      return {
+        canEdit: true,
+        canApprove: false,
+        canReject: false,
+        canGenerateAnalysis: false,
+        message: 'Rejeitado - Necessita correção',
+      };
+
+    case 'failed':
+      return {
+        canEdit: true,
+        canApprove: false,
+        canReject: false,
+        canGenerateAnalysis: false,
+        message: 'Falhou - Necessita correção',
+      };
+
+    default:
+      return {
+        canEdit: false,
+        canApprove: false,
+        canReject: false,
+        canGenerateAnalysis: false,
+      };
   }
-
-  if (status === "pending") {
-    return {
-      allowed: false,
-      reason: "Enriquecimento precisa ser aprovado primeiro",
-    };
-  }
-
-  if (status === "rejected") {
-    return {
-      allowed: false,
-      reason: "Enriquecimento foi rejeitado",
-    };
-  }
-
-  return {
-    allowed: false,
-    reason: "Status de enriquecimento inválido",
-  };
 }
 
 /**
- * Check if can send report to user (complete workflow)
+ * Get analysis workflow actions based on current status
  */
-export function canSendReport(analysis: Analysis | null): {
-  allowed: boolean;
-  reason?: string;
+export function getAnalysisActions(analysis: Analysis | null): {
+  canEdit: boolean;
+  canApprove: boolean;
+  canGeneratePDF: boolean;
+  canSend: boolean;
+  message?: string;
 } {
   if (!analysis) {
     return {
-      allowed: false,
-      reason: "Análise não encontrada",
+      canEdit: false,
+      canApprove: false,
+      canGeneratePDF: false,
+      canSend: false,
+      message: 'Análise não encontrada',
     };
   }
 
-  const status = analysis.status?.toLowerCase();
+  const status = analysis.status;
 
-  if (status === "completed") {
-    return { allowed: true };
+  switch (status) {
+    case 'pending':
+      return {
+        canEdit: false,
+        canApprove: false,
+        canGeneratePDF: false,
+        canSend: false,
+        message: 'Aguardando worker processar',
+      };
+
+    case 'processing':
+      return {
+        canEdit: false,
+        canApprove: false,
+        canGeneratePDF: false,
+        canSend: false,
+        message: 'Worker está analisando',
+      };
+
+    case 'completed':
+      return {
+        canEdit: true,
+        canApprove: true,
+        canGeneratePDF: true,
+        canSend: false,
+        message: 'Pronto para aprovação e envio',
+      };
+
+    case 'approved':
+      return {
+        canEdit: true, // Can still edit and create new version
+        canApprove: false,
+        canGeneratePDF: true,
+        canSend: true,
+        message: 'Aprovado - Pronto para enviar',
+      };
+
+    case 'sent':
+      return {
+        canEdit: false,
+        canApprove: false,
+        canGeneratePDF: true, // Can regenerate PDF
+        canSend: false,
+        message: 'Enviado ao cliente',
+      };
+
+    case 'failed':
+      return {
+        canEdit: true,
+        canApprove: false,
+        canGeneratePDF: false,
+        canSend: false,
+        message: 'Falhou - Necessita correção',
+      };
+
+    default:
+      return {
+        canEdit: false,
+        canApprove: false,
+        canGeneratePDF: false,
+        canSend: false,
+      };
   }
+}
 
-  if (status === "pending" || status === "failed") {
+/**
+ * Get next workflow action based on current state
+ */
+export function getNextAction(
+  enrichment?: Enrichment | null,
+  analysis?: Analysis | null
+): WorkflowAction | null {
+  const stage = getWorkflowStage(enrichment, analysis);
+
+  // Complete - no next action
+  if (stage === 'complete') {
     return {
-      allowed: false,
-      reason: "Análise ainda não está completa",
+      label: 'Concluído',
+      description: 'Relatório enviado ao cliente',
+      enabled: false,
     };
   }
 
+  // Analysis stage
+  if (stage === 'analysis') {
+    const analysisActions = getAnalysisActions(analysis);
+
+    if (analysisActions.canSend) {
+      return {
+        label: 'Enviar ao Cliente',
+        description: 'Enviar relatório aprovado ao cliente',
+        action: 'send_analysis',
+        enabled: true,
+      };
+    }
+
+    if (analysisActions.canApprove) {
+      return {
+        label: 'Aprovar Análise',
+        description: 'Aprovar análise para envio',
+        action: 'approve_analysis',
+        enabled: true,
+      };
+    }
+
+    return {
+      label: 'Aguardando',
+      description: analysisActions.message || 'Processando análise',
+      enabled: false,
+    };
+  }
+
+  // Enrichment stage
+  if (stage === 'enrichment') {
+    const enrichmentActions = getEnrichmentActions(enrichment);
+
+    if (enrichmentActions.canGenerateAnalysis) {
+      return {
+        label: 'Gerar Análise',
+        description: 'Iniciar análise estratégica',
+        action: 'generate_analysis',
+        enabled: true,
+      };
+    }
+
+    if (enrichmentActions.canApprove) {
+      return {
+        label: 'Aprovar Enriquecimento',
+        description: 'Aprovar dados enriquecidos',
+        action: 'approve_enrichment',
+        enabled: true,
+      };
+    }
+
+    return {
+      label: 'Aguardando',
+      description: enrichmentActions.message || 'Processando enriquecimento',
+      enabled: false,
+    };
+  }
+
+  // Submission stage
   return {
-    allowed: false,
-    reason: "Status de análise inválido",
+    label: 'Iniciar Enriquecimento',
+    description: 'Começar processo de enriquecimento de dados',
+    action: 'start_enrichment',
+    enabled: true,
   };
 }
 
 /**
- * Get next stage action based on current submission state
+ * Get workflow progress percentage (0-100)
  */
-export function getNextStageAction(
-  submission: Submission,
+export function getWorkflowProgress(
   enrichment?: Enrichment | null,
   analysis?: Analysis | null
-): WorkflowAction | null {
-  const currentStage = getWorkflowStage(submission);
+): number {
+  const stage = getWorkflowStage(enrichment, analysis);
 
-  // Stage 1 → Stage 2: Start Enrichment
-  if (currentStage === 1) {
-    const { allowed, reason } = canStartEnrichment(submission);
-    return {
-      label: "Iniciar Enriquecimento",
-      description: "Mover para edição de dados enriquecidos",
-      route: `/admin/enriquecimento/${submission.id}`,
-      enabled: allowed,
-      disabledReason: reason,
-    };
+  // Complete
+  if (stage === 'complete') {
+    return 100;
   }
 
-  // Stage 2 → Stage 3: Generate Analysis
-  if (currentStage === 2) {
-    const { allowed, reason } = canGenerateAnalysis(enrichment || null);
-    return {
-      label: "Gerar Análise",
-      description: "Criar análise estratégica completa",
-      route: `/admin/submissions/${submission.id}`,
-      enabled: allowed,
-      disabledReason: reason,
-    };
+  // Analysis stage (60-95%)
+  if (stage === 'analysis') {
+    switch (analysis?.status) {
+      case 'sent':
+        return 100;
+      case 'approved':
+        return 95;
+      case 'completed':
+        return 85;
+      case 'processing':
+        return 75;
+      case 'pending':
+        return 65;
+      default:
+        return 70;
+    }
   }
 
-  // Stage 3: Send Report (final action)
-  if (currentStage === 3) {
-    const { allowed, reason } = canSendReport(analysis || null);
-    return {
-      label: "Enviar Relatório",
-      description: "Enviar análise completa ao cliente",
-      route: "#", // No route, triggers email action
-      enabled: allowed,
-      disabledReason: reason,
-    };
+  // Enrichment stage (20-55%)
+  if (stage === 'enrichment') {
+    switch (enrichment?.status) {
+      case 'approved':
+        return 55;
+      case 'finished':
+        return 45;
+      case 'processing':
+        return 30;
+      case 'pending':
+        return 20;
+      case 'rejected':
+      case 'failed':
+        return 15;
+      default:
+        return 25;
+    }
   }
 
-  return null;
+  // Submission stage (0-15%)
+  return 10;
 }
 
 /**
@@ -205,9 +371,10 @@ export function getNextStageAction(
  */
 export function getStageLabel(stage: WorkflowStage): string {
   const labels: Record<WorkflowStage, string> = {
-    1: "Submissão Recebida",
-    2: "Enriquecimento",
-    3: "Análise Estratégica",
+    submission: 'Submissão Recebida',
+    enrichment: 'Enriquecimento de Dados',
+    analysis: 'Análise Estratégica',
+    complete: 'Concluído',
   };
 
   return labels[stage];
@@ -218,41 +385,11 @@ export function getStageLabel(stage: WorkflowStage): string {
  */
 export function getStageDescription(stage: WorkflowStage): string {
   const descriptions: Record<WorkflowStage, string> = {
-    1: "Aguardando início do processo de enriquecimento",
-    2: "Dados sendo enriquecidos e aprovados",
-    3: "Análise estratégica em andamento",
+    submission: 'Aguardando início do processo de enriquecimento',
+    enrichment: 'Coletando e validando dados empresariais',
+    analysis: 'Aplicando frameworks estratégicos',
+    complete: 'Relatório enviado ao cliente',
   };
 
   return descriptions[stage];
-}
-
-/**
- * Get workflow progress percentage
- */
-export function getWorkflowProgress(
-  submission: Submission,
-  enrichment?: Enrichment | null,
-  analysis?: Analysis | null
-): number {
-  const stage = getWorkflowStage(submission);
-  const status = submission.status?.toLowerCase();
-
-  if (stage === 1) return 10; // Received
-  
-  if (stage === 2) {
-    // Stage 2: Enrichment
-    if (enrichment?.status === "approved") return 60;
-    if (enrichment?.status === "rejected") return 30; // Stuck
-    return 40; // In progress
-  }
-  
-  if (stage === 3) {
-    // Stage 3: Analysis
-    if (status === "completed") return 100;
-    if (status === "generating_report") return 90;
-    if (analysis?.status === "completed") return 90;
-    return 75; // Analyzing
-  }
-
-  return 0;
 }

@@ -7,20 +7,9 @@
 // Enums and Status Types
 // ============================================================================
 
-export type SubmissionStatus =
-  | 'pending'            // Initial submission
-  | 'processing'         // Generic processing state
-  | 'enriching'          // Worker 1 Active
-  | 'enriched'           // Worker 1 Done
-  | 'analyzing'          // Worker 2 Active
-  | 'analyzed'           // Worker 2 Done (Internal)
-  | 'ready_for_review'   // Waiting for Admin Publish
-  | 'generating_report'  // PDF generation in progress
-  | 'completed'          // PDF Generated & Email Sent
-  | 'failed'             // Generic Failure
-  | 'enrichment_failed'
-  | 'analysis_failed'
-  | 'report_failed';
+// NEW ARCHITECTURE: Submission status is ONLY 'received'
+// All workflow state is tracked in Enrichment and Analysis entities
+export type SubmissionStatus = 'received';
 
 export type UserRole = 'admin' | 'user';
 
@@ -93,10 +82,19 @@ export interface Submission {
 // Enrichment Types (The Researcher Agent)
 // ============================================================================
 
+// NEW ARCHITECTURE: Enrichment states: pending → processing → finished → approved
+export type EnrichmentStatus =
+  | 'pending'      // Initial state, waiting for worker
+  | 'processing'   // Worker is enriching data
+  | 'finished'     // Worker completed, waiting for admin review
+  | 'approved'     // Admin approved, ready for analysis
+  | 'rejected'     // Admin rejected, needs rework
+  | 'failed';      // Worker failed
+
 export interface Enrichment {
   id: string;
   submissionId: string;
-  
+
   // The JSONMap stored in Postgres
   data: {
     overview?: {
@@ -122,7 +120,7 @@ export interface Enrichment {
     };
   };
 
-  status: 'pending' | 'approved' | 'rejected';
+  status: EnrichmentStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -244,11 +242,24 @@ export interface Synthesis {
   overallRecommendation: string;
 }
 
+// NEW ARCHITECTURE: Analysis states: pending → completed → approved → sent
+export type AnalysisStatus =
+  | 'pending'      // Initial state, waiting for worker
+  | 'processing'   // Worker is analyzing (optional transitional state)
+  | 'completed'    // Worker completed, admin can edit
+  | 'approved'     // Admin approved, ready to send
+  | 'sent'         // Report sent to user
+  | 'failed';      // Worker failed
+
 // The Master Analysis Object
 export interface Analysis {
   id: string;
   submissionId: string;
   enrichmentId: string;
+
+  // Versioning support (for admin edits)
+  version: number;                    // Version number (1, 2, 3, ...)
+  parentAnalysisId?: string | null;   // Reference to previous version
 
   // Frameworks
   pestel: PESTELAnalysis;
@@ -266,7 +277,7 @@ export interface Analysis {
   // Synthesis
   synthesis: Synthesis;
 
-  status: 'processing' | 'completed' | 'failed';
+  status: AnalysisStatus;
   createdAt: string;
   updatedAt: string;
 }

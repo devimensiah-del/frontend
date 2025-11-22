@@ -279,7 +279,21 @@ export const enrichmentApi = {
   },
 
   /**
-   * Approve enrichment data
+   * Mark enrichment as finished (worker completed)
+   */
+  async markFinished(submissionId: string): Promise<Enrichment> {
+    const response = await apiRequest<{ enrichment: Enrichment }>(
+      `/submissions/${submissionId}/enrichment/finish`,
+      {
+        method: 'PUT',
+      }
+    );
+
+    return response.enrichment;
+  },
+
+  /**
+   * Approve enrichment data (admin)
    */
   async approve(submissionId: string): Promise<Enrichment> {
     const response = await apiRequest<{ enrichment: Enrichment }>(
@@ -293,7 +307,7 @@ export const enrichmentApi = {
   },
 
   /**
-   * Reject enrichment data
+   * Reject enrichment data (admin)
    */
   async reject(submissionId: string, reason: string): Promise<Enrichment> {
     const response = await apiRequest<{ enrichment: Enrichment }>(
@@ -328,7 +342,7 @@ export const enrichmentApi = {
  */
 export const analysisApi = {
   /**
-   * Get analysis for submission
+   * Get analysis for submission (latest version)
    */
   async getBySubmissionId(submissionId: string): Promise<Analysis> {
     const response = await apiRequest<{ analysis: Analysis }>(`/submissions/${submissionId}/analysis`);
@@ -336,7 +350,23 @@ export const analysisApi = {
   },
 
   /**
-   * Generate analysis for submission
+   * Get all analysis versions for submission
+   */
+  async getVersions(submissionId: string): Promise<Analysis[]> {
+    const response = await apiRequest<{ analyses: Analysis[] }>(`/submissions/${submissionId}/analysis/versions`);
+    return response.analyses;
+  },
+
+  /**
+   * Get specific analysis version
+   */
+  async getVersion(submissionId: string, version: number): Promise<Analysis> {
+    const response = await apiRequest<{ analysis: Analysis }>(`/submissions/${submissionId}/analysis/versions/${version}`);
+    return response.analysis;
+  },
+
+  /**
+   * Generate analysis for submission (creates v1)
    */
   async generate(submissionId: string): Promise<Analysis> {
     const response = await apiRequest<{ analysis: Analysis }>(
@@ -350,7 +380,7 @@ export const analysisApi = {
   },
 
   /**
-   * Update analysis
+   * Update analysis (creates new version if status is 'approved')
    */
   async update(submissionId: string, data: Partial<Analysis>): Promise<Analysis> {
     const response = await apiRequest<{ analysis: Analysis }>(
@@ -358,6 +388,20 @@ export const analysisApi = {
       {
         method: 'PUT',
         body: JSON.stringify(data),
+      }
+    );
+
+    return response.analysis;
+  },
+
+  /**
+   * Approve analysis (admin) - marks as ready to send
+   */
+  async approve(submissionId: string): Promise<Analysis> {
+    const response = await apiRequest<{ analysis: Analysis }>(
+      `/submissions/${submissionId}/analysis/approve`,
+      {
+        method: 'PUT',
       }
     );
 
@@ -375,7 +419,7 @@ export const analysisApi = {
   },
 
   /**
-   * Send report to user email
+   * Send report to user email (marks analysis as 'sent')
    */
   async send(submissionId: string): Promise<{ message: string }> {
     return apiRequest(`/submissions/${submissionId}/analysis/send`, {

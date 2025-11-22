@@ -1,129 +1,202 @@
 /**
- * Status utility functions for submissions
- * NOW SYNCHRONIZED WITH GO BACKEND CONSTANTS
+ * Status utility functions - NEW ARCHITECTURE
+ * Submission status is always 'received'
+ * Workflow tracked via Enrichment and Analysis statuses
  */
 
-export type SubmissionStatus = 
-  | 'pending' 
-  | 'processing' 
-  | 'enriching' 
-  | 'enriched' 
-  | 'analyzing' 
-  | 'analyzed' 
-  | 'ready_for_review' 
-  | 'completed' 
-  | 'failed'
-  | 'enrichment_failed'
-  | 'analysis_failed';
+import type { EnrichmentStatus, AnalysisStatus } from '@/types';
 
 export type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'error' | 'gold';
 
-/**
- * Get badge variant for submission status
- */
-export function getStatusVariant(status: string): BadgeVariant {
-  // Normalize to ensure matching
-  const s = status?.toLowerCase() || 'pending';
+// ============================================================================
+// SUBMISSION STATUS (Always 'received')
+// ============================================================================
 
-  switch (s) {
-    case 'completed':
-      return 'success'; // Green
-      
-    // Active Working States -> Blue/Indigo
-    case 'enriching':
-    case 'enriched':
-    case 'analyzing':
-    case 'analyzed':
-    case 'ready_for_review':
-    case 'processing':
-      return 'primary'; 
-      
+/**
+ * Get badge variant for submission status (always received)
+ */
+export function getSubmissionStatusVariant(): BadgeVariant {
+  return 'success'; // Received is a positive state
+}
+
+/**
+ * Get human-readable label for submission status
+ */
+export function getSubmissionStatusLabel(): string {
+  return 'Recebido';
+}
+
+/**
+ * Get status description for submission
+ */
+export function getSubmissionStatusDescription(): string {
+  return 'Sua solicitação foi recebida e está sendo processada.';
+}
+
+// ============================================================================
+// ENRICHMENT STATUS
+// ============================================================================
+
+/**
+ * Get badge variant for enrichment status
+ */
+export function getEnrichmentStatusVariant(status: EnrichmentStatus): BadgeVariant {
+  switch (status) {
     case 'pending':
-      return 'warning'; // Yellow
-      
-    // Error States -> Red
+      return 'warning'; // Yellow - waiting
+    case 'processing':
+      return 'primary'; // Blue - in progress
+    case 'finished':
+      return 'gold'; // Gold - ready for review
+    case 'approved':
+      return 'success'; // Green - approved
+    case 'rejected':
+      return 'error'; // Red - rejected
     case 'failed':
-    case 'enrichment_failed':
-    case 'analysis_failed':
-    case 'report_failed':
-      return 'error';
-      
+      return 'error'; // Red - failed
     default:
       return 'default';
   }
 }
 
 /**
- * Get human-readable label for submission status
+ * Get human-readable label for enrichment status
  */
-export function getStatusLabel(status: string): string {
-  const s = status?.toLowerCase() || 'pending';
-
-  const map: Record<string, string> = {
+export function getEnrichmentStatusLabel(status: EnrichmentStatus): string {
+  const labels: Record<EnrichmentStatus, string> = {
     pending: 'Pendente',
-    
-    // Enrichment Phase
-    enriching: 'Enriquecendo Dados',
-    enriched: 'Enriquecimento Concluído',
-    
-    // Analysis Phase
-    analyzing: 'IA Analisando',
-    analyzed: 'Análise Pronta',
-    ready_for_review: 'Aguardando Revisão',
-    
-    // Final
-    completed: 'Relatório Disponível',
-    
-    // Errors
+    processing: 'Enriquecendo',
+    finished: 'Aguardando Aprovação',
+    approved: 'Aprovado',
+    rejected: 'Rejeitado',
     failed: 'Falhou',
-    enrichment_failed: 'Falha no Enriquecimento',
-    analysis_failed: 'Falha na Análise',
-    report_failed: 'Falha no Relatório'
   };
 
-  return map[s] || status;
+  return labels[status] || status;
 }
 
 /**
- * Get status description for user UI
+ * Get enrichment status description
  */
-export function getStatusDescription(status: string): string {
-  const s = status?.toLowerCase() || 'pending';
-
-  switch (s) {
-    case 'completed':
-      return 'Sua análise foi concluída. O relatório PDF está disponível para download.';
-    case 'ready_for_review':
-      return 'A análise foi gerada e está passando pela revisão final de qualidade.';
-    case 'analyzing':
-    case 'analyzed':
-      return 'Nossos algoritmos estão aplicando os frameworks estratégicos (SWOT, PESTEL, Porter).';
-    case 'enriching':
-    case 'enriched':
-      return 'Estamos coletando e validando dados públicos sobre sua empresa.';
+export function getEnrichmentStatusDescription(status: EnrichmentStatus): string {
+  switch (status) {
     case 'pending':
-      return 'Sua solicitação foi recebida e está na fila de processamento.';
+      return 'Aguardando início do enriquecimento de dados.';
+    case 'processing':
+      return 'Estamos coletando e validando dados públicos sobre sua empresa.';
+    case 'finished':
+      return 'Enriquecimento concluído. Aguardando revisão administrativa.';
+    case 'approved':
+      return 'Dados enriquecidos aprovados. Pronto para análise estratégica.';
+    case 'rejected':
+      return 'Enriquecimento rejeitado. Necessita revisão.';
     case 'failed':
-    case 'enrichment_failed':
-    case 'analysis_failed':
-      return 'Identificamos um problema técnico. Nossa equipe foi notificada.';
+      return 'Ocorreu um erro no processo de enriquecimento.';
     default:
       return 'Status desconhecido.';
   }
 }
 
+// ============================================================================
+// ANALYSIS STATUS
+// ============================================================================
+
 /**
- * Check if enrichment data implies completion
+ * Get badge variant for analysis status
  */
-export function hasEnrichmentData(status: string): boolean {
-  const s = status?.toLowerCase();
-  return ['enriched', 'analyzing', 'analyzed', 'ready_for_review', 'completed'].includes(s || '');
+export function getAnalysisStatusVariant(status: AnalysisStatus): BadgeVariant {
+  switch (status) {
+    case 'pending':
+      return 'warning'; // Yellow - waiting
+    case 'processing':
+      return 'primary'; // Blue - in progress
+    case 'completed':
+      return 'gold'; // Gold - ready for approval
+    case 'approved':
+      return 'success'; // Green - approved, can send
+    case 'sent':
+      return 'success'; // Green - sent to user
+    case 'failed':
+      return 'error'; // Red - failed
+    default:
+      return 'default';
+  }
 }
 
 /**
- * Check if analysis is fully done
+ * Get human-readable label for analysis status
  */
-export function hasAnalysisData(status: string): boolean {
-  const s = status?.toLowerCase();
-  return ['completed', 'ready_for_review'].includes(s || '');
+export function getAnalysisStatusLabel(status: AnalysisStatus): string {
+  const labels: Record<AnalysisStatus, string> = {
+    pending: 'Pendente',
+    processing: 'Analisando',
+    completed: 'Aguardando Aprovação',
+    approved: 'Aprovado',
+    sent: 'Enviado ao Cliente',
+    failed: 'Falhou',
+  };
+
+  return labels[status] || status;
+}
+
+/**
+ * Get analysis status description
+ */
+export function getAnalysisStatusDescription(status: AnalysisStatus): string {
+  switch (status) {
+    case 'pending':
+      return 'Aguardando início da análise estratégica.';
+    case 'processing':
+      return 'Nossos algoritmos estão aplicando os frameworks estratégicos (SWOT, PESTEL, Porter).';
+    case 'completed':
+      return 'Análise concluída. Aguardando aprovação administrativa para envio.';
+    case 'approved':
+      return 'Análise aprovada. Pronta para ser enviada ao cliente.';
+    case 'sent':
+      return 'Relatório enviado ao cliente com sucesso.';
+    case 'failed':
+      return 'Ocorreu um erro no processo de análise.';
+    default:
+      return 'Status desconhecido.';
+  }
+}
+
+// ============================================================================
+// WORKFLOW HELPERS
+// ============================================================================
+
+/**
+ * Check if enrichment can be approved
+ */
+export function canApproveEnrichment(status: EnrichmentStatus): boolean {
+  return status === 'finished';
+}
+
+/**
+ * Check if analysis can be generated (enrichment must be approved)
+ */
+export function canGenerateAnalysis(enrichmentStatus: EnrichmentStatus): boolean {
+  return enrichmentStatus === 'approved';
+}
+
+/**
+ * Check if analysis can be approved
+ */
+export function canApproveAnalysis(status: AnalysisStatus): boolean {
+  return status === 'completed';
+}
+
+/**
+ * Check if analysis can be sent (must be approved first)
+ */
+export function canSendAnalysis(status: AnalysisStatus): boolean {
+  return status === 'approved';
+}
+
+/**
+ * Check if report PDF can be generated
+ */
+export function canGeneratePDF(status: AnalysisStatus): boolean {
+  // Can generate PDF when analysis is completed or approved
+  return status === 'completed' || status === 'approved';
 }

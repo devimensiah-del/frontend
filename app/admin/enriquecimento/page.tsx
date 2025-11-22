@@ -19,7 +19,7 @@ import type { Submission, Enrichment } from "@/types";
    Stage 2 of 3-Stage Workflow
    ============================================ */
 
-type EnrichmentStatus = "pending" | "approved" | "rejected";
+import type { EnrichmentStatus } from "@/types";
 
 interface SubmissionWithEnrichment extends Submission {
   enrichment?: Enrichment;
@@ -98,16 +98,19 @@ export default function EnrichmentListPage() {
 
   const getEnrichmentStats = () => {
     const pending = submissions.filter(
-      (s) => s.enrichment?.status === "pending" || !s.enrichment
+      (s) => s.enrichment?.status === "pending" || s.enrichment?.status === "processing" || !s.enrichment
+    ).length;
+    const finished = submissions.filter(
+      (s) => s.enrichment?.status === "finished"
     ).length;
     const approved = submissions.filter(
       (s) => s.enrichment?.status === "approved"
     ).length;
     const rejected = submissions.filter(
-      (s) => s.enrichment?.status === "rejected"
+      (s) => s.enrichment?.status === "rejected" || s.enrichment?.status === "failed"
     ).length;
 
-    return { pending, approved, rejected, total: submissions.length };
+    return { pending, finished, approved, rejected, total: submissions.length };
   };
 
   const stats = getEnrichmentStats();
@@ -132,12 +135,17 @@ export default function EnrichmentListPage() {
             </div>
 
             {/* Stats Cards - Responsive Grid */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:flex">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 lg:flex">
               <StatsCard label="Total" value={stats.total} />
               <StatsCard
                 label="Pendentes"
                 value={stats.pending}
                 variant="warning"
+              />
+              <StatsCard
+                label="Prontos"
+                value={stats.finished}
+                variant="default"
               />
               <StatsCard
                 label="Aprovados"
@@ -170,6 +178,12 @@ export default function EnrichmentListPage() {
                 onClick={() => setStatusFilter("pending")}
               >
                 Pendentes ({stats.pending})
+              </FilterButton>
+              <FilterButton
+                active={statusFilter === "finished"}
+                onClick={() => setStatusFilter("finished")}
+              >
+                Prontos ({stats.finished})
               </FilterButton>
               <FilterButton
                 active={statusFilter === "approved"}
@@ -389,11 +403,14 @@ interface EnrichmentStatusBadgeProps {
 function EnrichmentStatusBadge({ status }: EnrichmentStatusBadgeProps) {
   const variants: Record<
     EnrichmentStatus,
-    { variant: "warning" | "success" | "error"; label: string }
+    { variant: "warning" | "success" | "error" | "default" | "primary" | "gold"; label: string }
   > = {
     pending: { variant: "warning", label: "Pendente" },
+    processing: { variant: "primary", label: "Processando" },
+    finished: { variant: "gold", label: "Pronto" },
     approved: { variant: "success", label: "Aprovado" },
     rejected: { variant: "error", label: "Rejeitado" },
+    failed: { variant: "error", label: "Falhou" },
   };
 
   const config = variants[status];
