@@ -274,26 +274,23 @@ export default function ReportPage() {
   const handleDownloadPDF = async () => {
     setDownloading(true);
     try {
-      // Call the API to get the PDF blob
-      const blob = await analysisApi.getPdf(reportId);
+      // Call the API to publish/get the PDF URL
+      const response = await analysisApi.publishReport(reportId);
 
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `imensiah-report-${reportId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      if (response && response.pdf_url) {
+        // Open PDF in new tab
+        window.open(response.pdf_url, '_blank');
 
-      toast({
-        title: 'PDF Baixado',
-        description: 'O relatório foi baixado com sucesso.',
-        variant: 'success',
-      });
+        toast({
+          title: 'PDF Aberto',
+          description: 'O relatório foi aberto em uma nova guia.',
+          variant: 'success',
+        });
+      } else {
+        throw new Error('O servidor não retornou a URL do PDF.');
+      }
     } catch (error: any) {
-      console.error('Error downloading PDF:', error);
+      console.error('Error opening PDF:', error);
 
       toast({
         title: 'Erro ao Baixar PDF',
