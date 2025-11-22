@@ -103,7 +103,7 @@ export default function NovaAnalisePage() {
         cnpj: '00.000.000/0000-00', // TODO: Add CNPJ field to form
         industry: data.companyIndustry || 'Não especificado',
         companySize: data.companySize || 'Não especificado',
-        website: data.companyWebsite || null,
+        website: data.companyWebsite || undefined,
         strategicGoal: data.businessChallenge, // Map challenge to strategic goal
         currentChallenges: data.businessChallenge,
         competitivePosition: 'Em análise', // TODO: Add competitive position field to form
