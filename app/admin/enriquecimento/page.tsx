@@ -40,7 +40,7 @@ export default function EnrichmentListPage() {
 
         // Get all submissions
         const response = await adminApi.getAllSubmissions();
-        const submissionsData = response.data;
+        const submissionsData = response.data || []; // Ensure always an array
 
         // Fetch enrichment data for each submission
         const submissionsWithEnrichment = await Promise.all(

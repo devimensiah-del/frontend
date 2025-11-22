@@ -30,7 +30,7 @@ export default function AdminAnalise() {
         // NEW ARCHITECTURE: All submissions have status 'received'
         // Show all submissions - admin can navigate to any
         // TODO: Filter by enrichment/analysis status via backend API
-        setSubmissions(data.data);
+        setSubmissions(data.data || []); // Ensure always an array
       } catch (err) {
         console.error("Error fetching submissions:", err);
         setError("Erro ao carregar envios.");

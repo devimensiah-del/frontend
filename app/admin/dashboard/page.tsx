@@ -35,7 +35,7 @@ export default function AdminDashboard() {
         setIsLoading(true);
         setError(null);
         const data = await adminApi.getAllSubmissions();
-        setSubmissions(data.data);
+        setSubmissions(data.data || []); // Ensure always an array
       } catch (err) {
         console.error("Error fetching submissions:", err);
         setError("Erro ao carregar envios. Por favor, tente novamente.");
