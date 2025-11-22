@@ -207,32 +207,39 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
 
   const handlePublishPDF = async () => {
     try {
-      // First, save current changes
+      // 1. First, save current changes to ensure the DB matches the Editor
       await handleSaveDraft();
 
-      // Generate PDF
-      const pdfBlob = await generatePDF();
-
-      // Create download link
-      const url = window.URL.createObjectURL(pdfBlob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `analise-${submission?.companyName || submissionId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
       toast({
-        title: "PDF gerado",
-        description: "O PDF foi baixado com sucesso.",
+        title: "Gerando PDF",
+        description: "Isso pode levar alguns segundos...",
         variant: "default"
       });
+
+      // 2. Generate PDF (Backend returns { pdf_url: string })
+      // NOTE: Ensure your useAnalysis/api client returns the raw JSON response, not a Blob!
+      const response = await generatePDF();
+
+      // 3. Handle the URL
+      if (response && response.pdf_url) {
+        // Open in new tab (Supabase Public URL)
+        window.open(response.pdf_url, '_blank');
+
+        toast({
+          title: "Sucesso",
+          description: "Relatório gerado e aberto em nova guia.",
+          variant: "default"
+        });
+      } else {
+        throw new Error("O servidor não retornou a URL do PDF.");
+      }
+
     } catch (error: any) {
+      console.error(error);
       toast({
         title: "Erro ao gerar PDF",
-        description: error.message || "Não foi possível gerar o PDF.",
-        variant: "default"
+        description: error.message || "Verifique os logs do servidor (Gotenberg).",
+        variant: "destructive"
       });
     }
   };
