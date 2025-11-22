@@ -162,8 +162,10 @@ export default function EnvioDetailPage({ params }: { params: Promise<{ id: stri
   const companyName = submission.companyName || 'N/A';
   const hasEnrichment = !!enrichment;
 
-  // --- FIXED: Check for correct backend status ---
-  const hasAnalysis = submission.status === 'completed';
+  // NEW ARCHITECTURE: Check if PDF is available (indicates analysis is sent)
+  // Submission status is always 'received', so check for pdfUrl instead
+  const pdfUrl = (submission as any)?.pdfUrl || (submission as any)?.pdf_url;
+  const hasAnalysis = !!pdfUrl;
 
   return (
     <div className="space-y-6">

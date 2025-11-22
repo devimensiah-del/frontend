@@ -246,7 +246,7 @@ export function getNextAction(
 
   // Analysis stage
   if (stage === 'analysis') {
-    const analysisActions = getAnalysisActions(analysis);
+    const analysisActions = getAnalysisActions(analysis ?? null);
 
     if (analysisActions.canSend) {
       return {
@@ -275,7 +275,7 @@ export function getNextAction(
 
   // Enrichment stage
   if (stage === 'enrichment') {
-    const enrichmentActions = getEnrichmentActions(enrichment);
+    const enrichmentActions = getEnrichmentActions(enrichment ?? null);
 
     if (enrichmentActions.canGenerateAnalysis) {
       return {

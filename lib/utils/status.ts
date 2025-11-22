@@ -4,7 +4,9 @@
  * Workflow tracked via Enrichment and Analysis statuses
  */
 
-import type { EnrichmentStatus, AnalysisStatus } from '@/types';
+// Using string types directly to avoid import issues during build
+type EnrichmentStatus = 'pending' | 'processing' | 'finished' | 'approved' | 'rejected' | 'failed';
+type AnalysisStatus = 'pending' | 'processing' | 'completed' | 'approved' | 'sent' | 'failed';
 
 export type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'error' | 'gold';
 

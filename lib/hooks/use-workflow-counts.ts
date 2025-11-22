@@ -1,47 +1,36 @@
 /**
  * Hook to fetch workflow stage counts
- * Tracks number of submissions in each workflow stage
+ * NEW ARCHITECTURE: All submissions have status 'received'
+ * Workflow tracking should be based on Enrichment/Analysis entities
+ *
+ * Note: This is a simplified version that counts total submissions.
+ * For accurate stage counts, the backend should provide an endpoint
+ * that aggregates enrichment and analysis statuses.
  */
 
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
-import type { SubmissionStatus, Submission } from '@/lib/types';
+import type { Submission } from '@/lib/types';
 
 interface WorkflowCounts {
-  stage1: number; // Envios (pending)
-  stage2: number; // Enriquecimento (enriching, enriched)
-  stage3: number; // Análise (analyzing, analyzed, generating_report, completed)
+  stage1: number; // Total submissions (all are 'received')
+  stage2: number; // Would need enrichment data to calculate
+  stage3: number; // Would need analysis data to calculate
 }
-
-// Map statuses to workflow stages
-const STAGE_STATUS_MAP: Record<1 | 2 | 3, SubmissionStatus[]> = {
-  1: ['pending'],
-  2: ['enriching', 'enriched'],
-  3: ['analyzing', 'analyzed', 'generating_report', 'completed'],
-};
 
 async function fetchWorkflowCounts(): Promise<WorkflowCounts> {
   try {
     const response = await apiClient.admin.getAllSubmissions();
-
     const submissions = response.data || [];
 
-    // Count submissions by stage
+    // NEW ARCHITECTURE: All submissions are 'received'
+    // Stage counts would need to be calculated based on Enrichment/Analysis
+    // For now, just return total count in stage1
     const counts: WorkflowCounts = {
-      stage1: 0,
-      stage2: 0,
-      stage3: 0,
+      stage1: submissions.length, // All submissions
+      stage2: 0, // TODO: Query enrichment statuses
+      stage3: 0, // TODO: Query analysis statuses
     };
-
-    submissions.forEach((submission: Submission) => {
-      if (STAGE_STATUS_MAP[1].includes(submission.status)) {
-        counts.stage1++;
-      } else if (STAGE_STATUS_MAP[2].includes(submission.status)) {
-        counts.stage2++;
-      } else if (STAGE_STATUS_MAP[3].includes(submission.status)) {
-        counts.stage3++;
-      }
-    });
 
     return counts;
   } catch (error) {

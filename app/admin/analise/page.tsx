@@ -27,16 +27,10 @@ export default function AdminAnalise() {
         setIsLoading(true);
         setError(null);
         const data = await adminApi.getAllSubmissions();
-        // Filter submissions that are ready for analysis (enrichment complete or later stages)
-        const analysisReadySubmissions = data.data.filter(
-          (s: Submission) =>
-            s.status === 'enriched' ||
-            s.status === 'analyzing' ||
-            s.status === 'analyzed' ||
-            s.status === 'generating_report' ||
-            s.status === 'completed'
-        );
-        setSubmissions(analysisReadySubmissions);
+        // NEW ARCHITECTURE: All submissions have status 'received'
+        // Show all submissions - admin can navigate to any
+        // TODO: Filter by enrichment/analysis status via backend API
+        setSubmissions(data.data);
       } catch (err) {
         console.error("Error fetching submissions:", err);
         setError("Erro ao carregar envios.");
@@ -65,14 +59,7 @@ export default function AdminAnalise() {
       });
       // Refresh submissions
       const data = await adminApi.getAllSubmissions();
-      setSubmissions(data.data.filter(
-        (s: Submission) =>
-          s.status === 'enriched' ||
-          s.status === 'analyzing' ||
-          s.status === 'analyzed' ||
-          s.status === 'generating_report' ||
-          s.status === 'completed'
-      ));
+      setSubmissions(data.data);
     } catch {
       toast({
         title: "Erro ao Iniciar Geração",
@@ -170,7 +157,7 @@ export default function AdminAnalise() {
                       <AnalysisStatus status={submission.status} />
                     </div>
                     <div className="col-span-2 flex items-center">
-                      <ReportStatus status={submission.status} />
+                      <ReportStatus submission={submission} />
                     </div>
                     <div className="col-span-3 flex items-center gap-2">
                       <Link href={`/admin/analise/${submission.id}`}>
@@ -184,13 +171,14 @@ export default function AdminAnalise() {
                         size="sm"
                         onClick={() => handleGeneratePdf(submission.id)}
                         disabled={
-                          generatingPdf === submission.id ||
-                          submission.status === 'completed'
+                          generatingPdf === submission.id
+                          // NEW ARCHITECTURE: Submission status is always 'received'
+                          // TODO: Check if PDF already exists via submission.pdfUrl
                         }
                       >
                         {generatingPdf === submission.id ? (
                           "Gerando..."
-                        ) : submission.status === 'completed' ? (
+                        ) : (submission as any).pdfUrl || (submission as any).pdf_url ? (
                           <>
                             <Check className="w-4 h-4 mr-2" />
                             Gerado
@@ -232,7 +220,7 @@ export default function AdminAnalise() {
                       <Text variant="small" className="text-text-tertiary mb-1">
                         Relatório
                       </Text>
-                      <ReportStatus status={submission.status} />
+                      <ReportStatus submission={submission} />
                     </div>
                   </div>
 
@@ -248,14 +236,11 @@ export default function AdminAnalise() {
                       variant="architect"
                       className="flex-1 justify-center"
                       onClick={() => handleGeneratePdf(submission.id)}
-                      disabled={
-                        generatingPdf === submission.id ||
-                        submission.status === 'completed'
-                      }
+                      disabled={generatingPdf === submission.id}
                     >
                       {generatingPdf === submission.id ? (
                         "Gerando..."
-                      ) : submission.status === 'completed' ? (
+                      ) : (submission as any).pdfUrl || (submission as any).pdf_url ? (
                         <>
                           <Check className="w-4 h-4 mr-2" />
                           Gerado
@@ -295,20 +280,9 @@ interface StatusBadgeProps {
 }
 
 function StatusBadge({ status }: StatusBadgeProps) {
-  const variants: Record<SubmissionStatus, { bg: string; text: string; label: string }> = {
-    pending: { bg: "bg-gray-100", text: "text-gray-600", label: "Pendente" },
-    processing: { bg: "bg-blue-50", text: "text-blue-600", label: "Processando" },
-    enriching: { bg: "bg-blue-50", text: "text-blue-600", label: "Enriquecendo" },
-    enriched: { bg: "bg-indigo-50", text: "text-indigo-600", label: "Enriq. Completo" },
-    analyzing: { bg: "bg-purple-50", text: "text-purple-600", label: "Em Análise" },
-    analyzed: { bg: "bg-teal-50", text: "text-teal-600", label: "Análise Completa" },
-    ready_for_review: { bg: "bg-purple-50", text: "text-purple-600", label: "Revisão Final" },
-    generating_report: { bg: "bg-cyan-50", text: "text-cyan-600", label: "Gerando PDF" },
-    completed: { bg: "bg-gold-500/10", text: "text-gold-600", label: "Concluído" },
-    enrichment_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro Enriq." },
-    analysis_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro Análise" },
-    report_failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro PDF" },
-    failed: { bg: "bg-red-50", text: "text-red-600", label: "Erro" },
+  // NEW ARCHITECTURE: All submissions have status 'received'
+  const variants: Record<string, { bg: string; text: string; label: string }> = {
+    received: { bg: "bg-green-50", text: "text-green-600", label: "Recebido" },
   };
 
   const variant = variants[status];
@@ -316,18 +290,17 @@ function StatusBadge({ status }: StatusBadgeProps) {
 }
 
 function AnalysisStatus({ status }: { status: SubmissionStatus }) {
-  if (status === 'analyzing' || status === 'analyzed' || status === 'ready_for_review' || status === 'generating_report' || status === 'completed') {
-    return <span className="text-sm text-green-600 font-medium">✓ Completa</span>;
-  }
-  return <span className="text-sm text-gray-500">Pendente</span>;
+  // NEW ARCHITECTURE: All submissions have status 'received'
+  // Check would need to be based on analysis entity status, not submission
+  // For now, show as pending since we don't have analysis status here
+  return <span className="text-sm text-gray-500">Ver Detalhes</span>;
 }
 
-function ReportStatus({ status }: { status: SubmissionStatus }) {
-  if (status === 'completed') {
+function ReportStatus({ submission }: { submission: Submission }) {
+  // NEW ARCHITECTURE: Check if PDF exists, not submission status
+  const hasPDF = !!(submission as any).pdfUrl || !!(submission as any).pdf_url;
+  if (hasPDF) {
     return <span className="text-sm text-green-600 font-medium">✓ Disponível</span>;
-  }
-  if (status === 'generating_report') {
-    return <span className="text-sm text-blue-600">Gerando...</span>;
   }
   return <span className="text-sm text-gray-500">Não gerado</span>;
 }

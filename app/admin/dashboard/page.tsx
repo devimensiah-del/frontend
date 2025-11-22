@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils/cn";
 import { AdminInboxSkeleton } from "@/components/skeletons";
 import { toast } from "@/components/ui/use-toast";
 import { adminApi } from "@/lib/api/client";
-import { canStartEnrichment } from "@/lib/utils/workflow";
 import type { SubmissionStatus, Submission } from "@/types";
 import {
   DropdownMenu,
@@ -54,37 +53,23 @@ export default function AdminDashboard() {
   }, []);
 
   const handleStartEnrichment = async (submission: Submission) => {
-    const { allowed, reason } = canStartEnrichment(submission);
-
-    if (!allowed) {
-      toast({
-        title: "Não é possível iniciar enriquecimento",
-        description: reason,
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // NEW ARCHITECTURE: All submissions are 'received', so we can always start enrichment
+    // Just redirect to the enrichment page directly
     try {
       setStartingEnrichment(submission.id);
 
-      // Update submission status to 'enriching'
-      await adminApi.updateSubmissionStatus(submission.id, "enriching");
-
       toast({
-        title: "Enriquecimento iniciado",
-        description: "Redirecionando para o editor...",
+        title: "Redirecionando para enriquecimento",
+        description: "Abrindo editor de enriquecimento...",
         variant: "default",
       });
 
       // Redirect to enrichment editor
-      setTimeout(() => {
-        router.push(`/admin/enriquecimento/${submission.id}`);
-      }, 1000);
-    } catch (error: any) {
+      router.push(`/admin/enriquecimento/${submission.id}`);
+    } catch (_error: any) {
       toast({
-        title: "Erro ao iniciar enriquecimento",
-        description: error.message || "Não foi possível iniciar o enriquecimento.",
+        title: "Erro ao abrir enriquecimento",
+        description: _error.message || "Não foi possível abrir o editor.",
         variant: "destructive",
       });
       setStartingEnrichment(null);
@@ -111,10 +96,10 @@ export default function AdminDashboard() {
     );
   }
 
-  const pendingCount = submissions.filter(
-    s => s.status === "pending"
-  ).length;
-  const completedCount = submissions.filter(s => s.status === "completed").length;
+  // NEW ARCHITECTURE: All submissions have status 'received'
+  // Show total count for now (can be enhanced with enrichment/analysis status later)
+  const pendingCount = 0; // All are received, none truly "pending"
+  const completedCount = 0; // Would need to check analysis status = 'sent'
 
   return (
     <div className="min-h-screen bg-surface-paper">
@@ -238,10 +223,7 @@ export default function AdminDashboard() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleStartEnrichment(submission)}
-                            disabled={
-                              !canStartEnrichment(submission).allowed ||
-                              startingEnrichment === submission.id
-                            }
+                            disabled={startingEnrichment === submission.id}
                           >
                             Iniciar Enriquecimento
                           </DropdownMenuItem>
@@ -332,7 +314,7 @@ function SubmissionCard({ submission, onStartEnrichment, isStarting }: Submissio
           variant="architect"
           size="sm"
           onClick={() => onStartEnrichment(submission)}
-          disabled={!canStartEnrichment(submission).allowed || isStarting}
+          disabled={isStarting}
           className="flex-1"
         >
           {isStarting ? "..." : "Enriquecer"}
@@ -363,7 +345,11 @@ interface StatusBadgeProps {
 }
 
 function StatusBadge({ status }: StatusBadgeProps) {
-  const variants: Record<SubmissionStatus, { bg: string; text: string; label: string }> = {
+  // NEW ARCHITECTURE: All submissions have status 'received'
+  const variants: Record<string, { bg: string; text: string; label: string }> = {
+    received: { bg: "bg-green-100", text: "text-green-600", label: "Recebido" },
+  };
+  const variantsOld = {
     pending: {
       bg: "bg-gray-100",
       text: "text-gray-600",

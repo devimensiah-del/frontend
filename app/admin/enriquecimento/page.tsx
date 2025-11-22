@@ -13,13 +13,12 @@ import { Button } from "@/components/ui/button";
 import { EnrichmentListSkeleton } from "@/components/skeletons";
 import { Calendar, Mail, Building2, ChevronRight } from "lucide-react";
 import type { Submission, Enrichment } from "@/types";
+// EnrichmentStatus is not imported to avoid type resolution issues - using string literals instead
 
 /* ============================================
    ADMIN ENRIQUECIMENTO - Enrichment List
    Stage 2 of 3-Stage Workflow
    ============================================ */
-
-import type { EnrichmentStatus } from "@/types";
 
 interface SubmissionWithEnrichment extends Submission {
   enrichment?: Enrichment;
@@ -30,7 +29,7 @@ export default function EnrichmentListPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [submissions, setSubmissions] = useState<SubmissionWithEnrichment[]>([]);
   const [filteredSubmissions, setFilteredSubmissions] = useState<SubmissionWithEnrichment[]>([]);
-  const [statusFilter, setStatusFilter] = useState<EnrichmentStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch submissions with enrichment data
@@ -397,12 +396,12 @@ function TableHeader({ children }: { children: React.ReactNode }) {
 }
 
 interface EnrichmentStatusBadgeProps {
-  status: EnrichmentStatus;
+  status: string; // EnrichmentStatus type
 }
 
 function EnrichmentStatusBadge({ status }: EnrichmentStatusBadgeProps) {
   const variants: Record<
-    EnrichmentStatus,
+    string,
     { variant: "warning" | "success" | "error" | "default" | "primary" | "gold"; label: string }
   > = {
     pending: { variant: "warning", label: "Pendente" },

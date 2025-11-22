@@ -219,8 +219,20 @@ export interface StatusConfig {
   description: string;
 }
 
-// Matches backend_v3/domain/submission/model.go
-export const statusConfig: Record<SubmissionStatus, StatusConfig> = {
+// NEW ARCHITECTURE: Submission status is always 'received'
+// These configs are for Enrichment and Analysis statuses
+export const statusConfig: Record<string, StatusConfig> = {
+  // Submission Status (NEW ARCHITECTURE)
+  received: {
+    label: 'Recebido',
+    color: 'green',
+    bgColor: 'bg-green-50',
+    textColor: 'text-green-700',
+    borderColor: 'border-green-200',
+    icon: 'CheckCircle',
+    description: 'Submissão recebida',
+  },
+
   // 1. Pending
   pending: {
     label: 'Pendente',
@@ -432,8 +444,9 @@ export const features = {
 
 export function getStatusConfig(status: string): StatusConfig {
   // Normalize to lowercase and handle unknown statuses
-  const s = (status?.toLowerCase() || 'pending') as SubmissionStatus;
-  return statusConfig[s] || statusConfig.pending;
+  // NEW ARCHITECTURE: Default to 'received' for submissions
+  const s = status?.toLowerCase() || 'received';
+  return statusConfig[s] || statusConfig.received;
 }
 
 export function getStatusLabel(status: string): string {
