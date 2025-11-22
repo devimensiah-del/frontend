@@ -8,25 +8,21 @@
 // ============================================================================
 
 export type SubmissionStatus =
-  | 'pendente'           // Pending initial review
-  | 'aguardando_pagamento' // Awaiting payment
-  | 'em_enriquecimento'  // Being enriched with data
-  | 'enriquecimento_completo' // Enrichment completed
-  | 'em_analise'         // Being analyzed
-  | 'analise_completa'   // Analysis completed
-  | 'em_geracao_relatorio' // Report generation in progress
-  | 'concluido'          // Completed
-  | 'cancelado'          // Cancelled
-  | 'erro';              // Error occurred
+  | 'pending'            // Initial submission
+  | 'processing'         // Generic processing state
+  | 'enriching'          // Worker 1 Active
+  | 'enriched'           // Worker 1 Done
+  | 'analyzing'          // Worker 2 Active
+  | 'analyzed'           // Worker 2 Done (Internal)
+  | 'ready_for_review'   // Waiting for Admin Publish
+  | 'generating_report'  // PDF generation in progress
+  | 'completed'          // PDF Generated & Email Sent
+  | 'failed'             // Generic Failure
+  | 'enrichment_failed'
+  | 'analysis_failed'
+  | 'report_failed';
 
 export type UserRole = 'admin' | 'user';
-
-export type PaymentStatus =
-  | 'pendente'
-  | 'processando'
-  | 'aprovado'
-  | 'rejeitado'
-  | 'reembolsado';
 
 // ============================================================================
 // User Types
@@ -36,554 +32,258 @@ export interface User {
   id: string;
   email: string;
   fullName: string;
-  jobTitle?: string;
   role: UserRole;
-  organizationId?: string;
   createdAt: string;
   updatedAt: string;
 }
-
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-}
-
 // ============================================================================
-// Submission Types (17 fields matching Go struct)
+// Submission Types
 // ============================================================================
 
 export interface Submission {
   id: string;
-  userId: string;
+  userId?: string;
 
-  // Company Information
+  // Company Information (from backend_v3/domain/submission/model.go)
   companyName: string;
-  cnpj: string;
-  industry: string;
-  companySize: string;
+  cnpj?: string;
   website?: string;
-  email?: string; // Contact email for the submission
+  email?: string;
+  industry?: string;
+  companySize?: string;
 
   // Strategic Context
-  strategicGoal: string;
-  currentChallenges: string;
-  competitivePosition: string;
-
-  // Additional Data
+  strategicGoal?: string;
+  currentChallenges?: string;
+  competitivePosition?: string;
   additionalInfo?: string;
 
-  // Status and Workflow
+  // Legacy fields (for backward compatibility)
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  contactPosition?: string;
+  targetMarket?: string;
+  annualRevenueMin?: number;
+  annualRevenueMax?: number;
+  fundingStage?: string;
+  businessChallenge?: string;
+  additionalNotes?: string;
+  linkedinUrl?: string;
+  twitterHandle?: string;
+  location?: string;
+
+  // Metadata
   status: SubmissionStatus;
-  paymentStatus: PaymentStatus;
+  paymentStatus?: string;
+  createdAt: string;
+  updatedAt: string;
 
   // Relationships
   enrichmentId?: string;
   analysisId?: string;
   reportId?: string;
 
-  // Timestamps
-  createdAt: string;
-  updatedAt: string;
+  // PDF URL (Only present if status === 'completed')
+  pdfUrl?: string;
+  pdf_url?: string; // Backend uses snake_case
 }
 
 // ============================================================================
-// Enrichment Types
+// Enrichment Types (The Researcher Agent)
 // ============================================================================
-
-export interface StrategicProfile {
-  mission?: string;
-  vision?: string;
-  coreValues: string[];
-  keyCompetencies: string[];
-  strategicPriorities: string[];
-  organizationalCulture?: string;
-}
-
-export interface CompanyOverview {
-  legalName: string;
-  tradeName: string;
-  cnpj: string;
-  foundedYear?: number;
-  headquarters: string;
-  numberOfEmployees?: number;
-  annualRevenue?: string;
-  mainProducts: string[];
-  mainServices: string[];
-  targetMarkets: string[];
-  geographicPresence: string[];
-  corporateStructure?: string;
-  keyExecutives: Array<{
-    name: string;
-    position: string;
-    background?: string;
-  }>;
-}
-
-export interface MarketIntelligence {
-  industryOverview: string;
-  marketSize?: string;
-  growthRate?: string;
-  keyTrends: string[];
-  regulatoryEnvironment: string[];
-  technologyDisruptions: string[];
-}
-
-export interface CompetitiveLandscape {
-  mainCompetitors: Array<{
-    name: string;
-    marketShare?: string;
-    strengths: string[];
-    weaknesses: string[];
-  }>;
-  competitiveAdvantages: string[];
-  competitiveDisadvantages: string[];
-  marketPosition: string;
-  differentiationFactors: string[];
-}
-
-export interface FinancialMetrics {
-  revenue: string;
-  revenueGrowth?: string;
-  profitMargin?: string;
-  ebitda?: string;
-  debtLevel?: string;
-  liquidityPosition?: string;
-  investmentCapacity?: string;
-  financialHealth: string;
-}
-
-export interface OperationalCapabilities {
-  productionCapacity?: string;
-  technologyInfrastructure: string[];
-  supplyChainMaturity: string;
-  qualityCertifications: string[];
-  innovationCapabilities: string[];
-  digitalMaturity: string;
-}
-
-export interface RiskAssessment {
-  strategicRisks: Array<{
-    risk: string;
-    severity: 'baixa' | 'média' | 'alta' | 'crítica';
-    mitigation?: string;
-  }>;
-  operationalRisks: Array<{
-    risk: string;
-    severity: 'baixa' | 'média' | 'alta' | 'crítica';
-    mitigation?: string;
-  }>;
-  financialRisks: Array<{
-    risk: string;
-    severity: 'baixa' | 'média' | 'alta' | 'crítica';
-    mitigation?: string;
-  }>;
-  complianceRisks: Array<{
-    risk: string;
-    severity: 'baixa' | 'média' | 'alta' | 'crítica';
-    mitigation?: string;
-  }>;
-}
 
 export interface Enrichment {
   id: string;
   submissionId: string;
+  
+  // The JSONMap stored in Postgres
+  data: {
+    overview?: {
+      description: string;
+      sources: string[] | null;
+    };
+    digitalPresence?: {
+      websiteUrl: string;
+      recentNews: string[] | null;
+    };
+    marketPosition?: {
+      industry: string;
+      keyDifferentiator: string;
+      competitors: string[];
+    };
+    strategicInference?: {
+      brandTone: string;
+      digitalMaturity: number;
+      valueArchetype: string;
+      customerSegment: string;
+      strengths: string[];
+      weaknesses: string[];
+    };
+  };
 
-  // Core enrichment data structures
-  strategicProfile: StrategicProfile;
-  companyOverview: CompanyOverview;
-  marketIntelligence: MarketIntelligence;
-  competitiveLandscape: CompetitiveLandscape;
-  financialMetrics: FinancialMetrics;
-  operationalCapabilities: OperationalCapabilities;
-  riskAssessment: RiskAssessment;
-
-  // Status (for UI workflows)
-  status?: 'pending' | 'approved' | 'rejected';
-
-  // Metadata
-  dataQualityScore: number; // 0-100
-  sourceReliability: 'baixa' | 'média' | 'alta';
-  lastVerified: string;
-  dataSources: string[];
-
-  // Timestamps
+  status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
   updatedAt: string;
 }
 
 // ============================================================================
-// Analysis Types (11 Strategic Frameworks)
+// Analysis Types (The 11 Frameworks from Go Backend)
 // ============================================================================
 
+// 1. PESTEL
 export interface PESTELAnalysis {
-  political: {
-    factors: string[];
-    impact: 'positivo' | 'neutro' | 'negativo';
-    opportunities: string[];
-    threats: string[];
-  };
-  economic: {
-    factors: string[];
-    impact: 'positivo' | 'neutro' | 'negativo';
-    opportunities: string[];
-    threats: string[];
-  };
-  social: {
-    factors: string[];
-    impact: 'positivo' | 'neutro' | 'negativo';
-    opportunities: string[];
-    threats: string[];
-  };
-  technological: {
-    factors: string[];
-    impact: 'positivo' | 'neutro' | 'negativo';
-    opportunities: string[];
-    threats: string[];
-  };
-  environmental: {
-    factors: string[];
-    impact: 'positivo' | 'neutro' | 'negativo';
-    opportunities: string[];
-    threats: string[];
-  };
-  legal: {
-    factors: string[];
-    impact: 'positivo' | 'neutro' | 'negativo';
-    opportunities: string[];
-    threats: string[];
-  };
+  political: string[];
+  economic: string[];
+  social: string[];
+  technological: string[];
+  environmental: string[];
+  legal: string[];
+  summary: string;
 }
 
-export interface PorterFiveForcesAnalysis {
-  threatOfNewEntrants: {
-    level: 'baixa' | 'média' | 'alta';
-    factors: string[];
-    analysis: string;
-  };
-  bargainingPowerOfSuppliers: {
-    level: 'baixa' | 'média' | 'alta';
-    factors: string[];
-    analysis: string;
-  };
-  bargainingPowerOfBuyers: {
-    level: 'baixa' | 'média' | 'alta';
-    factors: string[];
-    analysis: string;
-  };
-  threatOfSubstitutes: {
-    level: 'baixa' | 'média' | 'alta';
-    factors: string[];
-    analysis: string;
-  };
-  competitiveRivalry: {
-    level: 'baixa' | 'média' | 'alta';
-    factors: string[];
-    analysis: string;
-  };
-  overallIndustryAttractiveness: 'baixa' | 'média' | 'alta';
+// 2. Porter's 5 Forces
+export interface PorterAnalysis {
+  competitiveRivalry: string;
+  supplierPower: string;
+  buyerPower: string;
+  threatNewEntrants: string;
+  threatSubstitutes: string;
+  overallAttractiveness: string;
+  summary: string;
 }
 
+// 3. TAM SAM SOM
+export interface TamSamSomAnalysis {
+  tam: string;
+  sam: string;
+  som: string;
+  assumptions: string[];
+  cagr: string;
+  summary: string;
+}
+
+// 4. SWOT
 export interface SWOTAnalysis {
-  strengths: Array<{
-    item: string;
-    impact: 'baixo' | 'médio' | 'alto';
-    description: string;
-  }>;
-  weaknesses: Array<{
-    item: string;
-    impact: 'baixo' | 'médio' | 'alto';
-    description: string;
-  }>;
-  opportunities: Array<{
-    item: string;
-    potential: 'baixo' | 'médio' | 'alto';
-    description: string;
-  }>;
-  threats: Array<{
-    item: string;
-    severity: 'baixa' | 'média' | 'alta';
-    description: string;
-  }>;
-  strategicImplications: string;
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
+  summary: string;
 }
 
-export interface VRIOAnalysis {
-  resources: Array<{
-    resource: string;
-    valuable: boolean;
-    rare: boolean;
-    inimitable: boolean;
-    organized: boolean;
-    competitiveImplication: 'desvantagem' | 'paridade' | 'vantagem_temporária' | 'vantagem_sustentável';
-    analysis: string;
-  }>;
+// 5. Benchmarking
+export interface BenchmarkingAnalysis {
+  competitorsAnalyzed: string[];
+  performanceGaps: string[];
+  bestPractices: string[];
+  summary: string;
 }
 
-export interface ValueChainAnalysis {
-  primaryActivities: {
-    inboundLogistics: {
-      activities: string[];
-      valueCreation: 'baixa' | 'média' | 'alta';
-      improvements: string[];
-    };
-    operations: {
-      activities: string[];
-      valueCreation: 'baixa' | 'média' | 'alta';
-      improvements: string[];
-    };
-    outboundLogistics: {
-      activities: string[];
-      valueCreation: 'baixa' | 'média' | 'alta';
-      improvements: string[];
-    };
-    marketingAndSales: {
-      activities: string[];
-      valueCreation: 'baixa' | 'média' | 'alta';
-      improvements: string[];
-    };
-    service: {
-      activities: string[];
-      valueCreation: 'baixa' | 'média' | 'alta';
-      improvements: string[];
-    };
-  };
-  supportActivities: {
-    firmInfrastructure: {
-      activities: string[];
-      valueCreation: 'baixa' | 'média' | 'alta';
-      improvements: string[];
-    };
-    hrManagement: {
-      activities: string[];
-      valueCreation: 'baixa' | 'média' | 'alta';
-      improvements: string[];
-    };
-    technologyDevelopment: {
-      activities: string[];
-      valueCreation: 'baixa' | 'média' | 'alta';
-      improvements: string[];
-    };
-    procurement: {
-      activities: string[];
-      valueCreation: 'baixa' | 'média' | 'alta';
-      improvements: string[];
-    };
-  };
-}
-
-export interface BCGMatrixAnalysis {
-  businessUnits: Array<{
-    name: string;
-    category: 'estrela' | 'vaca_leiteira' | 'ponto_interrogacao' | 'abacaxi';
-    marketGrowthRate: number;
-    relativeMarketShare: number;
-    strategicRecommendation: string;
-  }>;
-}
-
-export interface AnsoffMatrixAnalysis {
-  marketPenetration: {
-    feasibility: 'baixa' | 'média' | 'alta';
-    strategies: string[];
-    risks: string[];
-  };
-  marketDevelopment: {
-    feasibility: 'baixa' | 'média' | 'alta';
-    strategies: string[];
-    risks: string[];
-  };
-  productDevelopment: {
-    feasibility: 'baixa' | 'média' | 'alta';
-    strategies: string[];
-    risks: string[];
-  };
-  diversification: {
-    feasibility: 'baixa' | 'média' | 'alta';
-    strategies: string[];
-    risks: string[];
-  };
-  recommendedStrategy: string;
-}
-
-export interface BalancedScorecardAnalysis {
-  financial: {
-    objectives: string[];
-    measures: string[];
-    targets: string[];
-    initiatives: string[];
-  };
-  customer: {
-    objectives: string[];
-    measures: string[];
-    targets: string[];
-    initiatives: string[];
-  };
-  internalProcesses: {
-    objectives: string[];
-    measures: string[];
-    targets: string[];
-    initiatives: string[];
-  };
-  learningAndGrowth: {
-    objectives: string[];
-    measures: string[];
-    targets: string[];
-    initiatives: string[];
-  };
-}
-
-export interface McKinsey7SAnalysis {
-  strategy: {
-    description: string;
-    alignment: 'baixo' | 'médio' | 'alto';
-    gaps: string[];
-  };
-  structure: {
-    description: string;
-    alignment: 'baixo' | 'médio' | 'alto';
-    gaps: string[];
-  };
-  systems: {
-    description: string;
-    alignment: 'baixo' | 'médio' | 'alto';
-    gaps: string[];
-  };
-  sharedValues: {
-    description: string;
-    alignment: 'baixo' | 'médio' | 'alto';
-    gaps: string[];
-  };
-  style: {
-    description: string;
-    alignment: 'baixo' | 'médio' | 'alto';
-    gaps: string[];
-  };
-  staff: {
-    description: string;
-    alignment: 'baixo' | 'médio' | 'alto';
-    gaps: string[];
-  };
-  skills: {
-    description: string;
-    alignment: 'baixo' | 'médio' | 'alto';
-    gaps: string[];
-  };
-  overallAlignment: 'baixo' | 'médio' | 'alto';
-}
-
+// 6. Blue Ocean
 export interface BlueOceanAnalysis {
-  currentMarketSpace: {
-    competingFactors: string[];
-    industryNorms: string[];
-  };
-  blueOceanOpportunities: Array<{
-    factor: string;
-    action: 'eliminar' | 'reduzir' | 'elevar' | 'criar';
-    rationale: string;
-    expectedImpact: string;
-  }>;
-  valueInnovation: string;
-  strategicMove: string;
+  eliminate: string[];
+  reduce: string[];
+  raise: string[];
+  create: string[];
+  newValueCurve: string;
+  summary: string;
 }
 
-export interface CoreCompetenciesAnalysis {
-  competencies: Array<{
-    competency: string;
-    providesCustomerValue: boolean;
-    difficultToImitate: boolean;
-    broadMarketApplicability: boolean;
-    isCoreCompetency: boolean;
-    analysis: string;
-    developmentRecommendations: string[];
-  }>;
+// 7. Growth Hacking
+export interface GrowthHackingAnalysis {
+  hypotheses: string[];
+  experiments: string[];
+  keyMetrics: string[];
+  summary: string;
 }
 
+// 8. Scenarios
+export interface ScenariosAnalysis {
+  optimistic: string;
+  realist: string;
+  pessimistic: string;
+  earlyWarningSignals: string[];
+  summary: string;
+}
+
+// 9. OKRs
+export interface OKRItem {
+  title: string;
+  keyResults: string[];
+}
+
+export interface OKRsAnalysis {
+  objectives: OKRItem[];
+  summary: string;
+}
+
+// 10. Balanced Scorecard (BSC)
+export interface BSCAnalysis {
+  financial: string[];
+  customer: string[];
+  internal: string[];
+  learningGrowth: string[];
+  summary: string;
+}
+
+// 11. Decision Matrix
+export interface DecisionMatrixAnalysis {
+  alternatives: string[];
+  criteria: string[];
+  finalRecommendation: string;
+  summary: string;
+}
+
+// Synthesis (Executive Summary)
+export interface Synthesis {
+  executiveSummary: string;
+  keyFindings: string[];
+  strategicPriorities: string[];
+  roadmap: string[];
+  overallRecommendation: string;
+}
+
+// The Master Analysis Object
 export interface Analysis {
   id: string;
   submissionId: string;
   enrichmentId: string;
 
-  // 11 Strategic Analysis Frameworks
+  // Frameworks
   pestel: PESTELAnalysis;
-  porterFiveForces: PorterFiveForcesAnalysis;
-  porter?: PorterFiveForcesAnalysis; // Alias for backward compatibility
+  porter: PorterAnalysis;
+  tamSamSom: TamSamSomAnalysis;
   swot: SWOTAnalysis;
-  vrio: VRIOAnalysis;
-  valueChain: ValueChainAnalysis;
-  bcgMatrix: BCGMatrixAnalysis;
-  ansoffMatrix: AnsoffMatrixAnalysis;
-  balancedScorecard: BalancedScorecardAnalysis;
-  mckinsey7S: McKinsey7SAnalysis;
+  benchmarking: BenchmarkingAnalysis;
   blueOcean: BlueOceanAnalysis;
-  coreCompetencies: CoreCompetenciesAnalysis;
+  growthHacking: GrowthHackingAnalysis;
+  scenarios: ScenariosAnalysis;
+  okrs: OKRsAnalysis;
+  bsc: BSCAnalysis;
+  decisionMatrix: DecisionMatrixAnalysis;
 
-  // Status (for UI workflows)
-  status?: 'pending' | 'completed' | 'in_progress';
+  // Synthesis
+  synthesis: Synthesis;
 
-  // Overall Strategic Assessment
-  strategicRecommendations: string[];
-  priorityActions: Array<{
-    action: string;
-    priority: 'baixa' | 'média' | 'alta' | 'crítica';
-    timeframe: 'curto_prazo' | 'médio_prazo' | 'longo_prazo';
-    expectedImpact: string;
-  }>;
-
-  // Metadata
-  analysisQualityScore: number; // 0-100
-  confidenceLevel: 'baixa' | 'média' | 'alta';
-
-  // Timestamps
+  status: 'processing' | 'completed' | 'failed';
   createdAt: string;
   updatedAt: string;
 }
 
 // ============================================================================
-// Report Types (13 HTML Pages)
+// Report Types
 // ============================================================================
-
-export interface ReportPage {
-  title: string;
-  content: string; // HTML content
-  pageNumber: number;
-}
 
 export interface Report {
   id: string;
   submissionId: string;
-  analysisId: string;
-
-  // 13 Report Pages
-  executiveSummary: ReportPage;           // Page 1: Sumário Executivo
-  companyOverview: ReportPage;            // Page 2: Visão Geral da Empresa
-  marketAnalysis: ReportPage;             // Page 3: Análise de Mercado
-  competitiveAnalysis: ReportPage;        // Page 4: Análise Competitiva
-  swotAnalysis: ReportPage;               // Page 5: Análise SWOT
-  strategicFrameworks: ReportPage;        // Page 6: Frameworks Estratégicos
-  valueChainAnalysis: ReportPage;         // Page 7: Análise da Cadeia de Valor
-  portfolioAnalysis: ReportPage;          // Page 8: Análise de Portfólio
-  balancedScorecard: ReportPage;          // Page 9: Balanced Scorecard
-  organizationalAlignment: ReportPage;    // Page 10: Alinhamento Organizacional
-  strategicOpportunities: ReportPage;     // Page 11: Oportunidades Estratégicas
-  implementationRoadmap: ReportPage;      // Page 12: Roadmap de Implementação
-  appendices: ReportPage;                 // Page 13: Apêndices e Referências
-
-  // Report Metadata
-  generatedAt: string;
-  version: string;
-  format: 'html' | 'pdf';
-  sharingToken?: string;
-  expiresAt?: string;
-
-  // Timestamps
+  pdfUrl: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 // ============================================================================
-// API Response Types
+// API Response Wrappers
 // ============================================================================
 
 export interface ApiResponse<T> {
@@ -592,14 +292,18 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
+export interface AuthResponse {
+  user: User;
+  access_token: string;
+  expires_in: number;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
-  pagination: {
-    page: number;
-    pageSize: number;
-    totalItems: number;
-    totalPages: number;
-  };
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 // ============================================================================
