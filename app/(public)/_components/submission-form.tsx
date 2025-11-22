@@ -108,13 +108,13 @@ export function SubmissionForm() {
       // Prepare submission data for backend (camelCase format)
       const submissionData = {
         companyName: data.companyName,
-        cnpj: "",
+        cnpj: "00.000.000/0000-00",
         industry: data.companyIndustry || "",
         companySize: data.companySize || "",
-        website: data.companyWebsite || "",
+        website: data.companyWebsite || null,
         strategicGoal: data.businessChallenge,
-        currentChallenges: "",
-        competitivePosition: "",
+        currentChallenges: data.businessChallenge,
+        competitivePosition: "Em análise",
         additionalInfo: JSON.stringify(additionalInfoData),
       }
 
