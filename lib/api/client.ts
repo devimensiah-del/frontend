@@ -228,7 +228,7 @@ export const submissionsApi = {
 
     return {
       submissions: response.data,
-      total: response.pagination.totalItems,
+      total: response.total,
     };
   },
 
@@ -365,28 +365,13 @@ export const analysisApi = {
   },
 
   /**
-   * Generate PDF report
+   * Publish report and generate PDF
+   * Returns JSON response with report_id and pdf_url (Supabase Storage link)
    */
-  async getPdf(submissionId: string): Promise<Blob> {
-    const token = getAuthToken();
-    const url = `${API_BASE_URL}/submissions/${submissionId}/analysis/pdf`;
-
-    const headers: HeadersInit = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    try {
-      const response = await fetch(url, { headers });
-
-      if (!response.ok) {
-        await handleApiError(response);
-      }
-
-      return await response.blob();
-    } catch (error) {
-      handleNetworkError(error);
-    }
+  async publishReport(submissionId: string): Promise<{ report_id: string; pdf_url: string }> {
+    return apiRequest(`/submissions/${submissionId}/report/publish`, {
+      method: 'POST',
+    });
   },
 
   /**
