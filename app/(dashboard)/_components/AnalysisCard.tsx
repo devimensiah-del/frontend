@@ -51,21 +51,21 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
         </div>
 
         {/* Executive Summary */}
-        {analysis.synthesis?.executiveSummary && (
+        {analysis.analysis?.synthesis?.executiveSummary && (
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-sm font-medium text-gray-700 mb-2">Sumário Executivo</p>
-            <p className="text-sm text-gray-900 leading-relaxed">{analysis.synthesis.executiveSummary}</p>
+            <p className="text-sm text-gray-900 leading-relaxed">{analysis.analysis.synthesis.executiveSummary}</p>
           </div>
         )}
 
         {/* Key Findings */}
-        {analysis.synthesis?.keyFindings && analysis.synthesis.keyFindings.length > 0 && (
+        {analysis.analysis?.synthesis?.keyFindings && analysis.analysis.synthesis.keyFindings.length > 0 && (
           <div className="pt-4 border-t border-gray-200">
             <p className="text-sm font-medium text-gray-700 mb-3">
               Principais Descobertas
             </p>
             <ul className="space-y-2">
-              {analysis.synthesis.keyFindings.map((finding, index) => (
+              {analysis.analysis.synthesis.keyFindings.map((finding, index) => (
                 <li
                   key={index}
                   className="flex items-start space-x-2 text-sm text-gray-900"
@@ -79,13 +79,13 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
         )}
 
         {/* Strategic Priorities */}
-        {analysis.synthesis?.strategicPriorities && analysis.synthesis.strategicPriorities.length > 0 && (
+        {analysis.analysis?.synthesis?.strategicPriorities && analysis.analysis.synthesis.strategicPriorities.length > 0 && (
           <div className="pt-4 border-t border-gray-200">
             <p className="text-sm font-medium text-gray-700 mb-3">
               Prioridades Estratégicas
             </p>
             <div className="space-y-2">
-              {analysis.synthesis.strategicPriorities.map((priority, index) => (
+              {analysis.analysis.synthesis.strategicPriorities.map((priority, index) => (
                 <div key={index} className="p-3 bg-blue-50 border border-blue-200 rounded">
                   <span className="text-sm text-blue-900">{priority}</span>
                 </div>
@@ -95,25 +95,25 @@ export function AnalysisCard({ analysis }: AnalysisCardProps) {
         )}
 
         {/* SWOT Analysis Summary */}
-        {analysis.swot && (
+        {analysis.analysis?.swot && (
           <div className="pt-4 border-t border-gray-200">
             <p className="text-sm font-medium text-gray-700 mb-3">Análise SWOT</p>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-green-50 p-3 rounded">
                 <p className="text-xs font-semibold text-green-700 uppercase mb-1">Forças</p>
-                <p className="text-sm text-gray-900">{analysis.swot.strengths.length} identificadas</p>
+                <p className="text-sm text-gray-900">{analysis.analysis.swot.strengths.length} identificadas</p>
               </div>
               <div className="bg-red-50 p-3 rounded">
                 <p className="text-xs font-semibold text-red-700 uppercase mb-1">Fraquezas</p>
-                <p className="text-sm text-gray-900">{analysis.swot.weaknesses.length} identificadas</p>
+                <p className="text-sm text-gray-900">{analysis.analysis.swot.weaknesses.length} identificadas</p>
               </div>
               <div className="bg-blue-50 p-3 rounded">
                 <p className="text-xs font-semibold text-blue-700 uppercase mb-1">Oportunidades</p>
-                <p className="text-sm text-gray-900">{analysis.swot.opportunities.length} identificadas</p>
+                <p className="text-sm text-gray-900">{analysis.analysis.swot.opportunities.length} identificadas</p>
               </div>
               <div className="bg-orange-50 p-3 rounded">
                 <p className="text-xs font-semibold text-orange-700 uppercase mb-1">Ameaças</p>
-                <p className="text-sm text-gray-900">{analysis.swot.threats.length} identificadas</p>
+                <p className="text-sm text-gray-900">{analysis.analysis.swot.threats.length} identificadas</p>
               </div>
             </div>
           </div>

@@ -47,13 +47,13 @@ function convertAnalysisToWarRoomFormat(analysis: Analysis | null, submission?: 
     submissionId: analysis.submissionId,
     companyName: submission?.companyName || "",
     lastUpdated: analysis.updatedAt || new Date().toISOString(),
-    swot: analysis.swot || {
+    swot: analysis.analysis?.swot || {
       strengths: [],
       weaknesses: [],
       opportunities: [],
       threats: []
     },
-    pestel: analysis.pestel || {
+    pestel: analysis.analysis?.pestel || {
       political: [],
       economic: [],
       social: [],
@@ -61,7 +61,7 @@ function convertAnalysisToWarRoomFormat(analysis: Analysis | null, submission?: 
       environmental: [],
       legal: []
     },
-    porter: analysis.porter || {
+    porter: analysis.analysis?.porter || {
       competitiveRivalry: { intensity: "", factors: [] },
       threatOfNewEntrants: { intensity: "", factors: [] },
       bargainingPowerOfSuppliers: { intensity: "", factors: [] },
@@ -158,10 +158,12 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
 
     try {
       await update({
-        swot: localAnalysis.swot,
-        pestel: localAnalysis.pestel,
-        porter: localAnalysis.porter
-      });
+        analysis: {
+          swot: localAnalysis.swot,
+          pestel: localAnalysis.pestel,
+          porter: localAnalysis.porter
+        }
+      } as Partial<Analysis>);
 
       if (!isAutoSave) {
         toast({
