@@ -64,10 +64,10 @@ export default function AnalysisEditorPage({
     fetchSubmission();
   }, [submissionId]);
 
-  // Initialize local analysis data
+  // Initialize local analysis data (edit the frameworks object, not the whole analysis)
   useEffect(() => {
-    if (analysis) {
-      setLocalAnalysisData(analysis);
+    if (analysis?.analysis) {
+      setLocalAnalysisData(analysis.analysis);
     }
   }, [analysis]);
 
@@ -115,7 +115,7 @@ export default function AnalysisEditorPage({
       return;
     }
 
-    if ((analysis as any).status !== 'completed') {
+    if (analysis.status !== 'completed') {
       toast({
         title: "Status inválido",
         description: "A análise deve estar no status 'completed' para ser aprovada.",
@@ -170,7 +170,7 @@ export default function AnalysisEditorPage({
       return;
     }
 
-    if ((analysis as any).status !== 'approved') {
+    if (analysis.status !== 'approved') {
       toast({
         title: "Status inválido",
         description: "A análise deve estar aprovada antes de ser enviada.",
@@ -243,7 +243,7 @@ export default function AnalysisEditorPage({
     );
   }
 
-  const analysisStatus = (analysis as any).status || 'pending';
+  const analysisStatus = analysis.status || 'pending';
   const canApprove = analysisStatus === 'completed';
   const canSend = analysisStatus === 'approved';
 
@@ -279,7 +279,7 @@ export default function AnalysisEditorPage({
               </h1>
               <p className="text-sm text-text-secondary mt-1">
                 Status: <span className="font-medium capitalize">{analysisStatus}</span>
-                {(analysis as any).version && ` • Versão ${(analysis as any).version}`}
+                {analysis.version && ` • Versão ${analysis.version}`}
               </p>
             </div>
 

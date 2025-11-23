@@ -169,6 +169,8 @@ export interface Enrichment {
   };
 
   status: EnrichmentStatus;
+  progress: number;  // Worker progress percentage (0-100)
+  currentStep: string;  // Current step description
   createdAt: string;
   updatedAt: string;
 }
@@ -334,33 +336,30 @@ export type AnalysisStatus =
   | 'sent'         // Report sent to user
   | 'failed';      // Worker failed
 
-// The Master Analysis Object
+// The Master Analysis Object (matches backend AnalysisResponse)
 export interface Analysis {
   id: string;
   submissionId: string;
-  enrichmentId: string;
-
-  // Versioning support (for admin edits)
   version: number;                    // Version number (1, 2, 3, ...)
-  parentAnalysisId?: string | null;   // Reference to previous version
-
-  // Frameworks
-  pestel: PESTELAnalysis;
-  porter: PorterAnalysis;
-  tamSamSom: TamSamSomAnalysis;
-  swot: SWOTAnalysis;
-  benchmarking: BenchmarkingAnalysis;
-  blueOcean: BlueOceanAnalysis;
-  growthHacking: GrowthHackingAnalysis;
-  scenarios: ScenariosAnalysis;
-  okrs: OKRsAnalysis;
-  bsc: BSCAnalysis;
-  decisionMatrix: DecisionMatrixAnalysis;
-
-  // Synthesis
-  synthesis: Synthesis;
-
+  parentId?: string | null;           // Reference to previous version (backend uses "parentId" not "parentAnalysisId")
   status: AnalysisStatus;
+
+  // ALL FRAMEWORKS NESTED IN "analysis" OBJECT (matches backend response structure)
+  analysis: {
+    pestel: PESTELAnalysis;
+    porter: PorterAnalysis;
+    tamSamSom: TamSamSomAnalysis;
+    swot: SWOTAnalysis;
+    benchmarking: BenchmarkingAnalysis;
+    blueOcean: BlueOceanAnalysis;
+    growthHacking: GrowthHackingAnalysis;
+    scenarios: ScenariosAnalysis;
+    okrs: OKRsAnalysis;
+    bsc: BSCAnalysis;
+    decisionMatrix: DecisionMatrixAnalysis;
+    synthesis: Synthesis;
+  };
+
   createdAt: string;
   updatedAt: string;
 }

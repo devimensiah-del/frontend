@@ -66,8 +66,8 @@ export default function EnrichmentEditorPage({
 
   // Initialize local enrichment data
   useEffect(() => {
-    if ((enrichment as any)?.data) {
-      setLocalEnrichmentData((enrichment as any).data);
+    if (enrichment?.data) {
+      setLocalEnrichmentData(enrichment.data);
     }
   }, [enrichment]);
 
@@ -265,7 +265,7 @@ export default function EnrichmentEditorPage({
         isApproving={adminEnrichment.isApproving}
         isRejecting={false}
         isGenerating={false}
-        disabled={isLoading || (enrichment as any)?.status === 'approved'}
+        disabled={isLoading || enrichment?.status === 'approved'}
       />
     </div>
   );
