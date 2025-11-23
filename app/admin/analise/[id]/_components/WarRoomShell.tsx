@@ -52,11 +52,15 @@ interface WarRoomShellProps {
   onAnalysisChange: (analysis: AnalysisData) => void;
   onSaveDraft: () => void;
   onRetryAnalysis: () => void;
+  onApproveAnalysis: () => void;
   onPublishPDF: () => void;
   onSendEmail: () => void;
+  onCreateNewVersion: () => void;
   isSaving: boolean;
+  isApproving: boolean;
   isGeneratingPDF: boolean;
   isSending: boolean;
+  isCreatingVersion: boolean;
   submissionId: string;
   userEmail: string;
 }
@@ -68,11 +72,15 @@ export function WarRoomShell({
   onAnalysisChange,
   onSaveDraft,
   onRetryAnalysis,
+  onApproveAnalysis,
   onPublishPDF,
   onSendEmail,
+  onCreateNewVersion,
   isSaving,
+  isApproving,
   isGeneratingPDF,
   isSending,
+  isCreatingVersion,
   submissionId,
   userEmail,
 }: WarRoomShellProps) {
@@ -96,18 +104,18 @@ export function WarRoomShell({
               analysis={null}
               allVersions={[]}
               currentVersion={1}
-              onVersionChange={() => {}}
+              onVersionChange={() => { }}
               onSaveDraft={onSaveDraft}
               onRetryAnalysis={onRetryAnalysis}
-              onApproveAnalysis={() => {}}
+              onApproveAnalysis={onApproveAnalysis}
               onPublishPDF={onPublishPDF}
               onSendToUser={onSendEmail}
-              onCreateNewVersion={() => {}}
+              onCreateNewVersion={onCreateNewVersion}
               isSaving={isSaving}
-              isApproving={false}
+              isApproving={isApproving}
               isGeneratingPDF={isGeneratingPDF}
               isSending={isSending}
-              isCreatingVersion={false}
+              isCreatingVersion={isCreatingVersion}
               userEmail={userEmail}
             />
           </div>
@@ -119,10 +127,9 @@ export function WarRoomShell({
               className={`
                 px-6 py-3 font-heading text-xs uppercase tracking-widest font-medium
                 transition-all duration-200
-                ${
-                  viewMode === "editor"
-                    ? "bg-[var(--navy-900)] text-white"
-                    : "bg-transparent text-[var(--text-secondary)] hover:bg-white"
+                ${viewMode === "editor"
+                  ? "bg-[var(--navy-900)] text-white"
+                  : "bg-transparent text-[var(--text-secondary)] hover:bg-white"
                 }
               `}
             >
@@ -133,10 +140,9 @@ export function WarRoomShell({
               className={`
                 px-6 py-3 font-heading text-xs uppercase tracking-widest font-medium
                 transition-all duration-200
-                ${
-                  viewMode === "preview"
-                    ? "bg-[var(--navy-900)] text-white"
-                    : "bg-transparent text-[var(--text-secondary)] hover:bg-white"
+                ${viewMode === "preview"
+                  ? "bg-[var(--navy-900)] text-white"
+                  : "bg-transparent text-[var(--text-secondary)] hover:bg-white"
                 }
               `}
             >
@@ -152,9 +158,8 @@ export function WarRoomShell({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
             {/* Editor Panel */}
             <div
-              className={`${
-                viewMode === "preview" ? "hidden lg:block" : "block"
-              }`}
+              className={`${viewMode === "preview" ? "hidden lg:block" : "block"
+                }`}
             >
               <EditorPanel
                 analysis={analysis}
@@ -164,9 +169,8 @@ export function WarRoomShell({
 
             {/* Preview Panel */}
             <div
-              className={`${
-                viewMode === "editor" ? "hidden lg:block" : "block"
-              }`}
+              className={`${viewMode === "editor" ? "hidden lg:block" : "block"
+                }`}
             >
               <PreviewPanel analysis={analysis} />
             </div>

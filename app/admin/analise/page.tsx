@@ -27,10 +27,11 @@ export default function AdminAnalise() {
         setIsLoading(true);
         setError(null);
         const data = await adminApi.getAllSubmissions();
-        // NEW ARCHITECTURE: All submissions have status 'received'
-        // Show all submissions - admin can navigate to any
-        // TODO: Filter by enrichment/analysis status via backend API
-        setSubmissions(data.data || []); // Ensure always an array
+        // Filter submissions that have an analysisId (meaning enrichment was approved)
+        const submissionsWithAnalysis = (data.data || []).filter(
+          (sub) => sub.analysisId
+        );
+        setSubmissions(submissionsWithAnalysis);
       } catch (err) {
         console.error("Error fetching submissions:", err);
         setError("Erro ao carregar envios.");
@@ -109,9 +110,17 @@ export default function AdminAnalise() {
       <div className="p-4 sm:p-6 lg:p-8">
         {submissions.length === 0 ? (
           <div className="bg-white border border-line p-8 sm:p-12 text-center">
-            <p className="text-text-secondary">
-              Nenhum envio pronto para análise.
+            <p className="text-text-secondary mb-4">
+              Nenhuma análise disponível.
             </p>
+            <p className="text-sm text-text-tertiary">
+              As análises aparecerão aqui após a aprovação do enriquecimento.
+            </p>
+            <Link href="/admin/enriquecimento">
+              <Button variant="outline" className="mt-4">
+                Ir para Enriquecimentos
+              </Button>
+            </Link>
           </div>
         ) : (
           <>

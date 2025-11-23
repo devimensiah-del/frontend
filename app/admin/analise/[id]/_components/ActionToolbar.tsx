@@ -96,6 +96,29 @@ export function ActionToolbar({
 
         {/* Right side: Action buttons */}
         <div className="flex items-center gap-3 flex-wrap">
+          {/* Version Selector */}
+          <div className="flex items-center gap-2 mr-4">
+            <span className="text-xs font-heading uppercase tracking-widest text-[var(--text-secondary)]">
+              Versão:
+            </span>
+            <Select
+              value={currentVersion.toString()}
+              onChange={(e) => onVersionChange(parseInt(e.target.value))}
+              disabled={allVersions.length <= 1}
+            >
+              <SelectOption value={currentVersion.toString()}>
+                v{currentVersion}
+              </SelectOption>
+              {allVersions
+                .filter((v) => v.version !== currentVersion)
+                .map((v) => (
+                  <SelectOption key={v.id} value={v.version.toString()}>
+                    v{v.version}
+                  </SelectOption>
+                ))}
+            </Select>
+          </div>
+
           {/* Retry Analysis */}
           <button
             onClick={onRetryAnalysis}
@@ -106,6 +129,16 @@ export function ActionToolbar({
             Refazer Análise
           </button>
 
+          {/* Create New Version */}
+          <button
+            onClick={() => setShowVersionDialog(true)}
+            disabled={isCreatingVersion || isAnyActionLoading}
+            className="btn-outline disabled:opacity-50 disabled:cursor-not-allowed"
+            type="button"
+          >
+            {isCreatingVersion ? "Criando..." : "Nova Versão"}
+          </button>
+
           {/* Save Draft */}
           <button
             onClick={onSaveDraft}
@@ -114,6 +147,16 @@ export function ActionToolbar({
             type="button"
           >
             {isSaving ? "Salvando..." : "Salvar"}
+          </button>
+
+          {/* Approve Analysis */}
+          <button
+            onClick={() => setShowApproveDialog(true)}
+            disabled={isApproving || isAnyActionLoading}
+            className="bg-green-600 text-white font-heading font-medium uppercase text-xs tracking-widest px-8 py-4 transition-all duration-300 hover:bg-green-700 border-radius-none disabled:opacity-50 disabled:cursor-not-allowed"
+            type="button"
+          >
+            {isApproving ? "Aprovando..." : "Aprovar"}
           </button>
 
           {/* Download PDF */}
@@ -137,6 +180,52 @@ export function ActionToolbar({
           </button>
         </div>
       </div>
+
+      {/* Approve Analysis Dialog */}
+      <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aprovar Análise</DialogTitle>
+            <DialogDescription>
+              Você está prestes a aprovar esta análise. Isso irá gerar o PDF final e preparar o relatório para envio.
+              As alterações atuais serão salvas.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowApproveDialog(false)}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleApproveConfirm} className="bg-green-600 hover:bg-green-700">
+              Confirmar Aprovação
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Version Dialog */}
+      <Dialog open={showVersionDialog} onOpenChange={setShowVersionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Criar Nova Versão</DialogTitle>
+            <DialogDescription>
+              Você está prestes a criar uma nova versão desta análise (v{currentVersion + 1}).
+              A versão atual (v{currentVersion}) será preservada e a nova versão será criada como cópia.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowVersionDialog(false)}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleVersionConfirm}>Criar Nova Versão</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Download PDF Dialog */}
       <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>

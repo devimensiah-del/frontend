@@ -102,6 +102,8 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
     isApproving,
     send,
     isSending,
+    createVersion,
+    isCreatingVersion,
   } = useAdminAnalysis();
 
   // Fetch submission data
@@ -124,106 +126,10 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
 
   // Initialize local analysis from backend data
   useEffect(() => {
-    if (analysis && submission) {
-      setLocalAnalysis(convertAnalysisToWarRoomFormat(analysis, submission));
-    } else if (submission && !isLoading) {
-      // Use mock data if no analysis exists yet
-      const mockAnalysis = {
-        submissionId: submissionId,
-        companyName: submission.companyName,
-        lastUpdated: new Date().toISOString(),
-        swot: {
-          strengths: [
-            "Forte presença no mercado brasileiro",
-            "Equipe técnica qualificada",
-            "Infraestrutura tecnológica robusta"
-          ],
-          weaknesses: [
-            "Dependência de poucos fornecedores",
-            "Processos internos pouco automatizados"
-          ],
-          opportunities: [
-            "Expansão para novos mercados internacionais",
-            "Crescimento do setor de tecnologia",
-            "Parcerias estratégicas com grandes players"
-          ],
-          threats: [
-            "Entrada de novos competidores",
-            "Mudanças regulatórias no setor",
-            "Volatilidade econômica"
-          ]
-        },
-        pestel: {
-          political: [
-            "Estabilidade política favorável para negócios",
-            "Incentivos fiscais para tecnologia"
-          ],
-          economic: [
-            "Taxa de crescimento do PIB positiva",
-            "Inflação controlada",
-            "Juros em queda"
-          ],
-          social: [
-            "Aumento da classe média",
-            "Maior acesso à tecnologia",
-            "Mudança nos hábitos de consumo"
-          ],
-          technological: [
-            "Transformação digital acelerada",
-            "Adoção de cloud computing",
-            "IA e automação em crescimento"
-          ],
-          environmental: [
-            "Pressão por sustentabilidade",
-            "Regulamentações ambientais mais rígidas"
-          ],
-          legal: [
-            "Nova Lei de Proteção de Dados (LGPD)",
-            "Regulamentação do setor de tecnologia"
-          ]
-        },
-        porter: {
-          competitiveRivalry: {
-            intensity: "Alta",
-            factors: [
-              "Mercado altamente competitivo",
-              "Baixa diferenciação de produtos",
-              "Guerra de preços frequente"
-            ]
-          },
-          threatOfNewEntrants: {
-            intensity: "Média",
-            factors: [
-              "Barreiras de entrada moderadas",
-              "Necessidade de capital significativo"
-            ]
-          },
-          bargainingPowerOfSuppliers: {
-            intensity: "Baixa",
-            factors: [
-              "Múltiplos fornecedores disponíveis",
-              "Baixo custo de mudança"
-            ]
-          },
-          bargainingPowerOfBuyers: {
-            intensity: "Alta",
-            factors: [
-              "Clientes bem informados",
-              "Fácil comparação de preços"
-            ]
-          },
-          threatOfSubstitutes: {
-            intensity: "Média",
-            factors: [
-              "Soluções alternativas disponíveis",
-              "Custo de mudança moderado"
-            ]
-          }
-        }
-      };
-      setLocalAnalysis(mockAnalysis);
+    if (submission) {
+      setLocalAnalysis(convertAnalysisToWarRoomFormat(analysis || null, submission));
     }
-  }, [analysis, submission, isLoading, submissionId]);
+  }, [analysis, submission]);
 
   // Auto-save functionality (debounced)
   const scheduleAutoSave = useCallback(() => {
@@ -427,11 +333,51 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
           onAnalysisChange={handleAnalysisChange}
           onSaveDraft={() => handleSaveDraft(false)}
           onRetryAnalysis={handleRetryAnalysis}
+          onApproveAnalysis={async () => {
+            if (!analysis?.id) return;
+            try {
+              await handleSaveDraft();
+              await approve(analysis.id);
+              toast({
+                title: "Análise Aprovada",
+                description: "A análise foi aprovada com sucesso.",
+                variant: "default"
+              });
+              refetch();
+            } catch (error: any) {
+              toast({
+                title: "Erro ao aprovar",
+                description: error.message || "Não foi possível aprovar a análise.",
+                variant: "destructive"
+              });
+            }
+          }}
           onPublishPDF={handlePublishPDF}
           onSendEmail={handleSendEmail}
+          onCreateNewVersion={async () => {
+            if (!analysis?.id) return;
+            try {
+              await handleSaveDraft();
+              await createVersion({ analysisId: analysis.id });
+              toast({
+                title: "Nova Versão Criada",
+                description: "Uma nova versão da análise foi criada com sucesso.",
+                variant: "default"
+              });
+              refetch();
+            } catch (error: any) {
+              toast({
+                title: "Erro ao criar versão",
+                description: error.message || "Não foi possível criar uma nova versão.",
+                variant: "destructive"
+              });
+            }
+          }}
           isSaving={isUpdating}
+          isApproving={isApproving}
           isGeneratingPDF={isPublishing}
           isSending={isSending}
+          isCreatingVersion={isCreatingVersion}
           submissionId={submissionId}
           userEmail={submission.email || ''}
         />

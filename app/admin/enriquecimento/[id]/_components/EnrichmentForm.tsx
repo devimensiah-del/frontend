@@ -22,11 +22,53 @@ export function EnrichmentForm({
   onChange,
   disabled = false,
 }: EnrichmentFormProps) {
-  const [formData, setFormData] = useState<Record<string, any>>((enrichment as any)?.data || {});
+  // Helper to map backend nested structure to flat form data
+  const mapBackendDataToForm = (data: any) => {
+    if (!data) return {};
+
+    // If data is already flat (legacy or edited), return it
+    if (data.companyDescription || data.foundedYear) return data;
+
+    // Map nested structure to flat form fields
+    return {
+      // Profile
+      companyDescription: data.profile_overview?.legal_name || "", // Fallback as description isn't explicit
+      foundedYear: data.profile_overview?.foundation_year || "",
+      headquarters: data.profile_overview?.headquarters || "",
+      websiteUrl: data.profile_overview?.website || "",
+
+      // Financials
+      employeeCount: data.financials?.employees_range || "",
+      revenueEstimate: data.financials?.revenue_estimate || "",
+
+      // Market Position
+      industry: data.market_position?.sector || "",
+      targetSegment: data.market_position?.target_audience || "",
+      keyDifferentiator: data.market_position?.value_proposition || "",
+
+      // Strategic Assessment
+      digitalMaturityScore: data.strategic_assessment?.digital_maturity || 5,
+      keyWeaknesses: Array.isArray(data.strategic_assessment?.weaknesses)
+        ? data.strategic_assessment.weaknesses.join("\n")
+        : (data.strategic_assessment?.weaknesses || ""),
+
+      // Competitive Landscape
+      competitors: Array.isArray(data.competitive_landscape?.competitors)
+        ? data.competitive_landscape.competitors.join(", ")
+        : (data.competitive_landscape?.competitors || ""),
+
+      // Preserve other fields if they exist
+      ...data
+    };
+  };
+
+  const [formData, setFormData] = useState<Record<string, any>>(
+    mapBackendDataToForm((enrichment as any)?.data)
+  );
 
   useEffect(() => {
     if ((enrichment as any)?.data) {
-      setFormData((enrichment as any).data);
+      setFormData(mapBackendDataToForm((enrichment as any).data));
     }
   }, [enrichment]);
 

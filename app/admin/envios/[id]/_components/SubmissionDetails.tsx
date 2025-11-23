@@ -75,47 +75,45 @@ export function SubmissionDetails({ submission }: SubmissionDetailsProps) {
         </div>
 
         {/* Strategic Context */}
-        {(submission.strategicGoal || submission.currentChallenges || submission.competitivePosition) && (
-          <div className="border-t border-line pt-6">
-            <h3 className="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
-              Contexto Estratégico
-            </h3>
-            <div className="space-y-4">
-              {submission.strategicGoal && (
-                <div>
-                  <p className="text-xs font-medium text-text-tertiary mb-1">
-                    Objetivo Estratégico
-                  </p>
-                  <p className="text-sm text-navy-900">{submission.strategicGoal}</p>
-                </div>
-              )}
-              {submission.currentChallenges && (
-                <div>
-                  <p className="text-xs font-medium text-text-tertiary mb-1">
-                    Desafios Atuais
-                  </p>
-                  <p className="text-sm text-navy-900">{submission.currentChallenges}</p>
-                </div>
-              )}
-              {submission.competitivePosition && (
-                <div>
-                  <p className="text-xs font-medium text-text-tertiary mb-1">
-                    Posição Competitiva
-                  </p>
-                  <p className="text-sm text-navy-900">{submission.competitivePosition}</p>
-                </div>
-              )}
-              {submission.additionalInfo && (
-                <div>
-                  <p className="text-xs font-medium text-text-tertiary mb-1">
-                    Informações Adicionais
-                  </p>
-                  <p className="text-sm text-navy-900">{submission.additionalInfo}</p>
-                </div>
-              )}
+        <div className="border-t border-line pt-6">
+          <h3 className="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
+            Contexto Estratégico
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs font-medium text-text-tertiary mb-1">
+                Objetivo Estratégico
+              </p>
+              <p className="text-sm text-navy-900">
+                {submission.strategicGoal || "Não informado"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-text-tertiary mb-1">
+                Desafios Atuais
+              </p>
+              <p className="text-sm text-navy-900">
+                {submission.currentChallenges || "Não informado"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-text-tertiary mb-1">
+                Posição Competitiva
+              </p>
+              <p className="text-sm text-navy-900">
+                {submission.competitivePosition || "Não informado"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-text-tertiary mb-1">
+                Informações Adicionais
+              </p>
+              <p className="text-sm text-navy-900">
+                {submission.additionalInfo || "Não informado"}
+              </p>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Metadata */}
         <div className="border-t border-line pt-6">
