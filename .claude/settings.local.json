@@ -6,7 +6,8 @@
       "Bash(tree:*)",
       "Bash(test:*)",
       "Bash(find:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(go test:*)"
     ],
     "deny": [],
     "ask": []

@@ -95,14 +95,22 @@ export function WarRoomShell({
               </p>
             </div>
             <ActionToolbar
+              analysis={null}
+              allVersions={[]}
+              currentVersion={1}
+              onVersionChange={() => {}}
               onSaveDraft={onSaveDraft}
               onRetryAnalysis={onRetryAnalysis}
+              onApproveAnalysis={() => {}}
               onPublishPDF={onPublishPDF}
-              onSendEmail={onSendEmail}
+              onSendToUser={onSendEmail}
+              onCreateNewVersion={() => {}}
               isSaving={isSaving}
               isGenerating={isGenerating}
+              isApproving={false}
               isGeneratingPDF={isGeneratingPDF}
               isSending={isSending}
+              isCreatingVersion={false}
               userEmail={userEmail}
             />
           </div>

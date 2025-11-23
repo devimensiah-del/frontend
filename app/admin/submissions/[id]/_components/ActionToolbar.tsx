@@ -10,14 +10,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/Select";
-import type { Analysis, AnalysisStatus } from "@/types";
+import { Select, SelectOption } from "@/components/ui/Select";
+import type { Analysis } from "@/types";
 
 interface ActionToolbarProps {
   analysis: Analysis | null;
@@ -91,7 +85,7 @@ export function ActionToolbar({
     isApproving ||
     isCreatingVersion;
 
-  const currentStatus: AnalysisStatus | undefined = analysis?.status;
+  const currentStatus = analysis?.status;
 
   // Status-based button visibility
   const canApprove = currentStatus === "completed";
@@ -107,20 +101,16 @@ export function ActionToolbar({
           {allVersions.length > 1 && (
             <Select
               value={currentVersion.toString()}
-              onValueChange={(val) => onVersionChange(parseInt(val))}
+              onChange={(e) => onVersionChange(parseInt(e.target.value))}
+              className="w-40"
             >
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Versão" />
-              </SelectTrigger>
-              <SelectContent>
-                {allVersions.map((v) => (
-                  <SelectItem key={v.version} value={v.version.toString()}>
-                    v{v.version}
-                    {v.status === "sent" && " (Enviado)"}
-                    {v.status === "approved" && " (Aprovado)"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+              {allVersions.map((v) => (
+                <SelectOption key={v.version} value={v.version.toString()}>
+                  v{v.version}
+                  {v.status === "sent" && " (Enviado)"}
+                  {v.status === "approved" && " (Aprovado)"}
+                </SelectOption>
+              ))}
             </Select>
           )}
 
