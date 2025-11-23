@@ -178,14 +178,6 @@ export default function EnrichmentEditorPage({
     }
   };
 
-  // Reject enrichment (deprecated - keeping for backward compatibility)
-  const handleReject = async (reason: string) => {
-    toast({
-      title: "Funcionalidade removida",
-      description: "Use 'Retry Enrichment' na lista de submissões para reiniciar o enriquecimento.",
-      variant: "destructive",
-    });
-  };
 
   if (isLoading || !submission) {
     return <EnrichmentEditorSkeleton />;
@@ -252,19 +244,8 @@ export default function EnrichmentEditorPage({
       <EnrichmentActions
         onSaveDraft={handleSaveDraft}
         onApprove={handleApprove}
-        onReject={handleReject}
-        onGenerateAnalysis={async () => {
-          // Deprecated - approval now auto-triggers analysis
-          toast({
-            title: "Funcionalidade removida",
-            description: "A aprovação do enriquecimento agora gera a análise automaticamente.",
-            variant: "default",
-          });
-        }}
         isSaving={adminEnrichment.isUpdating}
         isApproving={adminEnrichment.isApproving}
-        isRejecting={false}
-        isGenerating={false}
         disabled={isLoading || enrichment?.status === 'approved'}
       />
     </div>

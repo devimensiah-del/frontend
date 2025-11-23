@@ -50,20 +50,18 @@ export default function AdminAnalise() {
   const handleGeneratePdf = async (submissionId: string) => {
     try {
       setGeneratingPdf(submissionId);
-      // Update submission status to trigger report generation
-      await adminApi.updateSubmissionStatus(submissionId, 'generating_report');
+      // Navigate to analysis page to approve and generate PDF
       toast({
-        title: "Gerando PDF",
-        description: "O processo de geração do relatório foi iniciado.",
-        variant: "success",
+        title: "Navegar para Análise",
+        description: "Por favor, aprove a análise para gerar o PDF.",
+        variant: "default",
       });
-      // Refresh submissions
-      const data = await adminApi.getAllSubmissions();
-      setSubmissions(data.data);
+      // TODO: Navigate to analysis detail page or implement PDF generation through analysis approval
+      window.location.href = `/admin/analise/${submissionId}`;
     } catch {
       toast({
-        title: "Erro ao Iniciar Geração",
-        description: "Não foi possível iniciar a geração do relatório.",
+        title: "Erro",
+        description: "Não foi possível processar a solicitação.",
         variant: "destructive",
       });
     } finally {

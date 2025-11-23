@@ -3,8 +3,8 @@
  *
  * Workflow based on Enrichment and Analysis statuses:
  * - Submission: Always 'received'
- * - Enrichment: pending → processing → finished → approved
- * - Analysis: pending → processing → completed → approved → sent
+ * - Enrichment: pending → finished → approved
+ * - Analysis: pending → completed → approved → sent
  */
 
 import type { Enrichment, Analysis } from "@/types";
@@ -36,7 +36,6 @@ export function getWorkflowStage(
   if (
     enrichment?.status === 'approved' &&
     (analysis?.status === 'pending' ||
-     analysis?.status === 'processing' ||
      analysis?.status === 'completed' ||
      analysis?.status === 'approved')
   ) {
@@ -58,7 +57,6 @@ export function getWorkflowStage(
 export function getEnrichmentActions(enrichment: Enrichment | null): {
   canEdit: boolean;
   canApprove: boolean;
-  canReject: boolean;
   canGenerateAnalysis: boolean;
   message?: string;
 } {
@@ -66,7 +64,6 @@ export function getEnrichmentActions(enrichment: Enrichment | null): {
     return {
       canEdit: false,
       canApprove: false,
-      canReject: false,
       canGenerateAnalysis: false,
       message: 'Enriquecimento não encontrado',
     };
@@ -79,25 +76,14 @@ export function getEnrichmentActions(enrichment: Enrichment | null): {
       return {
         canEdit: true,
         canApprove: false,
-        canReject: false,
         canGenerateAnalysis: false,
         message: 'Aguardando worker processar',
-      };
-
-    case 'processing':
-      return {
-        canEdit: false,
-        canApprove: false,
-        canReject: false,
-        canGenerateAnalysis: false,
-        message: 'Worker está enriquecendo dados',
       };
 
     case 'finished':
       return {
         canEdit: true,
         canApprove: true,
-        canReject: true,
         canGenerateAnalysis: false,
         message: 'Pronto para revisão e aprovação',
       };
@@ -106,34 +92,14 @@ export function getEnrichmentActions(enrichment: Enrichment | null): {
       return {
         canEdit: false,
         canApprove: false,
-        canReject: false,
         canGenerateAnalysis: true,
-        message: 'Aprovado - Pode gerar análise',
-      };
-
-    case 'rejected':
-      return {
-        canEdit: true,
-        canApprove: false,
-        canReject: false,
-        canGenerateAnalysis: false,
-        message: 'Rejeitado - Necessita correção',
-      };
-
-    case 'failed':
-      return {
-        canEdit: true,
-        canApprove: false,
-        canReject: false,
-        canGenerateAnalysis: false,
-        message: 'Falhou - Necessita correção',
+        message: 'Aprovado - Análise será gerada automaticamente',
       };
 
     default:
       return {
         canEdit: false,
         canApprove: false,
-        canReject: false,
         canGenerateAnalysis: false,
       };
   }
@@ -171,15 +137,6 @@ export function getAnalysisActions(analysis: Analysis | null): {
         message: 'Aguardando worker processar',
       };
 
-    case 'processing':
-      return {
-        canEdit: false,
-        canApprove: false,
-        canGeneratePDF: false,
-        canSend: false,
-        message: 'Worker está analisando',
-      };
-
     case 'completed':
       return {
         canEdit: true,
@@ -205,15 +162,6 @@ export function getAnalysisActions(analysis: Analysis | null): {
         canGeneratePDF: true, // Can regenerate PDF
         canSend: false,
         message: 'Enviado ao cliente',
-      };
-
-    case 'failed':
-      return {
-        canEdit: true,
-        canApprove: false,
-        canGeneratePDF: false,
-        canSend: false,
-        message: 'Falhou - Necessita correção',
       };
 
     default:
@@ -334,8 +282,6 @@ export function getWorkflowProgress(
         return 95;
       case 'completed':
         return 85;
-      case 'processing':
-        return 75;
       case 'pending':
         return 65;
       default:
@@ -350,13 +296,8 @@ export function getWorkflowProgress(
         return 55;
       case 'finished':
         return 45;
-      case 'processing':
-        return 30;
       case 'pending':
         return 20;
-      case 'rejected':
-      case 'failed':
-        return 15;
       default:
         return 25;
     }

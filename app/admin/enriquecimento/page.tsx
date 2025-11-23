@@ -97,7 +97,7 @@ export default function EnrichmentListPage() {
 
   const getEnrichmentStats = () => {
     const pending = submissions.filter(
-      (s) => s.enrichment?.status === "pending" || s.enrichment?.status === "processing" || !s.enrichment
+      (s) => s.enrichment?.status === "pending" || !s.enrichment
     ).length;
     const finished = submissions.filter(
       (s) => s.enrichment?.status === "finished"
@@ -105,11 +105,8 @@ export default function EnrichmentListPage() {
     const approved = submissions.filter(
       (s) => s.enrichment?.status === "approved"
     ).length;
-    const rejected = submissions.filter(
-      (s) => s.enrichment?.status === "rejected" || s.enrichment?.status === "failed"
-    ).length;
 
-    return { pending, finished, approved, rejected, total: submissions.length };
+    return { pending, finished, approved, total: submissions.length };
   };
 
   const stats = getEnrichmentStats();
@@ -189,12 +186,6 @@ export default function EnrichmentListPage() {
                 onClick={() => setStatusFilter("approved")}
               >
                 Aprovados ({stats.approved})
-              </FilterButton>
-              <FilterButton
-                active={statusFilter === "rejected"}
-                onClick={() => setStatusFilter("rejected")}
-              >
-                Rejeitados ({stats.rejected})
               </FilterButton>
             </div>
           </div>
@@ -402,17 +393,14 @@ interface EnrichmentStatusBadgeProps {
 function EnrichmentStatusBadge({ status }: EnrichmentStatusBadgeProps) {
   const variants: Record<
     string,
-    { variant: "warning" | "success" | "error" | "default" | "primary" | "gold"; label: string }
+    { variant: "warning" | "success" | "default" | "gold"; label: string }
   > = {
     pending: { variant: "warning", label: "Pendente" },
-    processing: { variant: "primary", label: "Processando" },
     finished: { variant: "gold", label: "Pronto" },
     approved: { variant: "success", label: "Aprovado" },
-    rejected: { variant: "error", label: "Rejeitado" },
-    failed: { variant: "error", label: "Falhou" },
   };
 
-  const config = variants[status];
+  const config = variants[status] || variants.pending;
 
   return <Badge variant={config.variant}>{config.label}</Badge>;
 }

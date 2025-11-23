@@ -23,8 +23,8 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
     if (enrichment.status === 'approved') {
       return <Badge className="bg-green-100 text-green-800 border border-green-300">Aprovado</Badge>;
     }
-    if (enrichment.status === 'rejected') {
-      return <Badge className="bg-red-100 text-red-800 border border-red-300">Rejeitado</Badge>;
+    if (enrichment.status === 'finished') {
+      return <Badge className="bg-gold-100 text-gold-800 border border-gold-300">Pronto</Badge>;
     }
     return <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-300">Pendente</Badge>;
   };

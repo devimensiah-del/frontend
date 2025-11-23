@@ -82,14 +82,11 @@ export interface Submission {
 // Enrichment Types (The Researcher Agent)
 // ============================================================================
 
-// NEW ARCHITECTURE: Enrichment states: pending → processing → finished → approved
+// Enrichment workflow: pending → finished → approved
 export type EnrichmentStatus =
   | 'pending'      // Initial state, waiting for worker
-  | 'processing'   // Worker is enriching data
   | 'finished'     // Worker completed, waiting for admin review
-  | 'approved'     // Admin approved, ready for analysis
-  | 'rejected'     // Admin rejected, needs rework
-  | 'failed';      // Worker failed
+  | 'approved';    // Admin approved, ready for analysis
 
 // Macro-Economic & Industry Context (Addresses "Brazil blind spot")
 export interface EconomicIndicators {
@@ -327,14 +324,15 @@ export interface Synthesis {
   overallRecommendation: string;
 }
 
-// NEW ARCHITECTURE: Analysis states: pending → completed → approved → sent
+// Analysis workflow: pending → completed → approved → sent
 export type AnalysisStatus =
   | 'pending'      // Initial state, waiting for worker
-  | 'processing'   // Worker is analyzing (optional transitional state)
   | 'completed'    // Worker completed, admin can edit
-  | 'approved'     // Admin approved, ready to send
-  | 'sent'         // Report sent to user
-  | 'failed';      // Worker failed
+  | 'approved'     // Admin approved, PDF generated, ready to send
+  | 'sent';        // Report sent to user
+
+// Export for use in components
+export { type AnalysisStatus as AnalysisStatusType };
 
 // The Master Analysis Object (matches backend AnalysisResponse)
 export interface Analysis {

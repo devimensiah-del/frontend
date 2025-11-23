@@ -154,7 +154,7 @@ export default function AdminEnvios() {
                     </div>
                   </div>
                   <div className="col-span-2 flex items-center justify-end">
-                    <Link href={`/admin/submissions/${submission.id}`}>
+                    <Link href={`/admin/envios/${submission.id}`}>
                       <Button variant="outline" size="sm">
                         <FileText className="w-4 h-4 mr-2" />
                         Ver Detalhes
