@@ -24,10 +24,26 @@ export function useEnrichment(submissionId: string, options?: UseEnrichmentOptio
     refetch,
   } = useQuery({
     queryKey: ['enrichment', submissionId],
-    queryFn: () => enrichmentApi.getBySubmissionId(submissionId),
+    queryFn: async () => {
+      try {
+        return await enrichmentApi.getBySubmissionId(submissionId);
+      } catch (err: any) {
+        // Gracefully handle 404 - enrichment doesn't exist yet
+        if (err?.response?.status === 404 || err?.status === 404 || err?.message === 'Not found') {
+          return null;
+        }
+        throw err;
+      }
+    },
     enabled: options?.enabled !== false && !!submissionId,
     refetchInterval: options?.refetchInterval,
-    retry: 2,
+    retry: (failureCount, error: any) => {
+      // Don't retry on 404 - enrichment simply doesn't exist yet
+      if (error?.response?.status === 404 || error?.status === 404 || error?.message === 'Not found') {
+        return false;
+      }
+      return failureCount < 2;
+    },
     staleTime: 30000, // 30 seconds
   });
 

@@ -50,7 +50,7 @@ export default function PainelPage() {
             setEnrichment(enrichmentData);
           } catch (enrichmentError) {
             console.log('No enrichment data available yet');
-            // Enrichment not available yet - this is normal for pending submissions
+            setEnrichment(null); // Clear any stale data
           }
 
           // Try to fetch analysis data
@@ -59,7 +59,7 @@ export default function PainelPage() {
             setAnalysis(analysisData);
           } catch (analysisError) {
             console.log('No analysis data available yet');
-            // Analysis not available yet - this is normal
+            setAnalysis(null); // Clear any stale data
           }
         }
       } catch (err) {

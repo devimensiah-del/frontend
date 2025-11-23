@@ -70,6 +70,16 @@ async function apiRequest<T>(
     });
 
     if (!response.ok) {
+      // For 404 on enrichment/analysis endpoints, don't log as error
+      // These are expected when data doesn't exist yet
+      const is404NotFound = response.status === 404;
+      const isEnrichmentOrAnalysis = endpoint.includes('/enrichment') || endpoint.includes('/analysis');
+
+      if (is404NotFound && isEnrichmentOrAnalysis) {
+        // Silently throw for expected 404s (enrichment/analysis not created yet)
+        throw new Error('Not found');
+      }
+
       await handleApiError(response);
     }
 
