@@ -1,46 +1,108 @@
 "use client";
 
-import React, { use, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { use, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useAnalysis } from "@/lib/hooks/use-analysis";
 import { useAdminAnalysis } from "@/lib/hooks/use-admin-analysis";
 import { adminApi } from "@/lib/api/client";
 import { toast } from "@/components/ui/use-toast";
+import { WarRoomShell } from "./_components/WarRoomShell";
+import { WarRoomSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ArrowLeft, Save, Check, Send, FileText } from "lucide-react";
-import type { Submission, Analysis } from "@/types";
+import { MobileWarning } from "@/components/mobile";
+import { ArrowLeft } from "lucide-react";
+import type { Analysis, Submission } from "@/types";
 
-/* ============================================
-   ANALYSIS EDITOR PAGE - Stage 3 Editor
-   Edit, approve, and send analysis
-   ============================================ */
+// Convert backend Analysis to WarRoom format
+function convertAnalysisToWarRoomFormat(analysis: Analysis | null, submission?: Submission) {
+  if (!analysis) {
+    return {
+      submissionId: submission?.id || "",
+      companyName: submission?.companyName || "",
+      lastUpdated: new Date().toISOString(),
+      swot: {
+        strengths: [],
+        weaknesses: [],
+        opportunities: [],
+        threats: []
+      },
+      pestel: {
+        political: [],
+        economic: [],
+        social: [],
+        technological: [],
+        environmental: [],
+        legal: []
+      },
+      porter: {
+        competitiveRivalry: { intensity: "", factors: [] },
+        threatOfNewEntrants: { intensity: "", factors: [] },
+        bargainingPowerOfSuppliers: { intensity: "", factors: [] },
+        bargainingPowerOfBuyers: { intensity: "", factors: [] },
+        threatOfSubstitutes: { intensity: "", factors: [] }
+      }
+    };
+  }
 
-interface AnalysisEditorPageProps {
+  return {
+    submissionId: analysis.submissionId,
+    companyName: submission?.companyName || "",
+    lastUpdated: analysis.updatedAt || new Date().toISOString(),
+    swot: analysis.analysis?.swot || {
+      strengths: [],
+      weaknesses: [],
+      opportunities: [],
+      threats: []
+    },
+    pestel: analysis.analysis?.pestel || {
+      political: [],
+      economic: [],
+      social: [],
+      technological: [],
+      environmental: [],
+      legal: []
+    },
+    porter: analysis.analysis?.porter || {
+      competitiveRivalry: { intensity: "", factors: [] },
+      threatOfNewEntrants: { intensity: "", factors: [] },
+      bargainingPowerOfSuppliers: { intensity: "", factors: [] },
+      bargainingPowerOfBuyers: { intensity: "", factors: [] },
+      threatOfSubstitutes: { intensity: "", factors: [] }
+    }
+  };
+}
+
+interface WarRoomPageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default function AnalysisEditorPage({
-  params,
-}: AnalysisEditorPageProps) {
+export default function WarRoomPage({ params }: WarRoomPageProps) {
   const { id: submissionId } = use(params);
-  const router = useRouter();
-
   const [submission, setSubmission] = useState<Submission | null>(null);
-  const [localAnalysisData, setLocalAnalysisData] = useState<any>({});
-  const [userEmail, setUserEmail] = useState("");
-  const [showSendDialog, setShowSendDialog] = useState(false);
+  const [localAnalysis, setLocalAnalysis] = useState<any>(null);
+  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
+  const [showMobileWarning, setShowMobileWarning] = useState(true);
 
+  // Fetch analysis data (read-only)
   const {
     analysis,
     isLoading,
     refetch,
+    publishReport,
+    isPublishing,
   } = useAnalysis(submissionId);
 
-  const adminAnalysis = useAdminAnalysis();
+  // Admin operations (update, approve, send, versioning)
+  const {
+    update,
+    isUpdating,
+    approve,
+    isApproving,
+    send,
+    isSending,
+  } = useAdminAnalysis();
 
   // Fetch submission data
   useEffect(() => {
@@ -48,15 +110,11 @@ export default function AnalysisEditorPage({
       try {
         const data = await adminApi.getSubmission(submissionId);
         setSubmission(data);
-        // Pre-fill user email if available
-        if ((data as any).contactEmail) {
-          setUserEmail((data as any).contactEmail);
-        }
-      } catch (error: any) {
+      } catch {
         toast({
           title: "Erro ao carregar submissão",
-          description: error.message || "Não foi possível carregar os dados.",
-          variant: "destructive",
+          description: "Não foi possível carregar os dados da submissão.",
+          variant: "destructive"
         });
       }
     }
@@ -64,318 +122,320 @@ export default function AnalysisEditorPage({
     fetchSubmission();
   }, [submissionId]);
 
-  // Initialize local analysis data (edit the frameworks object, not the whole analysis)
+  // Initialize local analysis from backend data
   useEffect(() => {
-    if (analysis?.analysis) {
-      setLocalAnalysisData(analysis.analysis);
+    if (analysis && submission) {
+      setLocalAnalysis(convertAnalysisToWarRoomFormat(analysis, submission));
+    } else if (submission && !isLoading) {
+      // Use mock data if no analysis exists yet
+      const mockAnalysis = {
+        submissionId: submissionId,
+        companyName: submission.companyName,
+        lastUpdated: new Date().toISOString(),
+        swot: {
+          strengths: [
+            "Forte presença no mercado brasileiro",
+            "Equipe técnica qualificada",
+            "Infraestrutura tecnológica robusta"
+          ],
+          weaknesses: [
+            "Dependência de poucos fornecedores",
+            "Processos internos pouco automatizados"
+          ],
+          opportunities: [
+            "Expansão para novos mercados internacionais",
+            "Crescimento do setor de tecnologia",
+            "Parcerias estratégicas com grandes players"
+          ],
+          threats: [
+            "Entrada de novos competidores",
+            "Mudanças regulatórias no setor",
+            "Volatilidade econômica"
+          ]
+        },
+        pestel: {
+          political: [
+            "Estabilidade política favorável para negócios",
+            "Incentivos fiscais para tecnologia"
+          ],
+          economic: [
+            "Taxa de crescimento do PIB positiva",
+            "Inflação controlada",
+            "Juros em queda"
+          ],
+          social: [
+            "Aumento da classe média",
+            "Maior acesso à tecnologia",
+            "Mudança nos hábitos de consumo"
+          ],
+          technological: [
+            "Transformação digital acelerada",
+            "Adoção de cloud computing",
+            "IA e automação em crescimento"
+          ],
+          environmental: [
+            "Pressão por sustentabilidade",
+            "Regulamentações ambientais mais rígidas"
+          ],
+          legal: [
+            "Nova Lei de Proteção de Dados (LGPD)",
+            "Regulamentação do setor de tecnologia"
+          ]
+        },
+        porter: {
+          competitiveRivalry: {
+            intensity: "Alta",
+            factors: [
+              "Mercado altamente competitivo",
+              "Baixa diferenciação de produtos",
+              "Guerra de preços frequente"
+            ]
+          },
+          threatOfNewEntrants: {
+            intensity: "Média",
+            factors: [
+              "Barreiras de entrada moderadas",
+              "Necessidade de capital significativo"
+            ]
+          },
+          bargainingPowerOfSuppliers: {
+            intensity: "Baixa",
+            factors: [
+              "Múltiplos fornecedores disponíveis",
+              "Baixo custo de mudança"
+            ]
+          },
+          bargainingPowerOfBuyers: {
+            intensity: "Alta",
+            factors: [
+              "Clientes bem informados",
+              "Fácil comparação de preços"
+            ]
+          },
+          threatOfSubstitutes: {
+            intensity: "Média",
+            factors: [
+              "Soluções alternativas disponíveis",
+              "Custo de mudança moderado"
+            ]
+          }
+        }
+      };
+      setLocalAnalysis(mockAnalysis);
     }
-  }, [analysis]);
+  }, [analysis, submission, isLoading, submissionId]);
 
-  // Save draft
-  const handleSave = async () => {
-    if (!analysis?.id) {
-      toast({
-        title: "Erro",
-        description: "ID da análise não encontrado.",
-        variant: "destructive",
-      });
-      return;
+  // Auto-save functionality (debounced)
+  const scheduleAutoSave = useCallback(() => {
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer);
     }
+
+    const timer = setTimeout(() => {
+      handleSaveDraft(true);
+    }, 30000); // Auto-save after 30 seconds of inactivity
+
+    setAutoSaveTimer(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSaveTimer, localAnalysis]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+      }
+    };
+  }, [autoSaveTimer]);
+
+  const handleAnalysisChange = (updatedAnalysis: any) => {
+    setLocalAnalysis(updatedAnalysis);
+    scheduleAutoSave();
+  };
+
+  const handleSaveDraft = async (isAutoSave = false) => {
+    if (!localAnalysis || !analysis?.id) return;
 
     try {
-      await adminAnalysis.update({
+      await update({
         analysisId: analysis.id,
-        data: localAnalysisData,
+        data: {
+          swot: localAnalysis.swot,
+          pestel: localAnalysis.pestel,
+          porter: localAnalysis.porter
+        }
       });
 
-      toast({
-        title: "Análise salva",
-        description: "As alterações foram salvas com sucesso.",
-        variant: "default",
-      });
-
-      refetch();
+      if (!isAutoSave) {
+        toast({
+          title: "Rascunho salvo",
+          description: "As alterações foram salvas com sucesso.",
+          variant: "default"
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Erro ao salvar",
         description: error.message || "Não foi possível salvar as alterações.",
-        variant: "destructive",
+        variant: "default"
       });
     }
   };
 
-  // Approve analysis (triggers PDF generation)
-  const handleApprove = async () => {
-    if (!analysis?.id) {
-      toast({
-        title: "Erro",
-        description: "ID da análise não encontrado.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (analysis.status !== 'completed') {
-      toast({
-        title: "Status inválido",
-        description: "A análise deve estar no status 'completed' para ser aprovada.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleRetryAnalysis = async () => {
     try {
-      // Save current changes first
-      await adminAnalysis.update({
-        analysisId: analysis.id,
-        data: localAnalysisData,
+      toast({
+        title: "Gerando análise",
+        description: "Aguarde enquanto geramos uma nova análise...",
+        variant: "default"
       });
 
-      // Then approve (triggers PDF generation)
-      const response = await adminAnalysis.approve(analysis.id);
+      // Use admin API to retry analysis job
+      await adminApi.retryAnalysis(submissionId);
 
       toast({
-        title: "Análise aprovada",
-        description: "PDF será gerado automaticamente. Aguarde...",
-        variant: "default",
+        title: "Análise gerada",
+        description: "Nova análise gerada com sucesso.",
+        variant: "default"
       });
 
+      // Refetch to get latest data
       refetch();
     } catch (error: any) {
       toast({
-        title: "Erro ao aprovar",
-        description: error.message || "Não foi possível aprovar a análise.",
-        variant: "destructive",
+        title: "Erro ao gerar análise",
+        description: error.message || "Não foi possível gerar a análise.",
+        variant: "default"
       });
     }
   };
 
-  // Send analysis to user
-  const handleSend = async () => {
-    if (!analysis?.id) {
-      toast({
-        title: "Erro",
-        description: "ID da análise não encontrado.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!userEmail || !userEmail.includes('@')) {
-      toast({
-        title: "Email inválido",
-        description: "Por favor, insira um email válido.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (analysis.status !== 'approved') {
-      toast({
-        title: "Status inválido",
-        description: "A análise deve estar aprovada antes de ser enviada.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handlePublishPDF = async () => {
     try {
-      const response = await adminAnalysis.send({
-        analysisId: analysis.id,
-        userEmail,
-      });
+      // 1. First, save current changes to ensure the DB matches the Editor
+      await handleSaveDraft();
 
       toast({
-        title: "Análise enviada",
-        description: `Análise enviada para ${userEmail} com sucesso.`,
-        variant: "default",
+        title: "Gerando PDF",
+        description: "Isso pode levar alguns segundos...",
+        variant: "default"
       });
 
-      setShowSendDialog(false);
-      refetch();
+      // 2. Publish report and generate PDF
+      const response = await publishReport();
 
-      // Redirect to list after sending
-      setTimeout(() => {
-        router.push("/admin/analise");
-      }, 2000);
+      // 3. Handle the URL
+      if (response && response.pdf_url) {
+        // Open in new tab (Supabase Public URL)
+        window.open(response.pdf_url, '_blank');
+
+        toast({
+          title: "Sucesso",
+          description: "Relatório gerado e aberto em nova guia.",
+          variant: "default"
+        });
+      } else {
+        throw new Error("O servidor não retornou a URL do PDF.");
+      }
+
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: error.message || "Verifique os logs do servidor (Gotenberg).",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSendEmail = async () => {
+    try {
+      // First, save current changes
+      await handleSaveDraft();
+
+      if (!analysis?.id || !submission?.contactEmail) {
+        throw new Error("Missing analysis ID or user email");
+      }
+
+      // Send email using admin API
+      await send({ analysisId: analysis.id, userEmail: submission.contactEmail });
+
+      toast({
+        title: "Email enviado",
+        description: "O relatório foi enviado para o usuário.",
+        variant: "default"
+      });
+
+      // Note: Submission status is always "received" and never changes
+      refetch();
     } catch (error: any) {
       toast({
-        title: "Erro ao enviar",
-        description: error.message || "Não foi possível enviar a análise.",
-        variant: "destructive",
+        title: "Erro ao enviar email",
+        description: error.message || "Não foi possível enviar o email.",
+        variant: "default"
       });
     }
   };
 
-  if (isLoading || !submission) {
-    return (
-      <div className="min-h-screen bg-surface-paper flex items-center justify-center">
-        <div className="text-text-secondary">Carregando análise...</div>
-      </div>
-    );
+  if (!localAnalysis || !submission) {
+    return <WarRoomSkeleton />;
   }
-
-  if (!analysis) {
-    return (
-      <div className="min-h-screen bg-surface-paper">
-        <header className="bg-white border-b border-line">
-          <div className="px-8 py-4">
-            <Link href="/admin/analise" className="inline-flex items-center text-sm text-text-secondary hover:text-gold-600">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar para lista
-            </Link>
-            <h1 className="font-heading text-2xl font-medium tracking-tight text-navy-900 mt-3">
-              Análise não encontrada
-            </h1>
-          </div>
-        </header>
-        <div className="p-8">
-          <Card className="p-8 text-center">
-            <p className="text-text-secondary mb-4">
-              A análise ainda não foi gerada para esta submissão.
-            </p>
-            <p className="text-sm text-text-tertiary">
-              Aguarde o processamento ou verifique se o enriquecimento foi aprovado.
-            </p>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  const analysisStatus = analysis.status || 'pending';
-  const canApprove = analysisStatus === 'completed';
-  const canSend = analysisStatus === 'approved';
 
   return (
-    <div className="min-h-screen bg-surface-paper pb-20">
-      {/* --- BREADCRUMB HEADER --- */}
-      <header className="bg-white border-b border-line">
-        <div className="px-8 py-4">
-          <nav className="flex items-center gap-2 text-sm text-text-secondary">
-            <Link
-              href="/admin/dashboard"
-              className="hover:text-gold-600 transition-colors"
-            >
-              Dashboard
-            </Link>
-            <span>›</span>
-            <Link
-              href="/admin/analise"
-              className="hover:text-gold-600 transition-colors"
-            >
-              Análise
-            </Link>
-            <span>›</span>
-            <span className="text-navy-900 font-medium">
-              {submission.companyName}
-            </span>
-          </nav>
-
-          <div className="mt-3 flex items-center justify-between">
-            <div>
-              <h1 className="font-heading text-2xl font-medium tracking-tight text-navy-900">
-                Editar Análise
-              </h1>
-              <p className="text-sm text-text-secondary mt-1">
-                Status: <span className="font-medium capitalize">{analysisStatus}</span>
-                {analysis.version && ` • Versão ${analysis.version}`}
-              </p>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSave}
-                disabled={adminAnalysis.isUpdating}
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {adminAnalysis.isUpdating ? "Salvando..." : "Salvar"}
-              </Button>
-
-              {canApprove && (
-                <Button
-                  variant="architect"
-                  size="sm"
-                  onClick={handleApprove}
-                  disabled={adminAnalysis.isApproving}
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  {adminAnalysis.isApproving ? "Aprovando..." : "Aprovar"}
-                </Button>
-              )}
-
-              {canSend && (
-                <Button
-                  variant="architect"
-                  size="sm"
-                  onClick={() => setShowSendDialog(true)}
-                  disabled={adminAnalysis.isSending}
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  Enviar para Usuário
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* --- MAIN CONTENT --- */}
-      <div className="px-8 py-8">
-        <Card className="p-6">
-          <h2 className="font-heading text-lg font-medium mb-4">
-            Dados da Análise
-          </h2>
-          <div className="bg-surface-paper p-4 font-mono text-sm overflow-auto max-h-96">
-            <pre>{JSON.stringify(localAnalysisData, null, 2)}</pre>
-          </div>
-          <p className="text-sm text-text-tertiary mt-4">
-            Nota: Editor visual de frameworks será implementado em breve. Por enquanto, edite o JSON diretamente conforme necessário.
-          </p>
-        </Card>
-      </div>
-
-      {/* Send Dialog */}
-      {showSendDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="p-6 max-w-md w-full mx-4">
-            <h3 className="font-heading text-xl font-medium mb-4">
-              Enviar Análise para Usuário
-            </h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-text-secondary mb-2">
-                Email do destinatário
-              </label>
-              <input
-                type="email"
-                value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-line rounded focus:outline-none focus:ring-2 focus:ring-gold-500"
-                placeholder="usuario@exemplo.com"
-              />
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowSendDialog(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="architect"
-                onClick={handleSend}
-                disabled={adminAnalysis.isSending || !userEmail}
-              >
-                <Send className="w-4 h-4 mr-2" />
-                {adminAnalysis.isSending ? "Enviando..." : "Enviar"}
-              </Button>
-            </div>
-          </Card>
+    <>
+      {/* Mobile Warning (shown on screens below lg) */}
+      {showMobileWarning && (
+        <div className="lg:hidden">
+          <MobileWarning
+            title="War Room - Editor Avançado"
+            message="O War Room é uma ferramenta complexa de edição estratégica com múltiplos painéis, editores de texto e visualizações simultâneas. Para a melhor experiência de edição, recomendamos usar um computador desktop ou laptop com resolução mínima de 1280px."
+            showContinueButton={true}
+            onContinue={() => setShowMobileWarning(false)}
+          />
         </div>
       )}
-    </div>
+
+      {/* Desktop View (lg and up) or Mobile View if user clicked Continue */}
+      <div className={showMobileWarning ? "hidden lg:block min-h-screen bg-[var(--surface-paper)]" : "min-h-screen bg-[var(--surface-paper)]"}>
+        {/* Breadcrumb Header */}
+        <header className="bg-white border-b border-line sticky top-0 z-10">
+          <div className="px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <Link href={`/admin/analise`}>
+                  <Button variant="outline" size="sm" className="gap-2 w-full sm:w-auto">
+                    <ArrowLeft className="h-4 w-4" />
+                    Voltar à Lista de Análises
+                  </Button>
+                </Link>
+                <div className="hidden sm:block h-4 w-px bg-line" />
+                <div>
+                  <h1 className="font-heading text-lg sm:text-xl font-medium tracking-tight text-navy-900">
+                    War Room - {submission?.companyName}
+                  </h1>
+                  <p className="text-xs text-text-secondary">
+                    Análise estratégica completa
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <WarRoomShell
+          analysis={localAnalysis}
+          onAnalysisChange={handleAnalysisChange}
+          onSaveDraft={() => handleSaveDraft(false)}
+          onRetryAnalysis={handleRetryAnalysis}
+          onPublishPDF={handlePublishPDF}
+          onSendEmail={handleSendEmail}
+          isSaving={isUpdating}
+          isGeneratingPDF={isPublishing}
+          isSending={isSending}
+          submissionId={submissionId}
+          userEmail={submission.email || ''}
+        />
+      </div>
+    </>
   );
 }

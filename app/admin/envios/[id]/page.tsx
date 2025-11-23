@@ -2,15 +2,12 @@
 
 import React, { use, useState, useEffect } from "react";
 import Link from "next/link";
-import { adminApi, enrichmentApi } from "@/lib/api/client";
-import { useAnalysis } from "@/lib/hooks/use-analysis";
+import { adminApi } from "@/lib/api/client";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw, ArrowRight } from "lucide-react";
 import { SubmissionDetails } from "./_components/SubmissionDetails";
-import { WorkflowStatus } from "./_components/WorkflowStatus";
-import { SubmissionActions } from "./_components/SubmissionActions";
-import type { Submission, Enrichment } from "@/types";
+import type { Submission } from "@/types";
 
 interface SubmissionDetailPageProps {
   params: Promise<{
@@ -21,28 +18,14 @@ interface SubmissionDetailPageProps {
 export default function SubmissionDetailPage({ params }: SubmissionDetailPageProps) {
   const { id: submissionId } = use(params);
   const [submission, setSubmission] = useState<Submission | null>(null);
-  const [enrichment, setEnrichment] = useState<Enrichment | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { analysis, isLoading: isLoadingAnalysis, refetch: refetchAnalysis } = useAnalysis(submissionId);
-
-  // Fetch submission and enrichment data
+  // Fetch submission data ONLY (no enrichment or analysis)
   const fetchData = async () => {
     try {
       setIsLoading(true);
-
-      // Fetch submission
       const submissionData = await adminApi.getSubmission(submissionId);
       setSubmission(submissionData);
-
-      // Fetch enrichment
-      try {
-        const enrichmentData = await enrichmentApi.getBySubmissionId(submissionId);
-        setEnrichment(enrichmentData);
-      } catch {
-        // No enrichment data yet
-        setEnrichment(undefined);
-      }
     } catch (error: any) {
       toast({
         title: "Erro ao carregar dados",
@@ -60,7 +43,6 @@ export default function SubmissionDetailPage({ params }: SubmissionDetailPagePro
 
   const handleRefresh = () => {
     fetchData();
-    refetchAnalysis();
     toast({
       title: "Dados atualizados",
       description: "Os dados foram recarregados com sucesso.",
@@ -80,21 +62,11 @@ export default function SubmissionDetailPage({ params }: SubmissionDetailPagePro
           </div>
         </header>
         <div className="p-8">
-          <div className="grid grid-cols-12 gap-8">
-            <div className="col-span-8 space-y-8">
-              <div className="h-96 bg-white border border-line animate-pulse" />
-            </div>
-            <div className="col-span-4 space-y-8">
-              <div className="h-64 bg-white border border-line animate-pulse" />
-              <div className="h-48 bg-white border border-line animate-pulse" />
-            </div>
-          </div>
+          <div className="h-96 bg-white border border-line animate-pulse" />
         </div>
       </div>
     );
   }
-
-  const pdfUrl = (submission as any).pdfUrl || (submission as any).pdf_url;
 
   return (
     <div className="min-h-screen bg-surface-paper">
@@ -124,7 +96,7 @@ export default function SubmissionDetailPage({ params }: SubmissionDetailPagePro
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-heading text-2xl font-medium tracking-tight text-navy-900">
-                Detalhes da Submissão
+                Detalhes do Envio
               </h1>
               <p className="text-sm text-text-secondary mt-1">
                 {submission.companyName}
@@ -150,25 +122,51 @@ export default function SubmissionDetailPage({ params }: SubmissionDetailPagePro
       {/* --- MAIN CONTENT --- */}
       <div className="p-8">
         <div className="grid grid-cols-12 gap-8">
-          {/* Left Column: Submission Details & Workflow Status */}
-          <div className="col-span-12 lg:col-span-8 space-y-8">
+          {/* Left Column: Submission Details */}
+          <div className="col-span-12 lg:col-span-8">
             <SubmissionDetails submission={submission} />
-            <WorkflowStatus
-              enrichment={enrichment}
-              analysis={analysis || undefined}
-              hasPDF={!!pdfUrl}
-            />
           </div>
 
-          {/* Right Column: Actions */}
+          {/* Right Column: Next Steps */}
           <div className="col-span-12 lg:col-span-4">
             <div className="sticky top-8">
-              <SubmissionActions
-                submissionId={submissionId}
-                enrichment={enrichment}
-                analysis={analysis || undefined}
-                pdfUrl={pdfUrl}
-              />
+              <div className="bg-white border border-line p-6">
+                <h2 className="font-heading text-lg font-medium mb-4">
+                  Próximas Etapas
+                </h2>
+                <div className="space-y-3">
+                  <Link href={`/admin/enriquecimento/${submissionId}`}>
+                    <Button variant="architect" className="w-full justify-between">
+                      <span>Ir para Enriquecimento</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                  <Link href={`/admin/analise/${submissionId}`}>
+                    <Button variant="outline" className="w-full justify-between">
+                      <span>Ir para Análise</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="mt-6 p-4 bg-surface-paper rounded">
+                  <h3 className="text-sm font-medium mb-2">Fluxo de Trabalho</h3>
+                  <ol className="text-xs text-text-secondary space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold">1.</span>
+                      <span><strong>Envio</strong> - Dados do formulário recebidos</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold">2.</span>
+                      <span><strong>Enriquecimento</strong> - Dados enriquecidos com IA</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold">3.</span>
+                      <span><strong>Análise</strong> - Análise estratégica (SWOT, PESTEL, Porter)</span>
+                    </li>
+                  </ol>
+                </div>
+              </div>
             </div>
           </div>
         </div>
