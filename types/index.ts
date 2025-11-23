@@ -34,7 +34,6 @@ export type {
   GrowthHackingAnalysis,
   ScenariosAnalysis,
   OKRsAnalysis,
-  OKRItem,
   BSCAnalysis,
   DecisionMatrixAnalysis,
   Synthesis,

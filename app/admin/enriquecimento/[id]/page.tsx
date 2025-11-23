@@ -4,7 +4,8 @@ import React, { use, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEnrichment } from "@/lib/hooks/use-enrichment";
-import { adminApi, analysisApi } from "@/lib/api/client";
+import { useAdminEnrichment } from "@/lib/hooks/use-admin-enrichment";
+import { adminApi } from "@/lib/api/client";
 import { toast } from "@/components/ui/use-toast";
 import { EnrichmentEditorSkeleton } from "@/components/skeletons";
 import { SubmissionSummary } from "./_components/SubmissionSummary";
@@ -36,19 +37,14 @@ export default function EnrichmentEditorPage({
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(
     null
   );
-  const [isGeneratingAnalysis, setIsGeneratingAnalysis] = useState(false);
 
   const {
     enrichment,
     isLoading,
-    update,
-    isUpdating,
-    approve,
-    isApproving,
-    reject,
-    isRejecting,
     refetch,
   } = useEnrichment(submissionId);
+
+  const adminEnrichment = useAdminEnrichment();
 
   // Fetch submission data
   useEffect(() => {
@@ -106,8 +102,20 @@ export default function EnrichmentEditorPage({
 
   // Save draft
   const handleSaveDraft = async (isAutoSave = false) => {
+    if (!enrichment?.id) {
+      toast({
+        title: "Erro",
+        description: "ID do enriquecimento não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      await update({ data: localEnrichmentData } as any);
+      await adminEnrichment.update({
+        enrichmentId: enrichment.id,
+        data: localEnrichmentData,
+      });
 
       if (!isAutoSave) {
         toast({
@@ -127,23 +135,40 @@ export default function EnrichmentEditorPage({
     }
   };
 
-  // Approve enrichment
+  // Approve enrichment (triggers analysis job automatically)
   const handleApprove = async () => {
+    if (!enrichment?.id) {
+      toast({
+        title: "Erro",
+        description: "ID do enriquecimento não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       // First, save current changes
-      await update({ data: localEnrichmentData } as any);
+      await adminEnrichment.update({
+        enrichmentId: enrichment.id,
+        data: localEnrichmentData,
+      });
 
-      // Then approve
-      await approve();
+      // Then approve (backend will auto-trigger analysis job)
+      const response = await adminEnrichment.approve(enrichment.id);
 
       toast({
         title: "Enriquecimento aprovado",
-        description: "O enriquecimento foi aprovado com sucesso.",
+        description: "Análise será gerada automaticamente. Aguarde...",
         variant: "default",
       });
 
       // Refetch to get updated status
       refetch();
+
+      // Redirect to analysis list after a short delay
+      setTimeout(() => {
+        router.push("/admin/analise");
+      }, 2000);
     } catch (error: any) {
       toast({
         title: "Erro ao aprovar",
@@ -153,57 +178,13 @@ export default function EnrichmentEditorPage({
     }
   };
 
-  // Reject enrichment
+  // Reject enrichment (deprecated - keeping for backward compatibility)
   const handleReject = async (reason: string) => {
-    try {
-      await reject(reason);
-
-      toast({
-        title: "Enriquecimento rejeitado",
-        description: "O enriquecimento foi rejeitado.",
-        variant: "default",
-      });
-
-      // Redirect back to list
-      router.push("/admin/enriquecimento");
-    } catch (error: any) {
-      toast({
-        title: "Erro ao rejeitar",
-        description: error.message || "Não foi possível rejeitar o enriquecimento.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Generate analysis (moves to Stage 3)
-  const handleGenerateAnalysis = async () => {
-    try {
-      setIsGeneratingAnalysis(true);
-
-      // First, save current enrichment changes
-      await update({ data: localEnrichmentData } as any);
-
-      // Then generate analysis
-      await analysisApi.generate(submissionId);
-
-      toast({
-        title: "Análise gerada",
-        description: "Análise criada com sucesso. Redirecionando para War Room...",
-        variant: "default",
-      });
-
-      // Redirect to War Room (Stage 3)
-      setTimeout(() => {
-        router.push(`/admin/submissions/${submissionId}`);
-      }, 1500);
-    } catch (error: any) {
-      toast({
-        title: "Erro ao gerar análise",
-        description: error.message || "Não foi possível gerar a análise.",
-        variant: "destructive",
-      });
-      setIsGeneratingAnalysis(false);
-    }
+    toast({
+      title: "Funcionalidade removida",
+      description: "Use 'Retry Enrichment' na lista de submissões para reiniciar o enriquecimento.",
+      variant: "destructive",
+    });
   };
 
   if (isLoading || !submission) {
@@ -261,7 +242,7 @@ export default function EnrichmentEditorPage({
             <EnrichmentForm
               enrichment={enrichment || null}
               onChange={handleEnrichmentChange}
-              disabled={isUpdating || isApproving || isRejecting || isGeneratingAnalysis}
+              disabled={adminEnrichment.isUpdating || adminEnrichment.isApproving}
             />
           </div>
         </div>
@@ -272,12 +253,19 @@ export default function EnrichmentEditorPage({
         onSaveDraft={handleSaveDraft}
         onApprove={handleApprove}
         onReject={handleReject}
-        onGenerateAnalysis={handleGenerateAnalysis}
-        isSaving={isUpdating}
-        isApproving={isApproving}
-        isRejecting={isRejecting}
-        isGenerating={isGeneratingAnalysis}
-        disabled={isLoading}
+        onGenerateAnalysis={async () => {
+          // Deprecated - approval now auto-triggers analysis
+          toast({
+            title: "Funcionalidade removida",
+            description: "A aprovação do enriquecimento agora gera a análise automaticamente.",
+            variant: "default",
+          });
+        }}
+        isSaving={adminEnrichment.isUpdating}
+        isApproving={adminEnrichment.isApproving}
+        isRejecting={false}
+        isGenerating={false}
+        disabled={isLoading || (enrichment as any)?.status === 'approved'}
       />
     </div>
   );

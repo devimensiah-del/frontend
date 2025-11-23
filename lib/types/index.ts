@@ -91,6 +91,53 @@ export type EnrichmentStatus =
   | 'rejected'     // Admin rejected, needs rework
   | 'failed';      // Worker failed
 
+// Macro-Economic & Industry Context (Addresses "Brazil blind spot")
+export interface EconomicIndicators {
+  country: string;
+  gdp_growth: string;
+  inflation_rate: string;
+  interest_rate: string;
+  exchange_rate: string;
+  unemployment_rate: string;
+  political_stability: string;
+  economic_outlook: string;
+  recent_policy_changes: string[];
+}
+
+export interface IndustryTrends {
+  industry_sector: string;
+  growth_rate: string;
+  market_maturity: string;
+  technology_adoption: string;
+  competitive_intensity: string;
+  regulatory_environment: string;
+  key_innovations: string[];
+  disruptive_forces: string[];
+}
+
+export interface RegulatoryLandscape {
+  recent_changes: string[];
+  upcoming_regulations: string[];
+  compliance_requirements: string[];
+  industry_standards: string[];
+}
+
+export interface MarketSignals {
+  consumer_trends: string[];
+  investment_climate: string;
+  talent_availability: string;
+  infrastructure_development: string;
+}
+
+export interface MacroContext {
+  economic_indicators: EconomicIndicators;
+  industry_trends: IndustryTrends;
+  regulatory_landscape: RegulatoryLandscape;
+  market_signals: MarketSignals;
+  data_sources: string[];
+  last_updated: string;
+}
+
 export interface Enrichment {
   id: string;
   submissionId: string;
@@ -118,6 +165,7 @@ export interface Enrichment {
       strengths: string[];
       weaknesses: string[];
     };
+    macro_context?: MacroContext; // NEW: Real-time macro-economic data
   };
 
   status: EnrichmentStatus;
@@ -140,13 +188,26 @@ export interface PESTELAnalysis {
   summary: string;
 }
 
-// 2. Porter's 5 Forces
+// 2. Porter's 7 Forces (Extended Model)
+export interface PorterForce {
+  force: string;
+  intensity: string;
+  description: string;
+}
+
 export interface PorterAnalysis {
-  competitiveRivalry: string;
-  supplierPower: string;
-  buyerPower: string;
-  threatNewEntrants: string;
-  threatSubstitutes: string;
+  // Extended 7 Forces Model
+  forces: PorterForce[];
+
+  // Backward compatibility: individual fields (optional)
+  competitiveRivalry?: string;
+  supplierPower?: string;
+  buyerPower?: string;
+  threatNewEntrants?: string;
+  threatSubstitutes?: string;
+  powerOfPartnerships?: string;
+  aiDataDisruption?: string;
+
   overallAttractiveness: string;
   summary: string;
 }
@@ -161,12 +222,18 @@ export interface TamSamSomAnalysis {
   summary: string;
 }
 
-// 4. SWOT
+// 4. SWOT with Confidence & Source Attribution
+export interface SWOTItem {
+  content: string;
+  confidence: string;  // "Alta" | "Média" | "Baixa"
+  source: string;       // e.g., "análise de mercado", "dados financeiros"
+}
+
 export interface SWOTAnalysis {
-  strengths: string[];
-  weaknesses: string[];
-  opportunities: string[];
-  threats: string[];
+  strengths: SWOTItem[];
+  weaknesses: SWOTItem[];
+  opportunities: SWOTItem[];
+  threats: SWOTItem[];
   summary: string;
 }
 
@@ -205,14 +272,30 @@ export interface ScenariosAnalysis {
   summary: string;
 }
 
-// 9. OKRs
-export interface OKRItem {
-  title: string;
-  keyResults: string[];
+// 9. OKRs (Quarterly Model)
+export interface KeyResult {
+  description: string;
+  target: string;
+  measurement: string;
+}
+
+export interface QuarterlyOKR {
+  quarter: string;              // "Q1", "Q2", "Q3"
+  objective: string;
+  key_results: KeyResult[];
+  investment_estimate: string;
+  timeline: string;
 }
 
 export interface OKRsAnalysis {
-  objectives: OKRItem[];
+  quarters: QuarterlyOKR[];
+
+  // Backward compatibility: old format (optional)
+  objectives?: Array<{
+    title: string;
+    keyResults: string[];
+  }>;
+
   summary: string;
 }
 

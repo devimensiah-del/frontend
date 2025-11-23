@@ -510,6 +510,94 @@ export const adminApi = {
   }> {
     return apiRequest('/admin/analytics');
   },
+
+  /**
+   * Update enrichment fields (admin only) - status remains unchanged
+   */
+  async updateEnrichment(enrichmentId: string, data: Record<string, any>): Promise<Enrichment> {
+    const response = await apiRequest<{ enrichment: Enrichment }>(
+      `/admin/enrichment/${enrichmentId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }
+    );
+    return response.enrichment;
+  },
+
+  /**
+   * Approve enrichment (admin only) - changes status to 'approved' and triggers analysis
+   */
+  async approveEnrichment(enrichmentId: string): Promise<{ enrichment: Enrichment; message: string }> {
+    return apiRequest(`/admin/enrichment/${enrichmentId}/approve`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Update analysis fields (admin only) - status remains unchanged
+   */
+  async updateAnalysis(analysisId: string, data: Record<string, any>): Promise<Analysis> {
+    const response = await apiRequest<{ analysis: Analysis }>(
+      `/admin/analysis/${analysisId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }
+    );
+    return response.analysis;
+  },
+
+  /**
+   * Create new analysis version (admin only)
+   */
+  async createAnalysisVersion(analysisId: string, edits?: Record<string, any>): Promise<Analysis> {
+    const response = await apiRequest<{ analysis: Analysis }>(
+      `/admin/analysis/${analysisId}/version`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ edits }),
+      }
+    );
+    return response.analysis;
+  },
+
+  /**
+   * Approve analysis (admin only) - changes status to 'approved' and triggers PDF generation
+   */
+  async approveAnalysis(analysisId: string): Promise<{ analysis: Analysis; message: string }> {
+    return apiRequest(`/admin/analysis/${analysisId}/approve`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Send analysis to user (admin only) - changes status to 'sent'
+   */
+  async sendAnalysis(analysisId: string, userEmail: string): Promise<{ analysis: Analysis; message: string }> {
+    return apiRequest(`/admin/analysis/${analysisId}/send`, {
+      method: 'POST',
+      body: JSON.stringify({ userEmail }),
+    });
+  },
+
+  /**
+   * Retry enrichment for a submission
+   */
+  async retryEnrichment(submissionId: string): Promise<{ message: string }> {
+    return apiRequest(`/admin/submissions/${submissionId}/retry-enrichment`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Retry analysis for a submission
+   */
+  async retryAnalysis(submissionId: string): Promise<{ message: string }> {
+    return apiRequest(`/admin/submissions/${submissionId}/retry-analysis`, {
+      method: 'POST',
+    });
+  },
 };
 
 // Export all APIs as a single client
