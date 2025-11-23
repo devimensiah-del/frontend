@@ -25,7 +25,6 @@ interface ActionToolbarProps {
   onSendToUser: () => void;
   onCreateNewVersion: () => void;
   isSaving: boolean;
-  isGenerating: boolean;
   isApproving: boolean;
   isGeneratingPDF: boolean;
   isSending: boolean;
@@ -45,7 +44,6 @@ export function ActionToolbar({
   onSendToUser,
   onCreateNewVersion,
   isSaving,
-  isGenerating,
   isApproving,
   isGeneratingPDF,
   isSending,
@@ -79,7 +77,6 @@ export function ActionToolbar({
 
   const isAnyActionLoading =
     isSaving ||
-    isGenerating ||
     isGeneratingPDF ||
     isSending ||
     isApproving ||
@@ -127,18 +124,11 @@ export function ActionToolbar({
           {/* Retry Analysis */}
           <button
             onClick={onRetryAnalysis}
-            disabled={isGenerating || isAnyActionLoading}
+            disabled={isAnyActionLoading}
             className="btn-outline disabled:opacity-50 disabled:cursor-not-allowed"
             type="button"
           >
-            {isGenerating ? (
-              <>
-                <span className="animate-spin mr-2">⟳</span>
-                Gerando...
-              </>
-            ) : (
-              "Refazer Análise"
-            )}
+            Refazer Análise
           </button>
 
           {/* Save Draft */}

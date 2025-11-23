@@ -1,12 +1,12 @@
 /**
- * Hook for fetching and managing analysis data
- * Includes PDF generation and report sending
+ * Hook for fetching analysis data and PDF operations
+ * Admin operations (update, approve, send, versioning) are in use-admin-analysis hook
+ * Note: Analysis is automatically created after enrichment approval
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { analysisApi } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/error-handler';
-import type { Analysis } from '@/types';
 
 export interface UseAnalysisOptions {
   enabled?: boolean;
@@ -47,31 +47,8 @@ export function useAnalysis(submissionId: string, options?: UseAnalysisOptions) 
     staleTime: 30000, // 30 seconds
   });
 
-  // Generate analysis
-  const generateMutation = useMutation({
-    mutationFn: () => analysisApi.generate(submissionId),
-    onSuccess: (newAnalysis) => {
-      // Update cache
-      queryClient.setQueryData(['analysis', submissionId], newAnalysis);
-      // Invalidate submission
-      queryClient.invalidateQueries({ queryKey: ['submission', submissionId] });
-    },
-  });
-
-  // Update analysis
-  const updateMutation = useMutation({
-    mutationFn: (data: Partial<Analysis>) =>
-      analysisApi.update(submissionId, data),
-    onSuccess: (updatedAnalysis) => {
-      // Update cache
-      queryClient.setQueryData(['analysis', submissionId], updatedAnalysis);
-      // Invalidate submission
-      queryClient.invalidateQueries({ queryKey: ['submission', submissionId] });
-    },
-  });
-
   // Publish report and generate PDF
-  const generatePDFMutation = useMutation({
+  const publishReportMutation = useMutation({
     mutationFn: () => analysisApi.publishReport(submissionId),
     onSuccess: () => {
       // Invalidate submission to update report_id and pdf_url
@@ -79,13 +56,9 @@ export function useAnalysis(submissionId: string, options?: UseAnalysisOptions) 
     },
   });
 
-  // Send to user
-  const sendToUserMutation = useMutation({
-    mutationFn: () => analysisApi.send(submissionId),
-    onSuccess: () => {
-      // Invalidate submission to update status
-      queryClient.invalidateQueries({ queryKey: ['submission', submissionId] });
-    },
+  // Download report PDF
+  const downloadReportMutation = useMutation({
+    mutationFn: () => analysisApi.downloadReport(submissionId),
   });
 
   return {
@@ -93,17 +66,11 @@ export function useAnalysis(submissionId: string, options?: UseAnalysisOptions) 
     isLoading,
     error: error as ApiError | null,
     refetch,
-    generate: generateMutation.mutateAsync,
-    isGenerating: generateMutation.isPending,
-    generateError: generateMutation.error as ApiError | null,
-    update: updateMutation.mutateAsync,
-    isUpdating: updateMutation.isPending,
-    updateError: updateMutation.error as ApiError | null,
-    generatePDF: generatePDFMutation.mutateAsync,
-    isGeneratingPDF: generatePDFMutation.isPending,
-    generatePDFError: generatePDFMutation.error as ApiError | null,
-    sendToUser: sendToUserMutation.mutateAsync,
-    isSending: sendToUserMutation.isPending,
-    sendError: sendToUserMutation.error as ApiError | null,
+    publishReport: publishReportMutation.mutateAsync,
+    isPublishing: publishReportMutation.isPending,
+    publishError: publishReportMutation.error as ApiError | null,
+    downloadReport: downloadReportMutation.mutateAsync,
+    isDownloading: downloadReportMutation.isPending,
+    downloadError: downloadReportMutation.error as ApiError | null,
   };
 }

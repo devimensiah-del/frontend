@@ -55,7 +55,6 @@ interface WarRoomShellProps {
   onPublishPDF: () => void;
   onSendEmail: () => void;
   isSaving: boolean;
-  isGenerating: boolean;
   isGeneratingPDF: boolean;
   isSending: boolean;
   submissionId: string;
@@ -72,7 +71,6 @@ export function WarRoomShell({
   onPublishPDF,
   onSendEmail,
   isSaving,
-  isGenerating,
   isGeneratingPDF,
   isSending,
   submissionId,
@@ -106,7 +104,6 @@ export function WarRoomShell({
               onSendToUser={onSendEmail}
               onCreateNewVersion={() => {}}
               isSaving={isSaving}
-              isGenerating={isGenerating}
               isApproving={false}
               isGeneratingPDF={isGeneratingPDF}
               isSending={isSending}

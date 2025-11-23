@@ -3,6 +3,7 @@
 import { use, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useAnalysis } from "@/lib/hooks/use-analysis";
+import { useAdminAnalysis } from "@/lib/hooks/use-admin-analysis";
 import { adminApi } from "@/lib/api/client";
 import { toast } from "@/components/ui/use-toast";
 import { WarRoomShell } from "./_components/WarRoomShell";
@@ -84,19 +85,24 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const [showMobileWarning, setShowMobileWarning] = useState(true);
 
+  // Fetch analysis data (read-only)
   const {
     analysis,
     isLoading,
+    refetch,
+    publishReport,
+    isPublishing,
+  } = useAnalysis(submissionId);
+
+  // Admin operations (update, approve, send, versioning)
+  const {
     update,
     isUpdating,
-    generate,
-    isGenerating,
-    generatePDF,
-    isGeneratingPDF,
-    sendToUser,
+    approve,
+    isApproving,
+    send,
     isSending,
-    refetch
-  } = useAnalysis(submissionId);
+  } = useAdminAnalysis();
 
   // Fetch submission data
   useEffect(() => {
@@ -154,16 +160,17 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
   };
 
   const handleSaveDraft = async (isAutoSave = false) => {
-    if (!localAnalysis) return;
+    if (!localAnalysis || !analysis?.id) return;
 
     try {
       await update({
-        analysis: {
+        analysisId: analysis.id,
+        data: {
           swot: localAnalysis.swot,
           pestel: localAnalysis.pestel,
           porter: localAnalysis.porter
         }
-      } as Partial<Analysis>);
+      });
 
       if (!isAutoSave) {
         toast({
@@ -189,7 +196,8 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
         variant: "default"
       });
 
-      await generate();
+      // Use admin API to retry analysis job
+      await adminApi.retryAnalysis(submissionId);
 
       toast({
         title: "Análise gerada",
@@ -219,9 +227,8 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
         variant: "default"
       });
 
-      // 2. Generate PDF (Backend returns { pdf_url: string, report_id: string })
-      // NOTE: Ensure your useAnalysis/api client returns the raw JSON response, not a Blob!
-      const response = await generatePDF() as { pdf_url: string; report_id: string };
+      // 2. Publish report and generate PDF
+      const response = await publishReport();
 
       // 3. Handle the URL
       if (response && response.pdf_url) {
@@ -252,8 +259,12 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
       // First, save current changes
       await handleSaveDraft();
 
-      // Send email
-      await sendToUser();
+      if (!analysis?.id || !submission?.contactEmail) {
+        throw new Error("Missing analysis ID or user email");
+      }
+
+      // Send email using admin API
+      await send({ analysisId: analysis.id, userEmail: submission.contactEmail });
 
       toast({
         title: "Email enviado",
@@ -261,8 +272,8 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
         variant: "default"
       });
 
-      // Update submission status
-      await adminApi.updateSubmissionStatus(submissionId, "completed");
+      // Note: Submission status is always "received" and never changes
+      refetch();
     } catch (error: any) {
       toast({
         title: "Erro ao enviar email",
@@ -325,8 +336,7 @@ export default function WarRoomPage({ params }: WarRoomPageProps) {
           onPublishPDF={handlePublishPDF}
           onSendEmail={handleSendEmail}
           isSaving={isUpdating}
-          isGenerating={isGenerating}
-          isGeneratingPDF={isGeneratingPDF}
+          isGeneratingPDF={isPublishing}
           isSending={isSending}
           submissionId={submissionId}
           userEmail={submission.email || ''}

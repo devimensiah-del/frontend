@@ -277,6 +277,7 @@ export const submissionsApi = {
 
 /**
  * Enrichment API
+ * Note: Admin operations (update, approve) are in adminApi
  */
 export const enrichmentApi = {
   /**
@@ -286,68 +287,12 @@ export const enrichmentApi = {
     const response = await apiRequest<{ enrichment: Enrichment }>(`/submissions/${submissionId}/enrichment`);
     return response.enrichment;
   },
-
-  /**
-   * Mark enrichment as finished (worker completed)
-   */
-  async markFinished(submissionId: string): Promise<Enrichment> {
-    const response = await apiRequest<{ enrichment: Enrichment }>(
-      `/submissions/${submissionId}/enrichment/finish`,
-      {
-        method: 'PUT',
-      }
-    );
-
-    return response.enrichment;
-  },
-
-  /**
-   * Approve enrichment data (admin)
-   */
-  async approve(submissionId: string): Promise<Enrichment> {
-    const response = await apiRequest<{ enrichment: Enrichment }>(
-      `/submissions/${submissionId}/enrichment/approve`,
-      {
-        method: 'PUT',
-      }
-    );
-
-    return response.enrichment;
-  },
-
-  /**
-   * Reject enrichment data (admin)
-   */
-  async reject(submissionId: string, reason: string): Promise<Enrichment> {
-    const response = await apiRequest<{ enrichment: Enrichment }>(
-      `/submissions/${submissionId}/enrichment/reject`,
-      {
-        method: 'PUT',
-        body: JSON.stringify({ reason }),
-      }
-    );
-
-    return response.enrichment;
-  },
-
-  /**
-   * Update enrichment data (admin only)
-   */
-  async update(submissionId: string, data: Partial<Enrichment>): Promise<Enrichment> {
-    const response = await apiRequest<{ enrichment: Enrichment }>(
-      `/submissions/${submissionId}/enrichment`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      }
-    );
-
-    return response.enrichment;
-  },
 };
 
 /**
  * Analysis API
+ * Note: Admin operations (update, approve, send, versioning) are in adminApi
+ * Analysis is automatically created after enrichment approval
  */
 export const analysisApi = {
   /**
@@ -355,65 +300,6 @@ export const analysisApi = {
    */
   async getBySubmissionId(submissionId: string): Promise<Analysis> {
     const response = await apiRequest<{ analysis: Analysis }>(`/submissions/${submissionId}/analysis`);
-    return response.analysis;
-  },
-
-  /**
-   * Get all analysis versions for submission
-   */
-  async getVersions(submissionId: string): Promise<Analysis[]> {
-    const response = await apiRequest<{ analyses: Analysis[] }>(`/submissions/${submissionId}/analysis/versions`);
-    return response.analyses;
-  },
-
-  /**
-   * Get specific analysis version
-   */
-  async getVersion(submissionId: string, version: number): Promise<Analysis> {
-    const response = await apiRequest<{ analysis: Analysis }>(`/submissions/${submissionId}/analysis/versions/${version}`);
-    return response.analysis;
-  },
-
-  /**
-   * Generate analysis for submission (creates v1)
-   */
-  async generate(submissionId: string): Promise<Analysis> {
-    const response = await apiRequest<{ analysis: Analysis }>(
-      `/submissions/${submissionId}/analysis`,
-      {
-        method: 'POST',
-      }
-    );
-
-    return response.analysis;
-  },
-
-  /**
-   * Update analysis (creates new version if status is 'approved')
-   */
-  async update(submissionId: string, data: Partial<Analysis>): Promise<Analysis> {
-    const response = await apiRequest<{ analysis: Analysis }>(
-      `/submissions/${submissionId}/analysis`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      }
-    );
-
-    return response.analysis;
-  },
-
-  /**
-   * Approve analysis (admin) - marks as ready to send
-   */
-  async approve(submissionId: string): Promise<Analysis> {
-    const response = await apiRequest<{ analysis: Analysis }>(
-      `/submissions/${submissionId}/analysis/approve`,
-      {
-        method: 'PUT',
-      }
-    );
-
     return response.analysis;
   },
 
@@ -428,12 +314,11 @@ export const analysisApi = {
   },
 
   /**
-   * Send report to user email (marks analysis as 'sent')
+   * Download report PDF
+   * Returns PDF URL with metadata when report is ready
    */
-  async send(submissionId: string): Promise<{ message: string }> {
-    return apiRequest(`/submissions/${submissionId}/analysis/send`, {
-      method: 'POST',
-    });
+  async downloadReport(submissionId: string): Promise<{ pdf_url: string; report_id: string; created_at: string }> {
+    return apiRequest(`/submissions/${submissionId}/report/download`);
   },
 };
 
@@ -491,21 +376,6 @@ export const adminApi = {
    */
   async getSubmission(id: string): Promise<Submission> {
     const response = await apiRequest<{ submission: Submission }>(`/admin/submissions/${id}`);
-    return response.submission;
-  },
-
-  /**
-   * Update submission status
-   */
-  async updateSubmissionStatus(id: string, status: string): Promise<Submission> {
-    const response = await apiRequest<{ submission: Submission }>(
-      `/admin/submissions/${id}/status`,
-      {
-        method: 'PUT',
-        body: JSON.stringify({ status }),
-      }
-    );
-
     return response.submission;
   },
 
