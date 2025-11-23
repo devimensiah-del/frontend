@@ -71,15 +71,19 @@ async function apiRequest<T>(
 
     if (!response.ok) {
       // For 404 on enrichment/analysis endpoints, don't log as error
-      // These are expected when data doesn't exist yet
+      // These are expected when data doesn't exist yet (only for GET requests)
       const is404NotFound = response.status === 404;
       const isEnrichmentOrAnalysis = endpoint.includes('/enrichment') || endpoint.includes('/analysis');
+      const isGetRequest = !options.method || options.method === 'GET';
 
-      if (is404NotFound && isEnrichmentOrAnalysis) {
-        // Silently throw for expected 404s (enrichment/analysis not created yet)
+      // Only silently handle 404 for GET requests on enrichment/analysis
+      // (indicates data not yet created, which is expected early in workflow)
+      if (is404NotFound && isEnrichmentOrAnalysis && isGetRequest) {
+        console.debug(`Expected 404: ${endpoint} - Data not yet created`);
         throw new Error('Not found');
       }
 
+      // All other errors (including 404 on PUT/POST) should be logged
       await handleApiError(response);
     }
 
