@@ -151,13 +151,14 @@ export function EnrichmentDetails({
           <SelectOption value="strategic">Estratégico</SelectOption>
           <SelectOption value="financial">Financeiro</SelectOption>
           <SelectOption value="market">Mercado & Competição</SelectOption>
+          <SelectOption value="macro">Contexto Macro</SelectOption>
           <SelectOption value="metadata">Metadados</SelectOption>
         </Select>
       </div>
 
       {/* Tabbed view - matches SubmissionDetails structure */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="hidden md:grid w-full grid-cols-5 bg-white p-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide">
+        <TabsList className="hidden md:grid w-full grid-cols-6 bg-white p-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide">
           <TabsTrigger value="overview" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
             Visão Geral
           </TabsTrigger>
@@ -170,8 +171,11 @@ export function EnrichmentDetails({
           <TabsTrigger value="market" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
             Mercado
           </TabsTrigger>
+          <TabsTrigger value="macro" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
+            Macro
+          </TabsTrigger>
           <TabsTrigger value="metadata" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Metadados
+            Meta
           </TabsTrigger>
         </TabsList>
 
@@ -216,6 +220,88 @@ export function EnrichmentDetails({
             <Field label="Status de Market Share" value={parsedData.competitive_landscape?.market_share_status} />
           </div>
           <ListField label="Principais Concorrentes" items={parsedData.competitive_landscape?.competitors} />
+
+          {/* Market Signals from Macro Context */}
+          {parsedData.macro_context?.market_signals && (
+            <div className="mt-6 pt-6 border-t space-y-4">
+              <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Sinais de Mercado</h4>
+              <Field label="Sentimento do Consumidor" value={parsedData.macro_context.market_signals.consumer_sentiment} />
+              <Field label="Cadeia de Suprimentos" value={parsedData.macro_context.market_signals.supply_chain_status} />
+              <ListField label="Preços de Commodities" items={parsedData.macro_context.market_signals.commodity_prices} />
+              <ListField label="Atividade de Concorrentes" items={parsedData.macro_context.market_signals.competitor_activity} />
+              <ListField label="Ameaças Emergentes" items={parsedData.macro_context.market_signals.emerging_threats} />
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Macro Context Tab - Economic & Industry Context */}
+        <TabsContent value="macro" className="space-y-6">
+          {parsedData.macro_context ? (
+            <>
+              {/* Economic Indicators */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Indicadores Econômicos</h4>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <Field label="País" value={parsedData.macro_context.economic_indicators?.country} />
+                  <Field label="Crescimento PIB" value={parsedData.macro_context.economic_indicators?.gdp_growth} />
+                  <Field label="Taxa de Inflação" value={parsedData.macro_context.economic_indicators?.inflation_rate} />
+                  <Field label="Taxa de Juros" value={parsedData.macro_context.economic_indicators?.interest_rate} />
+                  <Field label="Câmbio" value={parsedData.macro_context.economic_indicators?.exchange_rate} />
+                  <Field label="Taxa de Desemprego" value={parsedData.macro_context.economic_indicators?.unemployment_rate} />
+                </div>
+                <Field label="Estabilidade Política" value={parsedData.macro_context.economic_indicators?.political_stability} />
+                <Field label="Perspectiva Econômica" value={parsedData.macro_context.economic_indicators?.economic_outlook} multiline />
+                <ListField label="Mudanças Recentes de Política" items={parsedData.macro_context.economic_indicators?.recent_policy_changes} />
+              </div>
+
+              {/* Industry Trends */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Tendências da Indústria</h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Field label="Setor" value={parsedData.macro_context.industry_trends?.industry_sector} />
+                  <Field label="Taxa de Crescimento" value={parsedData.macro_context.industry_trends?.growth_rate} />
+                  <Field label="Concentração de Mercado" value={parsedData.macro_context.industry_trends?.market_concentration} />
+                  <Field label="Barreiras de Entrada" value={parsedData.macro_context.industry_trends?.barriers_to_entry} />
+                </div>
+                <Field label="Adoção de Tecnologia" value={parsedData.macro_context.industry_trends?.technology_adoption} multiline />
+                <ListField label="Principais Tendências" items={parsedData.macro_context.industry_trends?.key_trends} />
+                <ListField label="Fusões e Aquisições" items={parsedData.macro_context.industry_trends?.mergers_aquisições || parsedData.macro_context.industry_trends?.mergers_acquisitions} />
+              </div>
+
+              {/* Regulatory Landscape */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Ambiente Regulatório</h4>
+                <Field label="Requisitos de Conformidade" value={parsedData.macro_context.regulatory_landscape?.compliance_requirements} multiline />
+                <ListField label="Regulamentações Recentes" items={parsedData.macro_context.regulatory_landscape?.recent_regulations} />
+                <ListField label="Mudanças Previstas" items={parsedData.macro_context.regulatory_landscape?.upcoming_changes} />
+                <ListField label="Padrões da Indústria" items={parsedData.macro_context.regulatory_landscape?.industry_standards} />
+              </div>
+
+              {/* Data Sources */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Fontes de Dados</h4>
+                <div className="flex flex-wrap gap-2">
+                  {parsedData.macro_context.data_sources?.map((source: string, i: number) => (
+                    <a
+                      key={i}
+                      href={source}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200 text-blue-600 truncate max-w-[200px]"
+                      title={source}
+                    >
+                      {source.replace(/https?:\/\/(www\.)?/, '').split('/')[0]}
+                    </a>
+                  ))}
+                </div>
+                <Field label="Última Atualização" value={parsedData.macro_context.last_updated} />
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>Dados de contexto macro não disponíveis para este enriquecimento.</p>
+            </div>
+          )}
         </TabsContent>
 
         {/* Metadata Tab - Status & Raw Data */}
