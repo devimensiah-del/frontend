@@ -1,9 +1,10 @@
 import React from "react";
 import { cn } from "@/lib/utils/cn";
+import { SWOTItem } from "@/types";
 
 interface SWOTQuadrantProps {
   title: string;
-  items: string[];
+  items: SWOTItem[];
   color: "green" | "red" | "blue" | "yellow";
 }
 
@@ -23,7 +24,7 @@ export function SWOTQuadrant({ title, items, color }: SWOTQuadrantProps) {
           items.map((item, index) => (
             <li key={index} className="text-sm leading-relaxed flex items-start gap-2">
               <span className="mt-2 w-1 h-1 rounded-full bg-current flex-shrink-0" />
-              <span>{item}</span>
+              <span>{item.content}</span>
             </li>
           ))
         ) : (
