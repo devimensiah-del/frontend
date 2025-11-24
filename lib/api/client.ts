@@ -662,3 +662,9 @@ export const apiClient = {
 };
 
 export default apiClient;
+
+export const reportApi = {
+  publishReport: analysisApi.publishReport,
+  downloadReport: analysisApi.downloadReport,
+};
+
