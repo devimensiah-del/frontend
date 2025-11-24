@@ -99,9 +99,9 @@ export function AnalysisCard({ analysis, isAdmin, submissionId }: AnalysisCardPr
             <div>
               <div className="flex items-center gap-2">
                 <CardTitle className="text-navy-900">Relatório Estratégico</CardTitle>
-                {analysis.version > 1 && (
+                {analysis.version && analysis.version !== 'v1' && (
                   <Badge variant="outline" className="text-xs">
-                    v{analysis.version}
+                    {analysis.version}
                   </Badge>
                 )}
               </div>
@@ -388,20 +388,20 @@ export function AnalysisCard({ analysis, isAdmin, submissionId }: AnalysisCardPr
               <Section title="Growth Hacking" icon={<Zap />}>
                 <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.growthHacking.summary}</p>
                 <div className="grid md:grid-cols-2 gap-6">
-                  {analysis.analysis.growthHacking.leapLoop && (
+                  {analysis.analysis.growthHacking.leap_loop && (
                     <div className="p-4 border rounded-lg">
-                      <h5 className="font-semibold mb-2">{analysis.analysis.growthHacking.leapLoop.name}</h5>
-                      <p className="text-sm text-gray-600 mb-2">{analysis.analysis.growthHacking.leapLoop.type}</p>
-                      <ListSection title="Passos" items={analysis.analysis.growthHacking.leapLoop.steps} />
-                      <ListSection title="Métricas" items={analysis.analysis.growthHacking.leapLoop.metrics} />
+                      <h5 className="font-semibold mb-2">{analysis.analysis.growthHacking.leap_loop.name}</h5>
+                      <p className="text-sm text-gray-600 mb-2">{analysis.analysis.growthHacking.leap_loop.type}</p>
+                      <ListSection title="Passos" items={analysis.analysis.growthHacking.leap_loop.steps} />
+                      <ListSection title="Métricas" items={analysis.analysis.growthHacking.leap_loop.metrics} />
                     </div>
                   )}
-                  {analysis.analysis.growthHacking.scaleLoop && (
+                  {analysis.analysis.growthHacking.scale_loop && (
                     <div className="p-4 border rounded-lg">
-                      <h5 className="font-semibold mb-2">{analysis.analysis.growthHacking.scaleLoop.name}</h5>
-                      <p className="text-sm text-gray-600 mb-2">{analysis.analysis.growthHacking.scaleLoop.type}</p>
-                      <ListSection title="Passos" items={analysis.analysis.growthHacking.scaleLoop.steps} />
-                      <ListSection title="Métricas" items={analysis.analysis.growthHacking.scaleLoop.metrics} />
+                      <h5 className="font-semibold mb-2">{analysis.analysis.growthHacking.scale_loop.name}</h5>
+                      <p className="text-sm text-gray-600 mb-2">{analysis.analysis.growthHacking.scale_loop.type}</p>
+                      <ListSection title="Passos" items={analysis.analysis.growthHacking.scale_loop.steps} />
+                      <ListSection title="Métricas" items={analysis.analysis.growthHacking.scale_loop.metrics} />
                     </div>
                   )}
                 </div>
@@ -419,21 +419,21 @@ export function AnalysisCard({ analysis, isAdmin, submissionId }: AnalysisCardPr
                     <div className="p-4 border border-green-200 bg-green-50 rounded-lg">
                       <h5 className="font-semibold text-green-900 mb-2">Otimista ({analysis.analysis.scenarios.optimistic.probability}%)</h5>
                       <p className="text-sm mb-2">{analysis.analysis.scenarios.optimistic.description}</p>
-                      <ListSection title="Ações Necessárias" items={analysis.analysis.scenarios.optimistic.requiredActions} />
+                      <ListSection title="Ações Necessárias" items={analysis.analysis.scenarios.optimistic.required_actions} />
                     </div>
                   )}
                   {analysis.analysis.scenarios.realist && (
                     <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
                       <h5 className="font-semibold text-blue-900 mb-2">Realista ({analysis.analysis.scenarios.realist.probability}%)</h5>
                       <p className="text-sm mb-2">{analysis.analysis.scenarios.realist.description}</p>
-                      <ListSection title="Ações Necessárias" items={analysis.analysis.scenarios.realist.requiredActions} />
+                      <ListSection title="Ações Necessárias" items={analysis.analysis.scenarios.realist.required_actions} />
                     </div>
                   )}
                   {analysis.analysis.scenarios.pessimistic && (
                     <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
                       <h5 className="font-semibold text-red-900 mb-2">Pessimista ({analysis.analysis.scenarios.pessimistic.probability}%)</h5>
                       <p className="text-sm mb-2">{analysis.analysis.scenarios.pessimistic.description}</p>
-                      <ListSection title="Ações Necessárias" items={analysis.analysis.scenarios.pessimistic.requiredActions} />
+                      <ListSection title="Ações Necessárias" items={analysis.analysis.scenarios.pessimistic.required_actions} />
                     </div>
                   )}
                 </div>
@@ -471,8 +471,8 @@ export function AnalysisCard({ analysis, isAdmin, submissionId }: AnalysisCardPr
                 <div className="grid md:grid-cols-2 gap-6">
                   <ListSection title="Perspectiva Financeira" items={analysis.analysis.bsc.financial} />
                   <ListSection title="Perspectiva do Cliente" items={analysis.analysis.bsc.customer} />
-                  <ListSection title="Processos Internos" items={analysis.analysis.bsc.internalProcesses} />
-                  <ListSection title="Aprendizado e Crescimento" items={analysis.analysis.bsc.learningGrowth} />
+                  <ListSection title="Processos Internos" items={analysis.analysis.bsc.internal_processes} />
+                  <ListSection title="Aprendizado e Crescimento" items={analysis.analysis.bsc.learning_growth} />
                 </div>
               </Section>
             )}
@@ -484,10 +484,10 @@ export function AnalysisCard({ analysis, isAdmin, submissionId }: AnalysisCardPr
               <Section title="Matriz de Decisão" icon={<CheckCircle />}>
                 <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.decisionMatrix.summary}</p>
 
-                {analysis.analysis.decisionMatrix.finalRecommendation && (
+                {analysis.analysis.decisionMatrix.final_recommendation && (
                   <div className="p-4 bg-gold-50 border border-gold-200 rounded-lg mb-4">
                     <h5 className="font-semibold text-gold-900 mb-2">Recomendação Final</h5>
-                    <p className="text-sm">{analysis.analysis.decisionMatrix.finalRecommendation}</p>
+                    <p className="text-sm">{analysis.analysis.decisionMatrix.final_recommendation}</p>
                   </div>
                 )}
 
@@ -496,10 +496,10 @@ export function AnalysisCard({ analysis, isAdmin, submissionId }: AnalysisCardPr
                   <ListSection title="Critérios" items={analysis.analysis.decisionMatrix.criteria} />
                 </div>
 
-                {analysis.analysis.decisionMatrix.priorityRecommendations && analysis.analysis.decisionMatrix.priorityRecommendations.length > 0 && (
+                {analysis.analysis.decisionMatrix.priority_recommendations && analysis.analysis.decisionMatrix.priority_recommendations.length > 0 && (
                   <div className="mt-4 space-y-3">
                     <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recomendações Prioritárias</h5>
-                    {analysis.analysis.decisionMatrix.priorityRecommendations.map((rec: any, index: number) => (
+                    {analysis.analysis.decisionMatrix.priority_recommendations.map((rec: any, index: number) => (
                       <div key={index} className="p-4 border rounded-lg">
                         <div className="flex items-start gap-3">
                           <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy-600 text-white flex items-center justify-center text-sm font-bold">

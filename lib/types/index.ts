@@ -263,19 +263,35 @@ export interface BlueOceanAnalysis {
 }
 
 // 7. Growth Hacking
+// 7. Growth Loop
+export interface GrowthLoop {
+  name: string;
+  type: string;
+  steps: string[];
+  metrics: string[];
+  bottleneck: string;
+}
+
 export interface GrowthHackingAnalysis {
-  hypotheses: string[];
-  experiments: string[];
-  keyMetrics: string[];
+  leap_loop: GrowthLoop;
+  scale_loop: GrowthLoop;
   summary: string;
 }
 
 // 8. Scenarios
+export interface Scenario {
+  name: string;
+  probability: number;
+  description: string;
+  required_actions: string[];
+}
+
 export interface ScenariosAnalysis {
-  optimistic: string;
-  realist: string;
-  pessimistic: string;
-  earlyWarningSignals: string[];
+  optimistic: Scenario;
+  realist: Scenario;
+  pessimistic: Scenario;
+  mitigation_tactics: string[];
+  early_warning_signals: string[];
   summary: string;
 }
 
@@ -310,16 +326,35 @@ export interface OKRsAnalysis {
 export interface BSCAnalysis {
   financial: string[];
   customer: string[];
-  internal: string[];
-  learningGrowth: string[];
+  internal_processes: string[];
+  learning_growth: string[];
   summary: string;
 }
 
 // 11. Decision Matrix
+export interface PriorityRecommendation {
+  priority: number;
+  title: string;
+  description: string;
+  timeline: string;
+  budget: string;
+}
+
+export interface ReviewCycle {
+  frequency: string;
+  extraordinary_triggers: string[];
+}
+
 export interface DecisionMatrixAnalysis {
   alternatives: string[];
   criteria: string[];
-  finalRecommendation: string;
+  final_recommendation: string;
+  recommended_option: string;
+  score: string;
+  score_comparison: string;
+  priority_recommendations: PriorityRecommendation[];
+  review_cycle: ReviewCycle;
+  monitoring_metrics: string[];
   summary: string;
 }
 
