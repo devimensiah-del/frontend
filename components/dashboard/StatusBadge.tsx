@@ -11,7 +11,7 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "submission", size = "md", className }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "submission", size: _size = "md", className }) => {
   const getStatusStyles = (value: string) => {
     switch (value.toLowerCase()) {
       case "received":

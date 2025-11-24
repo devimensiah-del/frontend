@@ -7,7 +7,7 @@ import {
   StatusBadge,
 } from '@/components/workflow';
 import { ProgressRing } from '@/components/ui/ProgressRing';
-import { getEnrichmentCompletion, getDataQualityScore } from '@/lib/utils/workflow-helpers';
+import { getDataQualityScore } from '@/lib/utils/workflow-helpers';
 import type { Enrichment } from '@/types';
 
 interface EnrichmentCardProps {
@@ -25,7 +25,6 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
     });
   };
 
-  const completionPercentage = getEnrichmentCompletion(enrichment);
   const qualityScore = getDataQualityScore(enrichment);
 
   return (

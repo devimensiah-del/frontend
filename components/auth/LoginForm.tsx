@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Heading, Text } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { siteConfig, authRoutes, getDefaultRouteByRole } from "@/lib/config/site";
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const { signIn, user } = useAuthContext();
+  const { signIn } = useAuthContext();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

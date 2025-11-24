@@ -1,5 +1,4 @@
 import React from "react";
-import { cn } from "@/lib/utils/cn";
 
 export function PublicFooter() {
   const currentYear = new Date().getFullYear();

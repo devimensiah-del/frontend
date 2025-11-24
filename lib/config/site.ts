@@ -3,8 +3,6 @@
  * Centralized configuration for navigation, routes, colors, and app settings
  */
 
-import { SubmissionStatus } from '../types';
-
 // ============================================================================
 // Site Metadata
 // ============================================================================

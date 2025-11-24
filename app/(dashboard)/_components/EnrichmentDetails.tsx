@@ -20,8 +20,8 @@ export function EnrichmentDetails({
   enrichment,
   isAdmin,
   onUpdate,
-  onRetry,
-  onEdit,
+  onRetry: _onRetry,
+  onEdit: _onEdit,
 }: EnrichmentDetailsProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState("overview");

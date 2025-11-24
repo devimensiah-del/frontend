@@ -5,14 +5,13 @@ import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi, submissionsApi, enrichmentApi, analysisApi, authApi, reportApi } from "@/lib/api/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { ActionToolbar } from "@/components/dashboard/ActionToolbar";
 import { Section, Container } from "@/components/editorial/Section";
-import { Heading, Text, Eyebrow } from "@/components/ui/Typography";
+import { Heading, Eyebrow } from "@/components/ui/Typography";
 import { Spinner } from "@/components/ui/loading-indicator";
 import { SubmissionDetails } from "@/app/(dashboard)/_components/SubmissionDetails";
 import { EnrichmentDetails } from "@/app/(dashboard)/_components/EnrichmentDetails";
@@ -42,7 +41,7 @@ export default function SubmissionPage() {
     queryFn: () => isAdmin ? adminApi.getSubmission(id) : submissionsApi.getById(id),
   });
 
-  const { data: enrichment, isLoading: isLoadingEnrichment } = useQuery({
+  const { data: enrichment } = useQuery({
     queryKey: ["enrichment", id],
     queryFn: () => isAdmin ? adminApi.getEnrichmentBySubmissionId(id) : enrichmentApi.getBySubmissionId(id),
     enabled: !!submission,
@@ -52,7 +51,7 @@ export default function SubmissionPage() {
     },
   });
 
-  const { data: analysis, isLoading: isLoadingAnalysis } = useQuery({
+  const { data: analysis } = useQuery({
     queryKey: ["analysis", id],
     queryFn: () => analysisApi.getBySubmissionId(id), // User/Admin both use this to get latest
     enabled: !!submission,
@@ -66,7 +65,7 @@ export default function SubmissionPage() {
     queryFn: async () => {
       try {
         return await reportApi.downloadReport(id);
-      } catch (error) {
+      } catch {
         // PDF not ready yet (404/202) - keep polling
         return null;
       }

@@ -31,10 +31,9 @@ import { Select, SelectOption } from "@/components/ui/Select";
 interface AnalysisCardProps {
   analysis: Analysis;
   isAdmin?: boolean;
-  submissionId?: string;
 }
 
-export function AnalysisCard({ analysis, isAdmin, submissionId }: AnalysisCardProps) {
+export function AnalysisCard({ analysis, isAdmin }: AnalysisCardProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("synthesis");
 

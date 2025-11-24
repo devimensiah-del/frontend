@@ -74,7 +74,7 @@ interface DividerProps extends React.HTMLAttributes<HTMLHRElement> {
 }
 
 export const Divider: React.FC<DividerProps> = ({
-  variant = "horizontal",
+  variant: _variant = "horizontal",
   className,
   ...props
 }) => {

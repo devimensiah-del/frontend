@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Analysis, SWOTItem, PorterForce, AnalysisContent } from '@/lib/types';
+import { Analysis, SWOTItem, PorterForce } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,25 +13,13 @@ import { Select, SelectOption } from '@/components/ui/Select';
 
 interface AnalysisEditorProps {
   analysis: Analysis;
-  onSave: (data: AnalysisContent) => void;
+  onSave: (data: Analysis['analysis']) => void;
 }
 
 export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
   const { toast } = useToast();
-  const [data, setData] = useState<AnalysisContent>(analysis.analysis);
+  const [data, setData] = useState<Analysis['analysis']>(analysis.analysis);
   const [activeTab, setActiveTab] = useState<string>('synthesis');
-
-  const handleSave = () => {
-    onSave(data);
-    toast({ title: "Nova versão criada com sucesso." });
-  };
-
-  const updateFramework = (framework: keyof AnalysisContent, newData: any) => {
-    setData(prev => ({
-      ...prev,
-      [framework]: { ...prev[framework], ...newData }
-    }));
-  };
 
   return (
     <div className="space-y-6">

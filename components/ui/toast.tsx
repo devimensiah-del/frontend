@@ -11,7 +11,7 @@ export interface ToastProps {
 }
 
 export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
-  ({ id, title, description, variant = "default", onClose, open = true }, ref) => {
+  ({ id: _id, title, description, variant = "default", onClose, open = true }, ref) => {
     const [isVisible, setIsVisible] = React.useState(open)
     const [isExiting, setIsExiting] = React.useState(false)
 

@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
-import { cn } from "@/lib/utils/cn";
 
 export function PublicNav() {
   return (

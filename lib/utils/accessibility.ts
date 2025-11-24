@@ -140,7 +140,6 @@ export const srOnlyClass =
  */
 export function setupFocusVisible(): void {
   let hadKeyboardEvent = true;
-  let hadFocusVisibleRecently = false;
 
   function onKeyDown() {
     hadKeyboardEvent = true;
@@ -154,13 +153,11 @@ export function setupFocusVisible(): void {
     if (hadKeyboardEvent) {
       (e.target as HTMLElement).setAttribute('data-focus-visible', 'true');
     }
-    hadFocusVisibleRecently = true;
     hadKeyboardEvent = false;
   }
 
   function onBlur(e: FocusEvent) {
     if ((e.target as HTMLElement).hasAttribute('data-focus-visible')) {
-      hadFocusVisibleRecently = true;
       (e.target as HTMLElement).removeAttribute('data-focus-visible');
     }
   }

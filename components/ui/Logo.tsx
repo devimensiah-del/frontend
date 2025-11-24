@@ -18,8 +18,8 @@ export const Logo: React.FC<LogoProps> = ({
   className,
   grayscale = false,
   alt = "IMENSIAH",
-  showText, // Ignored - PNG always includes text
-  variant, // Ignored - PNG is always default variant
+  showText: _showText, // Ignored - PNG always includes text
+  variant: _variant, // Ignored - PNG is always default variant
 }) => {
   return (
     <div className={cn("relative inline-block", className)}>

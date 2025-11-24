@@ -17,7 +17,7 @@ interface SubmissionCardProps {
   isAdmin?: boolean;
 }
 
-export const SubmissionCard: React.FC<SubmissionCardProps> = ({ submission, isAdmin = false }) => {
+export const SubmissionCard: React.FC<SubmissionCardProps> = ({ submission, isAdmin: _isAdmin = false }) => {
   const enrichmentStatus = (submission as any).enrichmentStatus || (submission as any).enrichment_status;
   const analysisStatus = (submission as any).analysisStatus || (submission as any).analysis_status;
 

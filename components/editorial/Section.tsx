@@ -12,7 +12,7 @@ interface SectionProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export const Section = React.forwardRef<HTMLElement, SectionProps>(
-  ({ className, variant = "default", fullWidth = false, children, ...props }, ref) => {
+  ({ className, variant = "default", fullWidth: _fullWidth = false, children, ...props }, ref) => {
     const variants = {
       default: "bg-surface-white border-b border-grid",
       hero: "min-h-[80vh] border-b border-grid",

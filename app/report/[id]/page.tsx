@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -20,7 +20,7 @@ export default function ReportPage() {
   const [downloading, setDownloading] = useState(false);
 
   // 1. Check Auth & Role
-  const { data: user, isLoading: isUserLoading } = useQuery({
+  const { data: _user, isLoading: isUserLoading } = useQuery({
     queryKey: ['user'],
     queryFn: authApi.getCurrentUser,
   });

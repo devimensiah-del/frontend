@@ -2,7 +2,6 @@
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils/cn";
 
 interface Props {
   children: ReactNode;

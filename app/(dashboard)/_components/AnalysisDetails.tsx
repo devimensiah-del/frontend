@@ -3,17 +3,19 @@ import { Analysis } from '@/lib/types';
 import { AnalysisCard } from './AnalysisCard';
 import { Button } from '@/components/ui/button';
 import { RefreshCcw } from 'lucide-react';
-
 import { AnalysisEditor } from './AnalysisEditor';
 
 interface AnalysisDetailsProps {
-  analysis?: Analysis;
+  analysis: Analysis;
+  onUpdate: (data: Analysis['analysis']) => void;
   isAdmin: boolean;
-  onUpdate: (data: any) => void;
-  onCreateVersion: () => void;
 }
 
-export function AnalysisDetails({ analysis, isAdmin, onUpdate, onCreateVersion }: AnalysisDetailsProps) {
+export function AnalysisDetails({
+  analysis,
+  onUpdate,
+  isAdmin,
+}: AnalysisDetailsProps) {
   const [isEditing, setIsEditing] = React.useState(false);
 
   if (!analysis) {

@@ -3,9 +3,6 @@
 import React from 'react';
 import { Submission } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { RefreshCcw } from 'lucide-react';
-
 import { Select, SelectOption } from '@/components/ui/Select';
 
 interface SubmissionDetailsProps {
@@ -14,7 +11,7 @@ interface SubmissionDetailsProps {
   onEdit?: () => void; // optional edit handler
 }
 
-export function SubmissionDetails({ submission, isAdmin, onEdit }: SubmissionDetailsProps) {
+export function SubmissionDetails({ submission, isAdmin: _isAdmin, onEdit: _onEdit }: SubmissionDetailsProps) {
   const [activeTab, setActiveTab] = React.useState("overview");
 
   const Field = ({ label, value, multiline }: { label: string; value: any; multiline?: boolean }) => (
@@ -149,4 +146,3 @@ function Field({ label, value, multiline }: FieldProps) {
     </div>
   );
 }
-
