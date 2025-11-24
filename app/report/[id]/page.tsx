@@ -4,8 +4,13 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-// ... imports
+import { useQuery } from '@tanstack/react-query';
+import { analysisApi, authApi } from '@/lib/api/client';
+import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/loading-indicator';
+import { Heading, Text, Eyebrow } from '@/components/ui/Typography';
+import { Section, Container } from '@/components/editorial/Section';
 
 export default function ReportPage() {
   const params = useParams();

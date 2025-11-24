@@ -1,9 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRef, useEffect } from "react";
-
-// ... imports
+import React from "react";
+import { useParams } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { adminApi, submissionsApi, enrichmentApi, analysisApi, authApi } from "@/lib/api/client";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { ActionToolbar } from "@/components/dashboard/ActionToolbar";
+import { Section, Container } from "@/components/editorial/Section";
+import { Heading, Text, Eyebrow } from "@/components/ui/Typography";
+import { Spinner } from "@/components/ui/loading-indicator";
+import { SubmissionDetails } from "@/app/(dashboard)/_components/SubmissionDetails";
+import { EnrichmentDetails } from "@/app/(dashboard)/_components/EnrichmentDetails";
+import { AnalysisDetails } from "@/app/(dashboard)/_components/AnalysisDetails";
 
 export default function SubmissionPage() {
   const params = useParams();

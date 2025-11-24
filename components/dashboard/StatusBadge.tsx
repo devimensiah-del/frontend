@@ -11,10 +11,11 @@ type AnyStatus = SubmissionStatus | EnrichmentStatus | AnalysisStatusType | stri
 interface StatusBadgeProps {
   status: AnyStatus;
   type?: "submission" | "enrichment" | "analysis";
+  size?: "sm" | "md" | "lg";
   className?: string;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "submission", className }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "submission", size = "md", className }) => {
   const getStatusStyles = (status: string) => {
     switch (status.toLowerCase()) {
       case "received":
