@@ -297,7 +297,6 @@ export default function SubmissionPage() {
                 analysis={analysis}
                 isAdmin={false}
                 onUpdate={() => { }}
-                onCreateVersion={() => { }}
               />
             ) : (
               // Admin View
@@ -305,7 +304,6 @@ export default function SubmissionPage() {
                 analysis={analysis}
                 isAdmin={isAdmin}
                 onUpdate={saveAnalysisEditsMutation.mutate}
-                onCreateVersion={() => { }} // Deprecated, keeping for type compatibility but not used
               />
             )}
           </TabsContent>
@@ -317,7 +315,7 @@ export default function SubmissionPage() {
             open={showSendDialog}
             onOpenChange={setShowSendDialog}
             onConfirm={() => sendAnalysisMutation.mutate()}
-            userEmail={submission.contactEmail}
+            userEmail={submission.contactEmail || ""}
             companyName={submission.companyName}
             isLoading={sendAnalysisMutation.isPending}
           />

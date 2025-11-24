@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Analysis, SWOTItem, PorterForce } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { Save, RotateCcw, Plus, X } from 'lucide-react';
 import { ListEditor } from '@/components/admin/editors/ListEditor';
@@ -20,6 +20,25 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
   const { toast } = useToast();
   const [data, setData] = useState<Analysis['analysis']>(analysis.analysis);
   const [activeTab, setActiveTab] = useState<string>('synthesis');
+
+  const updateFramework = (key: keyof Analysis['analysis'], value: Partial<Analysis['analysis'][typeof key]>) => {
+    setData((prev) => ({
+      ...prev,
+      [key]: {
+        ...(prev?.[key] as Record<string, any> || {}),
+        ...value,
+      },
+    }));
+  };
+
+  const handleSave = () => {
+    onSave(data);
+    toast({
+      title: "Salvo",
+      description: "AnA­lise atualizada.",
+      variant: "success",
+    });
+  };
 
   return (
     <div className="space-y-6">

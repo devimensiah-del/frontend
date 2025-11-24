@@ -26,7 +26,7 @@ export default function ReportPage() {
   });
 
   // 2. Fetch Analysis
-  const { data: analysis, isLoading: isAnalysisLoading, error } = useQuery({
+  const { data: analysis, isLoading: isAnalysisLoading, error: analysisError } = useQuery({
     queryKey: ['analysis', id],
     queryFn: () => analysisApi.getBySubmissionId(id), // Use submission ID to get analysis
   });
@@ -69,7 +69,7 @@ export default function ReportPage() {
     );
   }
 
-  if (error || !analysis) {
+  if (analysisError || !analysis) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-paper">
         <div className="text-center max-w-md px-4">

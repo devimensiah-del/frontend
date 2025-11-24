@@ -21,7 +21,7 @@ export function JsonEditor({ data, onChange, label }: JsonEditorProps) {
       const parsed = JSON.parse(value);
       onChange(parsed);
       setError(null);
-    } catch (e) {
+    } catch {
       setError("JSON inválido");
     }
   };

@@ -6,7 +6,7 @@ import { RefreshCcw } from 'lucide-react';
 import { AnalysisEditor } from './AnalysisEditor';
 
 interface AnalysisDetailsProps {
-  analysis: Analysis;
+  analysis?: Analysis;
   onUpdate: (data: Analysis['analysis']) => void;
   isAdmin: boolean;
 }
