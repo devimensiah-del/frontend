@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/loading-indicator";
    ============================================ */
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "architect" | "outline" | "default";
+  variant?: "architect" | "outline" | "default" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
   children: React.ReactNode;
   asChild?: boolean;
@@ -21,6 +21,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       architect: "btn-architect",
       outline: "btn-outline",
       default: "btn-architect",
+      ghost: "bg-transparent hover:bg-gray-100 text-gray-600 border-transparent",
     };
 
     const sizes = {
