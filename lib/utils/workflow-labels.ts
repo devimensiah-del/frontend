@@ -12,7 +12,7 @@ import { EnrichmentStatus, AnalysisStatus } from "@/lib/types";
  */
 export const ENRICHMENT_LABELS: Record<EnrichmentStatus, string> = {
   pending: "Coletando dados de mercado...",
-  finished: "Análise de mercado concluída",
+  completed: "Análise de mercado concluída",
   approved: "Pronto para relatório estratégico",
 };
 
@@ -107,7 +107,7 @@ export const getStatusDescription = (
     return "Coletando e analisando dados de mercado";
   }
 
-  if (enrichmentStatus === "finished") {
+  if (enrichmentStatus === "completed") {
     return "Aguardando revisão dos dados coletados";
   }
 

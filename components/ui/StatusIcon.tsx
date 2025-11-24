@@ -28,7 +28,7 @@ import { EnrichmentStatus, AnalysisStatus } from "@/lib/types";
  * ```
  */
 
-type GeneralStatus = "pending" | "processing" | "finished" | "completed" | "approved" | "sent" | "failed";
+type GeneralStatus = "pending" | "processing" | "completed" | "completed" | "approved" | "sent" | "failed";
 type AllStatus = GeneralStatus | EnrichmentStatus | AnalysisStatus;
 
 export interface StatusIconProps {
@@ -50,7 +50,7 @@ export const StatusIcon: React.FC<StatusIconProps> = ({ status, size = "md", cla
         return { Icon: Clock, color: "text-gray-400" };
       case "processing":
         return { Icon: Loader, color: "text-[var(--gold-600)]", animated: true };
-      case "finished":
+      case "completed":
         return { Icon: CheckCircle, color: "text-green-600" };
       case "completed":
         return { Icon: CheckCircle, color: "text-green-600" };

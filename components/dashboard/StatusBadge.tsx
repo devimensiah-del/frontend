@@ -25,7 +25,6 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "submis
       case "started":
         return "bg-blue-50 text-blue-600 border-blue-200";
       case "completed":
-      case "finished":
         return "bg-green-50 text-green-600 border-green-200";
       case "approved":
         return "bg-gold-50 text-gold-600 border-gold-200";
@@ -45,7 +44,6 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "submis
       processing: "Processando",
       started: "Iniciado",
       completed: "Concluído",
-      finished: "Finalizado",
       approved: "Aprovado",
       sent: "Enviado",
       failed: "Falhou",

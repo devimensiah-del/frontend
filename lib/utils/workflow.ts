@@ -3,7 +3,7 @@
  *
  * Workflow based on Enrichment and Analysis statuses:
  * - Submission: Always 'received'
- * * - Enrichment: pending -> finished -> approved
+ * * - Enrichment: pending -> completed -> approved
  * - Analysis: pending -> completed -> approved -> sent
  */
 
@@ -93,7 +93,7 @@ export function getEnrichmentActions(enrichment: Enrichment | null): {
         message: 'Aguardando worker processar',
       };
 
-    case 'finished':
+    case 'completed':
       return {
         canEdit: true,
         canApprove: true,
@@ -307,7 +307,7 @@ export function getWorkflowProgress(
     switch (enrichment?.status) {
       case 'approved':
         return 55;
-      case 'finished':
+      case 'completed':
         return 45;
       case 'pending':
         return 20;

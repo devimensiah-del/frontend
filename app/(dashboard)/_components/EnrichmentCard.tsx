@@ -1,13 +1,11 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Sparkles,
   Building2,
   DollarSign,
   TrendingUp,
-  CheckCircle,
   Globe,
   Target,
 } from 'lucide-react';
@@ -52,18 +50,16 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {enrichment.status === 'approved' && (
-              <Badge variant="default" className="bg-gold-50 text-gold-700 border-gold-200">
-                <CheckCircle className="w-3 h-3 mr-1" />
-                Concluído
-              </Badge>
-            )}
-            {enrichment.status === 'completed' && (
-              <StatusBadge status="completed" size="sm" />
-            )}
-            {enrichment.status === 'pending' && (
-              <StatusBadge status="processing" size="sm" />
-            )}
+            <StatusBadge
+              status={
+                enrichment.status === 'approved'
+                  ? 'approved'
+                  : enrichment.status === 'pending'
+                  ? 'processing'
+                  : 'completed'
+              }
+              size="sm"
+            />
           </div>
         </div>
 

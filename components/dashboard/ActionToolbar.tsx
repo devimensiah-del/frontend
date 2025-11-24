@@ -15,6 +15,7 @@ interface ActionToolbarProps {
   type: "enrichment" | "analysis";
   isLoading?: boolean;
   isAdmin?: boolean;
+  disableSend?: boolean;
 }
 
 export const ActionToolbar: React.FC<ActionToolbarProps> = ({
@@ -26,6 +27,7 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({
   type,
   isLoading = false,
   isAdmin = false,
+  disableSend = false,
 }) => {
   return (
     <div className="flex flex-wrap gap-3 items-center">
@@ -46,7 +48,7 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({
       )}
 
       {/* Approve Button - Admin only, when pending approval */}
-      {isAdmin && onApprove && (status === 'completed' || status === 'finished') && (
+      {isAdmin && onApprove && status === 'completed' && (
         <Button variant="architect" size="sm" onClick={onApprove} disabled={isLoading} className="gap-2">
           <CheckCircle className="w-4 h-4" />
           Aprovar {type === 'enrichment' ? 'Enriquecimento' : 'Análise'}
@@ -55,7 +57,7 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({
 
       {/* Send Button - Admin only, when approved but not sent (Analysis only) */}
       {isAdmin && onSend && type === 'analysis' && status === 'approved' && (
-        <Button variant="architect" size="sm" onClick={onSend} disabled={isLoading} className="gap-2 bg-gold-500 hover:bg-gold-600 text-white">
+        <Button variant="architect" size="sm" onClick={onSend} disabled={isLoading || disableSend} className="gap-2 bg-gold-500 hover:bg-gold-600 text-white">
           <Send className="w-4 h-4" />
           Enviar para Cliente
         </Button>

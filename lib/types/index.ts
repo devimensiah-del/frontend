@@ -82,10 +82,10 @@ export interface Submission {
 // Enrichment Types (The Researcher Agent)
 // ============================================================================
 
-// Enrichment workflow: pending → finished → approved
+// Enrichment workflow: pending -> completed -> approved
 export type EnrichmentStatus =
   | 'pending'      // Initial state, waiting for worker
-  | 'finished'     // Worker finished, waiting for admin review
+  | 'completed'     // Worker completed, waiting for admin review
   | 'approved';    // Admin approved, ready for analysis
 
 // Macro-Economic & Industry Context (Addresses "Brazil blind spot")

@@ -323,15 +323,6 @@ export const statusConfig: Record<string, StatusConfig> = {
     icon: 'CheckCircle',
     description: 'RelatA3rio disponA-vel para download',
   },
-  finished: {
-    label: 'ConcluA-do',
-    color: 'green',
-    bgColor: 'bg-green-50',
-    textColor: 'text-green-700',
-    borderColor: 'border-green-200',
-    icon: 'CheckCircle',
-    description: 'Enriquecimento finalizado, aguardando aprovaAAœo',
-  },
 
   // 6. Errors
   failed: {
@@ -493,4 +484,5 @@ export function getDefaultRouteByRole(role: string | undefined): string {
       return dashboardRoutes.main; // /dashboard
   }
 }
+
 

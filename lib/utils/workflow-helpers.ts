@@ -20,7 +20,7 @@ export function getWorkflowStage(
   analysis: Analysis | null
 ): string {
   if (!enrichment) return 'submission';
-  if (enrichment.status === 'pending' || enrichment.status === 'finished') return 'enrichment';
+  if (enrichment.status === 'pending' || enrichment.status === 'completed') return 'enrichment';
   if (!analysis || analysis.status === 'pending' || analysis.status === 'completed') return 'analysis';
   return 'completed';
 }
@@ -74,7 +74,7 @@ export function getTimelineEvents(
         timestamp: enrichment.createdAt,
         description: 'Coletando dados de mercado e contexto competitivo',
       });
-    } else if (enrichment.status === 'finished' || enrichment.status === 'approved') {
+    } else if (enrichment.status === 'completed' || enrichment.status === 'approved') {
       events.push({
         type: 'success',
         title: 'Pesquisa Concluída',
@@ -138,7 +138,7 @@ export function getNextAction(
   }
 
   // Enrichment in progress
-  if (enrichment.status === 'pending' || enrichment.status === 'finished') {
+  if (enrichment.status === 'pending' || enrichment.status === 'completed') {
     return {
       title: 'Pesquisa em Andamento',
       description:
@@ -196,7 +196,7 @@ export function getNextAction(
 export function getEnrichmentCompletion(enrichment: Enrichment | null): number {
   if (!enrichment) return 0;
   if (enrichment.status === 'approved') return 100;
-  if (enrichment.status === 'finished') return 90;
+  if (enrichment.status === 'completed') return 90;
   return enrichment.progress || 0;
 }
 

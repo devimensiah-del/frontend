@@ -3,7 +3,7 @@
 import React from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminApi, submissionsApi, enrichmentApi, analysisApi, authApi } from "@/lib/api/client";
+import { adminApi, submissionsApi, enrichmentApi, analysisApi, authApi, reportApi } from "@/lib/api/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,24 @@ export default function SubmissionPage() {
       return status === 'pending' ? 5000 : false;
     },
   });
+  const { data: reportStatus } = useQuery({
+    queryKey: ["report", id],
+    queryFn: async () => {
+      try {
+        return await reportApi.downloadReport(id);
+      } catch (error) {
+        // PDF not ready yet (404/202) - keep polling
+        return null;
+      }
+    },
+    enabled: !!submission && isAdmin && analysis?.status === 'approved',
+    refetchInterval: (query) => {
+        const ready = (query.state.data as any)?.pdf_url;
+        return ready ? false : 5000;
+    },
+    retry: true,
+  });
+  const pdfReady = !!(reportStatus as any)?.pdf_url;
   const approveEnrichmentMutation = useMutation({
     mutationFn: () => adminApi.approveEnrichment(enrichment!.id),
     onSuccess: () => {
@@ -82,7 +100,7 @@ export default function SubmissionPage() {
   });
 
   const updateEnrichmentMutation = useMutation({
-    mutationFn: (data: any) => adminApi.updateEnrichment(enrichment!.id, { data }),
+    mutationFn: (data: any) => adminApi.updateEnrichment(enrichment!.id, data),
     onSuccess: () => {
       toast({ title: "Atualizado", description: "Dados de enriquecimento salvos." });
       queryClient.invalidateQueries({ queryKey: ["enrichment", id] });
@@ -133,13 +151,14 @@ export default function SubmissionPage() {
               type={analysis ? "analysis" : "enrichment"}
               status={analysis?.status || enrichment?.status}
               isAdmin={isAdmin}
+              disableSend={!pdfReady}
               onDownload={downloadJson}
               onApprove={() => {
                 if (analysis && analysis.status === 'completed') approveAnalysisMutation.mutate();
-                else if (enrichment && enrichment.status === 'finished') approveEnrichmentMutation.mutate();
+                else if (enrichment && enrichment.status === 'completed') approveEnrichmentMutation.mutate();
               }}
               onSend={() => {
-                 if (analysis && analysis.status === 'approved') sendAnalysisMutation.mutate();
+                 if (analysis && analysis.status === 'approved' && pdfReady) sendAnalysisMutation.mutate();
               }}
               isLoading={approveEnrichmentMutation.isPending || approveAnalysisMutation.isPending}
             />
