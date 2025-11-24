@@ -18,6 +18,32 @@ interface EnrichmentDetailsProps {
   onEdit?: () => void; // optional external edit handler
 }
 
+/**
+ * Parse enrichment data - handles double-encoded JSON from backend
+ * The database sometimes stores JSON as a string, so we need to parse it
+ */
+function parseEnrichmentData(data: any): Record<string, any> {
+  if (!data) return {};
+
+  // If data is already an object, return it
+  if (typeof data === 'object' && data !== null) {
+    return data;
+  }
+
+  // If data is a string, try to parse it as JSON
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      return typeof parsed === 'object' ? parsed : {};
+    } catch (e) {
+      console.warn('Failed to parse enrichment data string:', e);
+      return {};
+    }
+  }
+
+  return {};
+}
+
 export function EnrichmentDetails({
   enrichment,
   isAdmin,
@@ -62,7 +88,9 @@ export function EnrichmentDetails({
     );
   }
 
-  const { data, status, progress, updatedAt } = enrichment;
+  // Parse data - handle double-encoded JSON from backend
+  const parsedData = parseEnrichmentData(enrichment.data);
+  const { status, progress, updatedAt } = enrichment;
 
   // Helper components for read‑only fields
   const Field = ({ label, value, multiline }: { label: string; value: any; multiline?: boolean }) => (
@@ -120,93 +148,92 @@ export function EnrichmentDetails({
           className="w-full"
         >
           <SelectOption value="overview">Visão Geral</SelectOption>
-          <SelectOption value="financial">Financeiro</SelectOption>
-          <SelectOption value="market">Mercado</SelectOption>
           <SelectOption value="strategic">Estratégico</SelectOption>
-          <SelectOption value="competitive">Competitivo</SelectOption>
-          <SelectOption value="raw">Dados Brutos</SelectOption>
+          <SelectOption value="financial">Financeiro</SelectOption>
+          <SelectOption value="market">Mercado & Competição</SelectOption>
+          <SelectOption value="metadata">Metadados</SelectOption>
         </Select>
       </div>
 
-      {/* Tabbed view */}
+      {/* Tabbed view - matches SubmissionDetails structure */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="hidden md:flex w-full overflow-x-auto flex-nowrap justify-start bg-white p-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide scrollbar-hide">
-          <TabsTrigger value="overview" className="min-w-[120px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
+        <TabsList className="hidden md:grid w-full grid-cols-5 bg-white p-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide">
+          <TabsTrigger value="overview" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
             Visão Geral
           </TabsTrigger>
-          <TabsTrigger value="financial" className="min-w-[100px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Financeiro
-          </TabsTrigger>
-          <TabsTrigger value="market" className="min-w-[100px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Mercado
-          </TabsTrigger>
-          <TabsTrigger value="strategic" className="min-w-[110px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
+          <TabsTrigger value="strategic" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
             Estratégico
           </TabsTrigger>
-          <TabsTrigger value="competitive" className="min-w-[110px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Competitivo
+          <TabsTrigger value="financial" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
+            Financeiro
           </TabsTrigger>
-          <TabsTrigger value="raw" className="min-w-[110px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Dados Brutos
+          <TabsTrigger value="market" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
+            Mercado
+          </TabsTrigger>
+          <TabsTrigger value="metadata" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
+            Metadados
           </TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab */}
+        {/* Overview Tab - Company Profile */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
-            <Field label="Razão Social" value={data.profile_overview?.legal_name} />
-            <Field label="Website" value={data.profile_overview?.website} />
-            <Field label="Ano de Fundação" value={data.profile_overview?.foundation_year} />
-            <Field label="Sede" value={data.profile_overview?.headquarters} />
-            <div className="col-span-2">
-              <Field label="Descrição" value={data.profile_overview?.description} multiline />
+            <Field label="Razão Social" value={parsedData.profile_overview?.legal_name} />
+            <Field label="Website" value={parsedData.profile_overview?.website} />
+            <Field label="Ano de Fundação" value={parsedData.profile_overview?.foundation_year} />
+            <Field label="Sede" value={parsedData.profile_overview?.headquarters} />
+            <div className="md:col-span-2">
+              <Field label="Proposta de Valor" value={parsedData.market_position?.value_proposition} multiline />
             </div>
           </div>
+        </TabsContent>
+
+        {/* Strategic Tab - Assessment & Insights */}
+        <TabsContent value="strategic" className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <Field label="Maturidade Digital (0‑10)" value={parsedData.strategic_assessment?.digital_maturity} />
+            <Field label="Setor de Atuação" value={parsedData.market_position?.sector} />
+          </div>
+          <ListField label="Forças Identificadas" items={parsedData.strategic_assessment?.strengths} />
+          <ListField label="Pontos de Atenção" items={parsedData.strategic_assessment?.weaknesses} />
         </TabsContent>
 
         {/* Financial Tab */}
         <TabsContent value="financial" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
-            <Field label="Faixa de Funcionários" value={data.financials?.employees_range} />
-            <Field label="Estimativa de Receita" value={data.financials?.revenue_estimate} />
-            <Field label="Modelo de Negócio" value={data.financials?.business_model} />
+            <Field label="Faixa de Funcionários" value={parsedData.financials?.employees_range} />
+            <Field label="Estimativa de Receita" value={parsedData.financials?.revenue_estimate} />
+            <div className="md:col-span-2">
+              <Field label="Modelo de Negócio" value={parsedData.financials?.business_model} multiline />
+            </div>
           </div>
         </TabsContent>
 
-        {/* Market Tab */}
+        {/* Market Tab - Position & Competition */}
         <TabsContent value="market" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6 mb-6 border-b pb-6">
+            <Field label="Público Alvo" value={parsedData.market_position?.target_audience} />
+            <Field label="Status de Market Share" value={parsedData.competitive_landscape?.market_share_status} />
+          </div>
+          <ListField label="Principais Concorrentes" items={parsedData.competitive_landscape?.competitors} />
+        </TabsContent>
+
+        {/* Metadata Tab - Status & Raw Data */}
+        <TabsContent value="metadata" className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-6 mb-6 border-b pb-6">
             <Field label="Status" value={status} />
-            <Field label="Atualizado em" value={updatedAt} />
-            <Field label="Aprovado" value={status === "approved" ? "Sim" : "Não"} />
             <Field label="Progresso" value={progress !== undefined ? `${progress}%` : "—"} />
-            <Field label="Qualidade dos Dados" value={data?.quality ?? "—"} />
+            <Field label="Aprovado" value={status === "approved" ? "Sim" : "Não"} />
+            <Field label="Atualizado em" value={updatedAt ? new Date(updatedAt).toLocaleString('pt-BR') : "—"} />
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
-            <Field label="Setor" value={data.market_position?.sector} />
-            <Field label="Público Alvo" value={data.market_position?.target_audience} />
-            <Field label="Proposta de Valor" value={data.market_position?.value_proposition} />
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+              Dados Brutos (JSON)
+            </label>
+            <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm text-navy-900 max-h-[400px]">
+              {JSON.stringify(parsedData, null, 2)}
+            </pre>
           </div>
-        </TabsContent>
-
-        {/* Strategic Tab */}
-        <TabsContent value="strategic" className="space-y-4">
-          <Field label="Maturidade Digital (0‑10)" value={data.strategic_assessment?.digital_maturity} />
-          <ListField label="Forças Identificadas" items={data.strategic_assessment?.strengths} />
-          <ListField label="Pontos de Atenção" items={data.strategic_assessment?.weaknesses} />
-        </TabsContent>
-
-        {/* Competitive Tab */}
-        <TabsContent value="competitive" className="space-y-4">
-          <ListField label="Concorrentes" items={data.competitive_landscape?.competitors} />
-          <Field label="Status de Share de Mercado" value={data.competitive_landscape?.market_share_status} />
-        </TabsContent>
-
-        {/* Raw JSON Tab */}
-        <TabsContent value="raw" className="space-y-4">
-          <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm text-navy-900">
-            {JSON.stringify(data, null, 2)}
-          </pre>
         </TabsContent>
       </Tabs>
     </div>
