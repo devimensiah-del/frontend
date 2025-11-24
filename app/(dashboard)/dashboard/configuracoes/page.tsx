@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Save, Eye, EyeOff, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -21,9 +21,50 @@ import { authApi, userApi } from '@/lib/api/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Section, Container } from '@/components/editorial/Section';
 import { Heading, Eyebrow, Text } from '@/components/ui/Typography';
+import { useProfile } from '@/lib/hooks/use-profile';
 
 export default function ConfiguracoesPage() {
   const { toast } = useToast();
+
+  const { profile, isLoading: profileLoading, update, isUpdating: isUpdatingProfile, updateError } =
+    useProfile(undefined, { enabled: true });
+
+  const [profileForm, setProfileForm] = useState({
+    fullName: '',
+  });
+
+  const normalizedFullName = profile?.fullName?.trim() || '';
+  const isProfileDirty = profile ? profileForm.fullName.trim() !== normalizedFullName : false;
+
+  useEffect(() => {
+    if (profile?.fullName) {
+      setProfileForm({ fullName: profile.fullName });
+    }
+  }, [profile]);
+
+  // Profile form state
+  const [profileError, setProfileError] = useState('');
+
+  const handleProfileSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileError('');
+
+    if (!profile) {
+      setProfileError('Usuário não autenticado.');
+      return;
+    }
+
+    try {
+      await update({ fullName: profileForm.fullName.trim() });
+      toast({
+        title: 'Perfil atualizado',
+        description: 'Seu nome foi salvo com sucesso.',
+        variant: 'success',
+      });
+    } catch (error: any) {
+      setProfileError(error?.message || 'Erro ao salvar perfil.');
+    }
+  };
 
   // Password change state
   const [passwordForm, setPasswordForm] = useState({
@@ -120,6 +161,82 @@ export default function ConfiguracoesPage() {
               Gerencie sua conta, senha e preferências.
             </Text>
           </div>
+
+          {/* Profile Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Meu Perfil</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleProfileSave} className="space-y-4">
+                {(!profile && profileLoading) ? (
+                  <p className="text-sm text-text-secondary">Carregando seus dados...</p>
+                ) : (
+                  <div className="space-y-4">
+                    <FormFieldWrapper
+                      label="Nome Completo"
+                      id="fullName"
+                      required
+                    >
+                      <Input
+                        id="fullName"
+                        value={profileForm.fullName}
+                        onChange={(e) => setProfileForm({ fullName: e.target.value })}
+                        placeholder="Seu nome completo"
+                        className="pr-10"
+                      />
+                    </FormFieldWrapper>
+
+                    <FormFieldWrapper label="E-mail" id="email">
+                      <Input
+                        id="email"
+                        value={profile?.email || ''}
+                        disabled
+                        className="bg-gray-50 text-gray-500 cursor-not-allowed"
+                      />
+                    </FormFieldWrapper>
+
+                    {profile?.role && (
+                      <Text className="text-sm text-text-secondary">
+                        Perfil: {profile.role === 'admin' ? 'Administrador' : 'Usuário'}
+                      </Text>
+                    )}
+                  </div>
+                )}
+
+                {(profileError || updateError) && (
+                  <Alert variant="error">
+                    <AlertDescription>{profileError || updateError?.message}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Button
+                  type="submit"
+                  variant="architect"
+                  disabled={
+                    profileLoading ||
+                    isUpdatingProfile ||
+                    !profile ||
+                    profileForm.fullName.trim().length < 2 ||
+                    !isProfileDirty
+                  }
+                  className="w-full sm:w-auto"
+                >
+                  {isUpdatingProfile ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar Alterações
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
 
           {/* Change Password Section */}
           <Card>

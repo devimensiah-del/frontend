@@ -2,10 +2,6 @@ import React from "react";
 import { cn } from "@/lib/utils/cn";
 import { SubmissionStatus, EnrichmentStatus, AnalysisStatusType } from "@/lib/types";
 
-/* ============================================
-   STATUS BADGE COMPONENT
-   ============================================ */
-
 type AnyStatus = SubmissionStatus | EnrichmentStatus | AnalysisStatusType | string;
 
 interface StatusBadgeProps {
@@ -16,8 +12,8 @@ interface StatusBadgeProps {
 }
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "submission", size = "md", className }) => {
-  const getStatusStyles = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusStyles = (value: string) => {
+    switch (value.toLowerCase()) {
       case "received":
       case "pending":
         return "bg-gray-100 text-gray-600 border-gray-200";
@@ -37,7 +33,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "submis
     }
   };
 
-  const getLabel = (status: string) => {
+  const getLabel = (value: string) => {
     const labels: Record<string, string> = {
       received: "Recebido",
       pending: "Pendente",
@@ -48,7 +44,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = "submis
       sent: "Enviado",
       failed: "Falhou",
     };
-    return labels[status.toLowerCase()] || status;
+    return labels[value.toLowerCase()] || value;
   };
 
   return (

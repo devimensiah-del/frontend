@@ -10,13 +10,14 @@ interface AnalysisDetailsProps {
   analysis?: Analysis;
   isAdmin: boolean;
   onUpdate: (data: any) => void;
+  onCreateVersion: () => void;
 }
 
-export function AnalysisDetails({ analysis, isAdmin, onUpdate }: AnalysisDetailsProps) {
+export function AnalysisDetails({ analysis, isAdmin, onUpdate, onCreateVersion }: AnalysisDetailsProps) {
   const [isEditing, setIsEditing] = React.useState(false);
 
   if (!analysis) {
-     return (
+    return (
       <div className="text-center py-12 text-gray-500">
         <p>Nenhuma análise gerada ainda.</p>
       </div>
@@ -25,12 +26,12 @@ export function AnalysisDetails({ analysis, isAdmin, onUpdate }: AnalysisDetails
 
   if (isEditing && isAdmin) {
     return (
-      <AnalysisEditor 
-        analysis={analysis} 
+      <AnalysisEditor
+        analysis={analysis}
         onSave={(data) => {
           onUpdate(data);
           setIsEditing(false);
-        }} 
+        }}
       />
     );
   }
@@ -39,19 +40,13 @@ export function AnalysisDetails({ analysis, isAdmin, onUpdate }: AnalysisDetails
     <div className="space-y-6">
       <div className="flex justify-end gap-2">
         {isAdmin && (
-          <>
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-              <RefreshCcw className="w-4 h-4 mr-2" />
-              Editar Análise
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => onUpdate({ action: 'regenerate' })}>
-              <RefreshCcw className="w-4 h-4 mr-2" />
-              Gerar Nova Versão
-            </Button>
-          </>
+          <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+            <RefreshCcw className="w-4 h-4 mr-2" />
+            Editar Análise
+          </Button>
         )}
       </div>
-      <AnalysisCard analysis={analysis} />
+      <AnalysisCard analysis={analysis} isAdmin={isAdmin} />
     </div>
   );
 }

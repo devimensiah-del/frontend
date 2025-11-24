@@ -61,7 +61,7 @@ const MOCK_DATA = {
     id: 'mock-analysis-1',
     submissionId: 'mock-id-1',
     status: 'approved',
-    version: 1,
+    version: "v1",
     pdf_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
     analysis: {
       synthesis: {
@@ -323,7 +323,7 @@ export const submissionsApi = {
    */
   async getById(id: string): Promise<Submission> {
     if (process.env.NODE_ENV === 'development') {
-        return MOCK_DATA.submission as unknown as Submission;
+      return MOCK_DATA.submission as unknown as Submission;
     }
     const response = await apiRequest<{ submission: Submission }>(`/submissions/${id}`);
     return response.submission;
@@ -338,7 +338,7 @@ export const submissionsApi = {
     pageSize?: number;
   }): Promise<{ submissions: Submission[]; total: number }> {
     if (process.env.NODE_ENV === 'development') {
-        return { submissions: [MOCK_DATA.submission as unknown as Submission], total: 1 };
+      return { submissions: [MOCK_DATA.submission as unknown as Submission], total: 1 };
     }
     return this.listSubmissions(params);
   },
@@ -412,7 +412,7 @@ export const enrichmentApi = {
    */
   async getBySubmissionId(submissionId: string): Promise<Enrichment> {
     if (process.env.NODE_ENV === 'development') {
-        return MOCK_DATA.enrichment as unknown as Enrichment;
+      return MOCK_DATA.enrichment as unknown as Enrichment;
     }
     const response = await apiRequest<{ enrichment: Enrichment }>(`/submissions/${submissionId}/enrichment`);
     return response.enrichment;
@@ -430,7 +430,7 @@ export const analysisApi = {
    */
   async getBySubmissionId(submissionId: string): Promise<Analysis> {
     if (process.env.NODE_ENV === 'development') {
-        return MOCK_DATA.analysis as unknown as Analysis;
+      return MOCK_DATA.analysis as unknown as Analysis;
     }
     const response = await apiRequest<{ analysis: Analysis }>(`/submissions/${submissionId}/analysis`);
     return response.analysis;
@@ -442,7 +442,7 @@ export const analysisApi = {
    */
   async publishReport(submissionId: string): Promise<{ report_id: string; pdf_url: string }> {
     if (process.env.NODE_ENV === 'development') {
-        return { report_id: 'mock-report-id', pdf_url: MOCK_DATA.analysis.pdf_url };
+      return { report_id: 'mock-report-id', pdf_url: MOCK_DATA.analysis.pdf_url };
     }
     return apiRequest(`/submissions/${submissionId}/report/publish`, {
       method: 'POST',
@@ -455,7 +455,7 @@ export const analysisApi = {
    */
   async downloadReport(submissionId: string): Promise<{ pdf_url: string; report_id: string; created_at: string }> {
     if (process.env.NODE_ENV === 'development') {
-        return { pdf_url: MOCK_DATA.analysis.pdf_url, report_id: 'mock-report-id', created_at: new Date().toISOString() };
+      return { pdf_url: MOCK_DATA.analysis.pdf_url, report_id: 'mock-report-id', created_at: new Date().toISOString() };
     }
     return apiRequest(`/submissions/${submissionId}/report/download`);
   },
@@ -508,13 +508,13 @@ export const adminApi = {
     pageSize?: number;
   }): Promise<PaginatedResponse<Submission>> {
     if (process.env.NODE_ENV === 'development') {
-        return {
-            data: [MOCK_DATA.submission as unknown as Submission],
-            total: 1,
-            page: 1,
-            pageSize: 10,
-            totalPages: 1
-        };
+      return {
+        data: [MOCK_DATA.submission as unknown as Submission],
+        total: 1,
+        page: 1,
+        pageSize: 10,
+        totalPages: 1
+      };
     }
     const queryParams = new URLSearchParams();
     if (params?.status) queryParams.append('status', params.status);
@@ -532,7 +532,7 @@ export const adminApi = {
    */
   async getSubmission(id: string): Promise<Submission> {
     if (process.env.NODE_ENV === 'development') {
-        return MOCK_DATA.submission as unknown as Submission;
+      return MOCK_DATA.submission as unknown as Submission;
     }
     const response = await apiRequest<{ submission: Submission }>(`/admin/submissions/${id}`);
     return response.submission;
@@ -548,28 +548,28 @@ export const adminApi = {
     revenue: number;
   }> {
     if (process.env.NODE_ENV === 'development') {
-        return {
-            totalSubmissions: 12,
-            activeSubmissions: 3,
-            completedSubmissions: 9,
-            revenue: 45000
-        };
+      return {
+        totalSubmissions: 12,
+        activeSubmissions: 3,
+        completedSubmissions: 9,
+        revenue: 45000
+      };
     }
     return apiRequest('/admin/analytics');
   },
 
-      /**
-     * Get enrichment by submission ID (admin only)
-     */
-    async getEnrichmentBySubmissionId(submissionId: string): Promise<Enrichment> {
-      if (process.env.NODE_ENV === 'development') {
-          return MOCK_DATA.enrichment as unknown as Enrichment;
-      }
-      const response = await apiRequest<{ enrichment: Enrichment }>(
-        `/admin/submissions/${submissionId}/enrichment`
-      );
-      return response.enrichment;
-    },
+  /**
+ * Get enrichment by submission ID (admin only)
+ */
+  async getEnrichmentBySubmissionId(submissionId: string): Promise<Enrichment> {
+    if (process.env.NODE_ENV === 'development') {
+      return MOCK_DATA.enrichment as unknown as Enrichment;
+    }
+    const response = await apiRequest<{ enrichment: Enrichment }>(
+      `/admin/submissions/${submissionId}/enrichment`
+    );
+    return response.enrichment;
+  },
 
   /**
    * Update enrichment fields (admin only) - status remains unchanged

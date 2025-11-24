@@ -146,6 +146,7 @@ export interface Enrichment {
       website: string;
       foundation_year: string;
       headquarters: string;
+      description?: string; // Added optional description field
     };
     financials?: {
       employees_range: string;
@@ -345,7 +346,7 @@ export { type AnalysisStatus as AnalysisStatusType };
 export interface Analysis {
   id: string;
   submissionId: string;
-  version: number;                    // Version number (1, 2, 3, ...)
+  version: string;                    // Version string ("v1", "v2", ...)
   parentId?: string | null;           // Reference to previous version (backend uses "parentId" not "parentAnalysisId")
   status: AnalysisStatus;
   pdfUrl?: string;

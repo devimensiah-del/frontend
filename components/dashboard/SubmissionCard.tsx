@@ -18,6 +18,9 @@ interface SubmissionCardProps {
 }
 
 export const SubmissionCard: React.FC<SubmissionCardProps> = ({ submission, isAdmin = false }) => {
+  const enrichmentStatus = (submission as any).enrichmentStatus || (submission as any).enrichment_status;
+  const analysisStatus = (submission as any).analysisStatus || (submission as any).analysis_status;
+
   return (
     <Link href={`/submissions/${submission.id}`} className="block group">
       <Card className="h-full hover:shadow-md transition-all duration-300 border-l-4 border-l-transparent hover:border-l-gold-500">
@@ -32,6 +35,10 @@ export const SubmissionCard: React.FC<SubmissionCardProps> = ({ submission, isAd
           <Heading as="h3" className="text-xl group-hover:text-gold-600 transition-colors">
             {submission.companyName}
           </Heading>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {enrichmentStatus && <StatusBadge status={enrichmentStatus} type="enrichment" />}
+            {analysisStatus && <StatusBadge status={analysisStatus} type="analysis" />}
+          </div>
         </CardHeader>
         
         <CardContent className="pb-4 pt-0">

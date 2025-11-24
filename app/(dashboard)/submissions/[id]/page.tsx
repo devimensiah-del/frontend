@@ -17,12 +17,17 @@ import { Spinner } from "@/components/ui/loading-indicator";
 import { SubmissionDetails } from "@/app/(dashboard)/_components/SubmissionDetails";
 import { EnrichmentDetails } from "@/app/(dashboard)/_components/EnrichmentDetails";
 import { AnalysisDetails } from "@/app/(dashboard)/_components/AnalysisDetails";
+import { Select, SelectOption } from "@/components/ui/Select";
+import { SendAnalysisDialog } from "@/app/(dashboard)/_components/SendAnalysisDialog";
+import { WorkflowProgress } from "@/app/(dashboard)/_components/WorkflowProgress";
 
 export default function SubmissionPage() {
   const params = useParams();
   const id = params.id as string;
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = React.useState("submission");
+  const [showSendDialog, setShowSendDialog] = React.useState(false);
 
   // 1. Fetch User Role
   const { data: user } = useQuery({
@@ -68,8 +73,8 @@ export default function SubmissionPage() {
     },
     enabled: !!submission && isAdmin && analysis?.status === 'approved',
     refetchInterval: (query) => {
-        const ready = (query.state.data as any)?.pdf_url;
-        return ready ? false : 5000;
+      const ready = (query.state.data as any)?.pdf_url;
+      return ready ? false : 5000;
     },
     retry: true,
   });
@@ -80,6 +85,14 @@ export default function SubmissionPage() {
       toast({ title: "Sucesso", description: "Enriquecimento aprovado. Análise iniciada." });
       queryClient.invalidateQueries({ queryKey: ["enrichment", id] });
       queryClient.invalidateQueries({ queryKey: ["analysis", id] }); // Analysis should be created
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível aprovar o enriquecimento.",
+        variant: "destructive"
+      });
+      console.error("Error approving enrichment:", error);
     }
   });
 
@@ -88,14 +101,31 @@ export default function SubmissionPage() {
     onSuccess: () => {
       toast({ title: "Sucesso", description: "Análise aprovada. PDF gerado." });
       queryClient.invalidateQueries({ queryKey: ["analysis", id] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível aprovar a análise.",
+        variant: "destructive"
+      });
+      console.error("Error approving analysis:", error);
     }
   });
 
   const sendAnalysisMutation = useMutation({
     mutationFn: () => adminApi.sendAnalysis(analysis!.id, submission!.contactEmail || ""), // Use submission email
     onSuccess: () => {
-      toast({ title: "Sucesso", description: "Análise enviada para o cliente." });
+      toast({ title: "Sucesso", description: "Análise liberada para o cliente." });
       queryClient.invalidateQueries({ queryKey: ["analysis", id] });
+      setShowSendDialog(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível liberar a análise.",
+        variant: "destructive"
+      });
+      console.error("Error sending analysis:", error);
     }
   });
 
@@ -108,17 +138,47 @@ export default function SubmissionPage() {
   });
 
   const updateAnalysisMutation = useMutation({
-    mutationFn: (edits: any) => adminApi.createAnalysisVersion(analysis!.id, edits),
+    mutationFn: (data: any) => adminApi.updateAnalysis(analysis!.id, data),
     onSuccess: () => {
-      toast({ title: "Nova Versão", description: "Nova versão da análise criada." });
+      toast({ title: "Atualizado", description: "Análise salva." });
       queryClient.invalidateQueries({ queryKey: ["analysis", id] });
+    }
+  });
+
+  // Combined mutation: create new version, then update it with edited data
+  const saveAnalysisEditsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      // First, create a new version (clones previous)
+      await adminApi.createAnalysisVersion(analysis!.id);
+      // Then update the new version with the edited data
+      return adminApi.updateAnalysis(analysis!.id, data);
+    },
+    onSuccess: () => {
+      toast({ title: "Sucesso", description: "Nova versão criada com sucesso." });
+      queryClient.invalidateQueries({ queryKey: ["analysis", id] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar as alterações.",
+        variant: "destructive"
+      });
+      console.error("Error saving analysis edits:", error);
+    }
+  });
+
+  const retryEnrichmentMutation = useMutation({
+    mutationFn: () => adminApi.retryEnrichment(submission!.id),
+    onSuccess: () => {
+      toast({ title: "Solicitado", description: "Enriquecimento reiniciado." });
+      queryClient.invalidateQueries({ queryKey: ["enrichment", id] });
     }
   });
 
   const downloadJson = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ submission, enrichment, analysis }, null, 2));
     const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", `project_${id}.json`);
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
@@ -147,7 +207,7 @@ export default function SubmissionPage() {
           </div>
 
           {isAdmin && (
-            <ActionToolbar 
+            <ActionToolbar
               type={analysis ? "analysis" : "enrichment"}
               status={analysis?.status || enrichment?.status}
               isAdmin={isAdmin}
@@ -158,41 +218,53 @@ export default function SubmissionPage() {
                 else if (enrichment && enrichment.status === 'completed') approveEnrichmentMutation.mutate();
               }}
               onSend={() => {
-                 if (analysis && analysis.status === 'approved' && pdfReady) sendAnalysisMutation.mutate();
+                if (analysis && analysis.status === 'approved' && pdfReady) setShowSendDialog(true);
               }}
               isLoading={approveEnrichmentMutation.isPending || approveAnalysisMutation.isPending}
             />
           )}
-          
+
           {!isAdmin && analysis?.status === 'sent' && (
-             <Button variant="architect" onClick={() => window.open(analysis.pdf_url || analysis.pdfUrl || '#', '_blank')}>
-               Baixar Relatório PDF
-             </Button>
+            <Button variant="architect" onClick={() => window.open(analysis.pdf_url || analysis.pdfUrl || '#', '_blank')}>
+              Baixar Relatório PDF
+            </Button>
           )}
         </div>
 
+        {/* Mobile Tab Selector */}
+        <div className="md:hidden mb-6">
+          <Select
+            value={activeTab}
+            onChange={(e) => setActiveTab(e.target.value)}
+            className="w-full"
+          >
+            <SelectOption value="submission">Envio</SelectOption>
+            <SelectOption value="enrichment">Enriquecimento</SelectOption>
+            <SelectOption value="analysis">Análise</SelectOption>
+          </Select>
+        </div>
+
         {/* Content Tabs */}
-        <Tabs defaultValue="submission" className="w-full space-y-6">
-          <TabsList className="grid w-full md:w-[400px] grid-cols-3 bg-white p-1 border border-gray-200 rounded-none">
-            <TabsTrigger value="submission">Envio</TabsTrigger>
-            <TabsTrigger value="enrichment">Enriquecimento</TabsTrigger>
-            <TabsTrigger value="analysis">Análise</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
+          <TabsList className="hidden md:grid w-full md:w-[600px] md:grid-cols-3 bg-white p-2 gap-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide">
+            <TabsTrigger value="submission" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
+              Envio
+            </TabsTrigger>
+            <TabsTrigger value="enrichment" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
+              Enriquecimento
+            </TabsTrigger>
+            <TabsTrigger value="analysis" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
+              Análise
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="submission" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <Card>
               <CardHeader><CardTitle>Dados do Envio</CardTitle></CardHeader>
               <CardContent>
-                <SubmissionDetails 
-                    submission={submission} 
-                    isAdmin={isAdmin}
-                    onUpdate={(data) => {
-                        // Implement submission update mutation if needed
-                        // For now, just a placeholder as actual API might differ
-                        // submissionsApi.update(submission.id, data);
-                        console.log("Update submission", data);
-                        toast({ title: "Info", description: "Atualização de envio ainda não implementada na API." });
-                    }}
+                <SubmissionDetails
+                  submission={submission}
+                  isAdmin={isAdmin}
                 />
               </CardContent>
             </Card>
@@ -202,62 +274,57 @@ export default function SubmissionPage() {
             <Card>
               <CardHeader><CardTitle>Dados Enriquecidos (IA)</CardTitle></CardHeader>
               <CardContent>
-                <EnrichmentDetails 
-                   enrichment={enrichment} 
-                   isAdmin={isAdmin} 
-                   onUpdate={updateEnrichmentMutation.mutate} 
+                <EnrichmentDetails
+                  enrichment={enrichment}
+                  isAdmin={isAdmin}
+                  onUpdate={updateEnrichmentMutation.mutate}
+                  onRetry={retryEnrichmentMutation.mutate}
                 />
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Only show Analysis tab content if Admin or Approved */ }
+          {/* Only show Analysis tab content if Admin or Approved */}
           <TabsContent value="analysis" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             {(!isAdmin && analysis?.status !== 'approved' && analysis?.status !== 'sent') ? (
-                 <Card className="border-dashed">
-                     <CardContent className="py-12 text-center">
-                         <div className="mb-4 bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-                             <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
-                         </div>
-                         <Heading variant="subtitle" className="mb-2">Análise em Andamento</Heading>
-                         <Text variant="small">Nossa equipe e IA estão processando seus dados. Você será notificado assim que estiver pronto.</Text>
-                     </CardContent>
-                 </Card>
-             ) : (!isAdmin && (analysis?.status === 'approved' || analysis?.status === 'sent')) ? (
-                 <Card className="border-gold-200 bg-gold-50/10">
-                     <CardContent className="py-12 text-center">
-                         <div className="mb-6">
-                             <Heading variant="title" className="text-2xl mb-2">Seu Relatório de Inteligência Estratégica está pronto.</Heading>
-                             <Text className="max-w-lg mx-auto mb-8">
-                                 Acesse a análise completa, incluindo SWOT, PESTEL, Forças de Porter e recomendações executivas.
-                             </Text>
-                             <Button 
-                                variant="architect" 
-                                size="lg" 
-                                onClick={() => window.open(`/report/${analysis.id}`, '_blank')}
-                                className="shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all"
-                             >
-                                 Visualizar Relatório Completo <ArrowRight className="ml-2 w-4 h-4" />
-                             </Button>
-                         </div>
-                     </CardContent>
-                 </Card>
-             ) : (
-                 // Admin View
-                 <AnalysisDetails 
-                    analysis={analysis} 
-                    isAdmin={isAdmin}
-                    onUpdate={updateAnalysisMutation.mutate}
-                 />
-             )}
+            {(!isAdmin && (!analysis || (analysis.status !== 'approved' && analysis.status !== 'sent'))) ? (
+              <WorkflowProgress
+                enrichmentStatus={enrichment?.status}
+                analysisStatus={analysis?.status}
+                isAdmin={false}
+              />
+            ) : (!isAdmin && (analysis?.status === 'approved' || analysis?.status === 'sent')) ? (
+              // User view when analysis is ready
+              <AnalysisDetails
+                analysis={analysis}
+                isAdmin={false}
+                onUpdate={() => { }}
+                onCreateVersion={() => { }}
+              />
+            ) : (
+              // Admin View
+              <AnalysisDetails
+                analysis={analysis}
+                isAdmin={isAdmin}
+                onUpdate={saveAnalysisEditsMutation.mutate}
+                onCreateVersion={() => { }} // Deprecated, keeping for type compatibility but not used
+              />
+            )}
           </TabsContent>
         </Tabs>
+
+        {/* Send Analysis Confirmation Dialog */}
+        {showSendDialog && submission && (
+          <SendAnalysisDialog
+            open={showSendDialog}
+            onOpenChange={setShowSendDialog}
+            onConfirm={() => sendAnalysisMutation.mutate()}
+            userEmail={submission.contactEmail}
+            companyName={submission.companyName}
+            isLoading={sendAnalysisMutation.isPending}
+          />
+        )}
 
       </Container>
     </Section>
   );
 }
-
-
-
-

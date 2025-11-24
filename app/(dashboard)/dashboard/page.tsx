@@ -6,9 +6,9 @@ import { submissionsApi, adminApi, authApi } from "@/lib/api/client";
 import { SubmissionCard } from "@/components/dashboard/SubmissionCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Section, Container } from "@/components/editorial/Section";
-import { Heading, Eyebrow } from "@/components/ui/Typography";
+import { Heading, Eyebrow, Text } from "@/components/ui/Typography";
 import { Spinner } from "@/components/ui/loading-indicator";
-import { AlertCircle, Loader, CheckCircle, BarChart3 } from "lucide-react";
+import { Loader, CheckCircle, BarChart3 } from "lucide-react";
 import type { Submission } from "@/lib/types";
 
 export default function DashboardPage() {
@@ -63,6 +63,15 @@ export default function DashboardPage() {
           <Heading variant="section">
             {isAdmin ? "Painel de Controle" : "Envios Recentes"}
           </Heading>
+          {isAdmin ? (
+            <Text className="text-text-secondary mt-2">
+              Acompanhe o fluxo: recebidos, enriquecimento, análise e aprovação/envio do relatório.
+            </Text>
+          ) : (
+            <Text className="text-text-secondary mt-2">
+              Veja o status dos seus envios enquanto avançam por enriquecimento e análise.
+            </Text>
+          )}
         </div>
 
         {/* Admin Analytics Cards */}
@@ -89,7 +98,9 @@ export default function DashboardPage() {
         )}
 
         {isAdmin && (
-            <Heading variant="subtitle" className="mb-6">Todos os Envios</Heading>
+          <Heading variant="subtitle" className="mb-6">
+            Todos os Envios
+          </Heading>
         )}
 
         {submissions.length === 0 ? (
