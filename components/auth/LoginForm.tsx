@@ -27,7 +27,7 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      await signIn(email, password);
+      const authData = await signIn(email, password);
 
       toast({
         title: "Bem-vindo de volta",
@@ -35,13 +35,12 @@ export function LoginForm() {
         variant: "success",
       });
 
-      // Wait for auth context to update with user profile from backend
-      // The AuthProvider will fetch the user profile automatically
-      setTimeout(() => {
-        // Check if there's a redirect param, otherwise use role-based default
-        const redirectPath = searchParams.get("redirect") || getDefaultRouteByRole(user?.role);
-        router.push(redirectPath);
-      }, 500); // Increased timeout to ensure user profile is loaded
+      // Use the returned auth data to determine the route immediately
+      // This avoids waiting for the context state to update
+      const userRole = authData?.user?.role;
+      const redirectPath = searchParams.get("redirect") || getDefaultRouteByRole(userRole);
+      router.push(redirectPath);
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao fazer login";
       setError(errorMessage);
