@@ -22,6 +22,7 @@ export default function SubmissionPage() {
   const params = useParams();
   const id = params.id as string;
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // 1. Fetch User Role
   const { data: user } = useQuery({
@@ -40,9 +41,9 @@ export default function SubmissionPage() {
     queryKey: ["enrichment", id],
     queryFn: () => isAdmin ? adminApi.getEnrichmentBySubmissionId(id) : enrichmentApi.getBySubmissionId(id),
     enabled: !!submission,
-    refetchInterval: (data) => {
-        if (data?.status === 'pending') return 5000;
-        return false;
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === 'pending' ? 5000 : false;
     },
   });
 
@@ -50,9 +51,9 @@ export default function SubmissionPage() {
     queryKey: ["analysis", id],
     queryFn: () => analysisApi.getBySubmissionId(id), // User/Admin both use this to get latest
     enabled: !!submission,
-    refetchInterval: (data) => {
-        if (data?.status === 'pending' || data?.status === 'processing') return 5000;
-        return false;
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === 'pending' ? 5000 : false;
     },
   });
   const approveEnrichmentMutation = useMutation({
@@ -135,7 +136,7 @@ export default function SubmissionPage() {
               onDownload={downloadJson}
               onApprove={() => {
                 if (analysis && analysis.status === 'completed') approveAnalysisMutation.mutate();
-                else if (enrichment && enrichment.status === 'completed') approveEnrichmentMutation.mutate();
+                else if (enrichment && enrichment.status === 'finished') approveEnrichmentMutation.mutate();
               }}
               onSend={() => {
                  if (analysis && analysis.status === 'approved') sendAnalysisMutation.mutate();
@@ -145,7 +146,7 @@ export default function SubmissionPage() {
           )}
           
           {!isAdmin && analysis?.status === 'sent' && (
-             <Button variant="architect" onClick={() => window.open(analysis.pdf_url || '#', '_blank')}>
+             <Button variant="architect" onClick={() => window.open(analysis.pdf_url || analysis.pdfUrl || '#', '_blank')}>
                Baixar Relatório PDF
              </Button>
           )}
@@ -237,3 +238,7 @@ export default function SubmissionPage() {
     </Section>
   );
 }
+
+
+
+

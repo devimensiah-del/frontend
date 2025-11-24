@@ -37,14 +37,14 @@ export function SubmissionDetails({ submission, isAdmin, onUpdate }: SubmissionD
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium text-navy-900">Informações da Empresa</h3>
         {isAdmin && !isEditing && (
-          <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+          <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
             <Edit2 className="w-4 h-4 mr-2" />
             Editar
           </Button>
         )}
         {isEditing && (
           <div className="flex gap-2">
-             <Button variant="ghost" size="sm" onClick={handleCancel}>
+             <Button variant="outline" size="sm" onClick={handleCancel}>
               <X className="w-4 h-4 mr-2" />
               Cancelar
             </Button>
@@ -59,7 +59,7 @@ export function SubmissionDetails({ submission, isAdmin, onUpdate }: SubmissionD
       <div className="grid md:grid-cols-2 gap-6">
         <Field label="Nome da Empresa" value={formData.companyName} isEditing={isEditing} 
                onChange={(v) => setFormData({...formData, companyName: v})} />
-        <Field label="CNPJ" value={formData.cnpj} isEditing={isEditing} 
+        <Field label="CNPJ" value={formData.cnpj || ''} isEditing={isEditing} 
                onChange={(v) => setFormData({...formData, cnpj: v})} />
         <Field label="Website" value={formData.website || ''} isEditing={isEditing} 
                onChange={(v) => setFormData({...formData, website: v})} />
@@ -86,17 +86,30 @@ export function SubmissionDetails({ submission, isAdmin, onUpdate }: SubmissionD
   );
 }
 
-function Field({ label, value, isEditing, onChange, multiline }: any) {
-    return (
-        <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">{label}</label>
-            {isEditing ? (
-                multiline ? 
-                <Textarea value={value} onChange={(e) => onChange(e.target.value)} className="min-h-[100px]" /> :
-                <Input value={value} onChange={(e) => onChange(e.target.value)} />
-            ) : (
-                <p className="text-sm text-navy-900">{value || '-'}</p>
-            )}
-        </div>
-    )
+interface FieldProps {
+  label: string;
+  value: string;
+  isEditing: boolean;
+  onChange: (value: string) => void;
+  multiline?: boolean;
 }
+
+function Field({ label, value, isEditing, onChange, multiline }: FieldProps) {
+  return (
+    <div>
+      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">
+        {label}
+      </label>
+      {isEditing ? (
+        multiline ? (
+          <Textarea value={value} onChange={(e) => onChange(e.target.value)} className="min-h-[100px]" />
+        ) : (
+          <Input value={value} onChange={(e) => onChange(e.target.value)} />
+        )
+      ) : (
+        <p className="text-sm text-navy-900">{value || '-'}</p>
+      )}
+    </div>
+  );
+}
+

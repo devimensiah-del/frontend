@@ -110,7 +110,7 @@ export default function ConfiguracoesPage() {
       toast({
         title: 'Erro',
         description: 'Erro ao salvar preferências. Tente novamente.',
-        variant: 'destructive',
+        variant: 'error',
       });
     } finally {
       setNotificationsLoading(false);
@@ -134,7 +134,7 @@ export default function ConfiguracoesPage() {
       toast({
         title: 'Erro',
         description: 'Erro ao excluir conta. Tente novamente.',
-        variant: 'destructive',
+        variant: 'error',
       });
     }
   };
@@ -260,7 +260,7 @@ export default function ConfiguracoesPage() {
 
                 {/* Error Message */}
                 {passwordError && (
-                  <Alert variant="destructive">
+                  <Alert variant="error">
                     <AlertDescription>{passwordError}</AlertDescription>
                   </Alert>
                 )}

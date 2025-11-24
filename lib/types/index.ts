@@ -82,10 +82,10 @@ export interface Submission {
 // Enrichment Types (The Researcher Agent)
 // ============================================================================
 
-// Enrichment workflow: pending → completed → approved
+// Enrichment workflow: pending → finished → approved
 export type EnrichmentStatus =
   | 'pending'      // Initial state, waiting for worker
-  | 'completed'    // Worker completed, waiting for admin review
+  | 'finished'     // Worker finished, waiting for admin review
   | 'approved';    // Admin approved, ready for analysis
 
 // Macro-Economic & Industry Context (Addresses "Brazil blind spot")
@@ -348,6 +348,8 @@ export interface Analysis {
   version: number;                    // Version number (1, 2, 3, ...)
   parentId?: string | null;           // Reference to previous version (backend uses "parentId" not "parentAnalysisId")
   status: AnalysisStatus;
+  pdfUrl?: string;
+  pdf_url?: string;
 
   // ALL FRAMEWORKS NESTED IN "analysis" OBJECT (matches backend response structure)
   analysis: {

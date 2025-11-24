@@ -44,7 +44,7 @@ export function getEnrichmentStatusVariant(status: EnrichmentStatus): BadgeVaria
   switch (status) {
     case 'pending':
       return 'warning'; // Yellow - waiting
-    case 'completed':
+    case 'finished':
       return 'gold'; // Gold - ready for review
     case 'approved':
       return 'success'; // Green - approved
@@ -59,7 +59,7 @@ export function getEnrichmentStatusVariant(status: EnrichmentStatus): BadgeVaria
 export function getEnrichmentStatusLabel(status: EnrichmentStatus): string {
   const labels: Partial<Record<EnrichmentStatus, string>> = {
     pending: 'Pendente',
-    completed: 'Pronto',
+    finished: 'Pronto',
     approved: 'Aprovado',
   };
 
@@ -73,7 +73,7 @@ export function getEnrichmentStatusDescription(status: EnrichmentStatus): string
   switch (status) {
     case 'pending':
       return 'Aguardando início do enriquecimento de dados.';
-    case 'completed':
+    case 'finished':
       return 'Enriquecimento concluído. Aguardando revisão administrativa.';
     case 'approved':
       return 'Dados enriquecidos aprovados. Pronto para análise estratégica.';
@@ -144,7 +144,7 @@ export function getAnalysisStatusDescription(status: AnalysisStatus): string {
  * Check if enrichment can be approved
  */
 export function canApproveEnrichment(status: EnrichmentStatus): boolean {
-  return status === 'completed';
+  return status === 'finished';
 }
 
 /**

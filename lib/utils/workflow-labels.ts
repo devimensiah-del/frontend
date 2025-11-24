@@ -12,7 +12,7 @@ import { EnrichmentStatus, AnalysisStatus } from "@/lib/types";
  */
 export const ENRICHMENT_LABELS: Record<EnrichmentStatus, string> = {
   pending: "Coletando dados de mercado...",
-  completed: "Análise de mercado concluída",
+  finished: "Análise de mercado concluída",
   approved: "Pronto para relatório estratégico",
 };
 
@@ -21,9 +21,9 @@ export const ENRICHMENT_LABELS: Record<EnrichmentStatus, string> = {
  */
 export const ANALYSIS_LABELS: Record<AnalysisStatus, string> = {
   pending: "Aguardando dados de mercado",
-  completed: "Relatório estratégico concluído",
-  approved: "Relatório aprovado",
-  sent: "Relatório enviado",
+  completed: "RelatA3rio estratAcgico concluA-do",
+  approved: "RelatA3rio aprovado",
+  sent: "RelatA3rio enviado",
 };
 
 /**
@@ -107,7 +107,7 @@ export const getStatusDescription = (
     return "Coletando e analisando dados de mercado";
   }
 
-  if (enrichmentStatus === "completed") {
+  if (enrichmentStatus === "finished") {
     return "Aguardando revisão dos dados coletados";
   }
 
@@ -198,3 +198,6 @@ export const getNextAction = (
       };
   }
 };
+
+
+

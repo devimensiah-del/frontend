@@ -58,8 +58,8 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
                 Concluído
               </Badge>
             )}
-            {enrichment.status === 'completed' && (
-              <StatusBadge status="completed" size="sm" />
+            {enrichment.status === 'finished' && (
+              <StatusBadge status="finished" size="sm" />
             )}
             {enrichment.status === 'pending' && (
               <StatusBadge status="processing" size="sm" />

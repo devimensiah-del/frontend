@@ -38,6 +38,7 @@ export const STATUS_ICONS: Record<string, IconComponent> = {
   // Workflow status
   pending: Clock,
   processing: Loader,
+  finished: CheckCircle,
   completed: CheckCircle,
   approved: BadgeCheck,
   sent: Send,
@@ -69,7 +70,7 @@ export const STATUS_ICONS: Record<string, IconComponent> = {
 export const getEnrichmentIcon = (status: EnrichmentStatus): IconComponent => {
   const iconMap: Record<EnrichmentStatus, IconComponent> = {
     pending: Loader,
-    completed: CheckCircle,
+    finished: CheckCircle,
     approved: BadgeCheck,
   };
 
@@ -111,6 +112,7 @@ export const getIconColor = (status: string): string => {
   const colorMap: Record<string, string> = {
     pending: "text-gray-400",
     processing: "text-[var(--gold-600)]",
+    finished: "text-green-600",
     completed: "text-green-600",
     approved: "text-green-600",
     sent: "text-blue-600",

@@ -1,3 +1,4 @@
+import path from 'path';
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
@@ -23,6 +24,8 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  // Force Next.js to treat this folder as the workspace root to avoid parent lockfiles
+  outputFileTracingRoot: path.join(__dirname),
 }
 
 export default nextConfig

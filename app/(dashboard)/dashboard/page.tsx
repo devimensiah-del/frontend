@@ -9,6 +9,7 @@ import { Section, Container } from "@/components/editorial/Section";
 import { Heading, Eyebrow } from "@/components/ui/Typography";
 import { Spinner } from "@/components/ui/loading-indicator";
 import { AlertCircle, Loader, CheckCircle, BarChart3 } from "lucide-react";
+import type { Submission } from "@/lib/types";
 
 export default function DashboardPage() {
   // Fetch current user to check role
@@ -20,9 +21,15 @@ export default function DashboardPage() {
   const isAdmin = user?.role === "admin";
 
   // Fetch submissions (user or admin)
-  const { data: submissionsData, isLoading: isSubmissionsLoading } = useQuery({
+  const { data: submissionsData, isLoading: isSubmissionsLoading } = useQuery<{ submissions: Submission[]; total: number }>({
     queryKey: [isAdmin ? "adminSubmissions" : "submissions"],
-    queryFn: () => isAdmin ? adminApi.getAllSubmissions() : submissionsApi.getAll(),
+    queryFn: async () => {
+      if (isAdmin) {
+        const response = await adminApi.getAllSubmissions();
+        return { submissions: response.data, total: response.total };
+      }
+      return submissionsApi.getAll();
+    },
     enabled: !!user,
   });
 
@@ -44,7 +51,7 @@ export default function DashboardPage() {
   }
 
   // Handle different response structures or default to empty
-  const submissions = submissionsData?.submissions || submissionsData?.data || [];
+  const submissions = submissionsData?.submissions || [];
 
   return (
     <Section className="bg-gray-50 border-0">
