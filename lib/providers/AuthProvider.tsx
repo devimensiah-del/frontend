@@ -126,9 +126,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('No access token received');
       }
 
-      // Save token to localStorage for API calls
+      // Save token to localStorage for API calls and set cookies for middleware
       if (typeof window !== 'undefined') {
         localStorage.setItem('auth_token', token);
+        const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+        document.cookie = `sb-access-token=${token}; Path=/; SameSite=Lax; Expires=${expires}`;
+        document.cookie = `supabase-auth-token=${token}; Path=/; SameSite=Lax; Expires=${expires}`;
+        if (data.refresh_token) {
+          document.cookie = `sb-refresh-token=${data.refresh_token}; Path=/; SameSite=Lax; Expires=${expires}`;
+        }
       }
 
       // Set Supabase session manually for supabase.auth state

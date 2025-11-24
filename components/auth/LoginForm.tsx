@@ -39,7 +39,8 @@ export function LoginForm() {
       // This avoids waiting for the context state to update
       const userRole = authData?.user?.role;
       const redirectPath = searchParams.get("redirect") || getDefaultRouteByRole(userRole);
-      router.push(redirectPath);
+      // Force full redirect to ensure middleware picks up auth cookies immediately
+      window.location.href = redirectPath;
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao fazer login";
