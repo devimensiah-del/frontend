@@ -4,6 +4,8 @@ import { EnrichmentCard } from './EnrichmentCard';
 import { Button } from '@/components/ui/button';
 import { RefreshCcw } from 'lucide-react';
 
+import { EnrichmentEditor } from './EnrichmentEditor';
+
 interface EnrichmentDetailsProps {
   enrichment?: Enrichment;
   isAdmin: boolean;
@@ -11,6 +13,8 @@ interface EnrichmentDetailsProps {
 }
 
 export function EnrichmentDetails({ enrichment, isAdmin, onUpdate }: EnrichmentDetailsProps) {
+  const [isEditing, setIsEditing] = React.useState(false);
+
   if (!enrichment) {
     return (
       <div className="text-center py-12 text-gray-500">
@@ -19,14 +23,32 @@ export function EnrichmentDetails({ enrichment, isAdmin, onUpdate }: EnrichmentD
     );
   }
 
+  if (isEditing && isAdmin) {
+    return (
+      <EnrichmentEditor 
+        enrichment={enrichment} 
+        onSave={(data) => {
+          onUpdate(data);
+          setIsEditing(false);
+        }} 
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
         {isAdmin && (
-          <Button variant="outline" size="sm" onClick={() => onUpdate({ action: 'refresh' })}>
-            <RefreshCcw className="w-4 h-4 mr-2" />
-            Atualizar Dados
-          </Button>
+          <>
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <RefreshCcw className="w-4 h-4 mr-2" />
+              Editar Dados
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => onUpdate({ action: 'refresh' })}>
+              <RefreshCcw className="w-4 h-4 mr-2" />
+              Regenerar com IA
+            </Button>
+          </>
         )}
       </div>
       <EnrichmentCard enrichment={enrichment} />
