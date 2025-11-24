@@ -94,7 +94,7 @@ export const FounderCard: React.FC<FounderCardProps> = ({ name, role, bio }) => 
     <div className="grid lg:grid-cols-12 gap-8 border border-white/10 p-8 hover:bg-white/5 transition-colors">
       <div className="lg:col-span-4">
         <div className="mb-4">
-          <Heading as="h3" className="text-2xl font-medium text-white mb-2">{name}</Heading>
+          <Heading as="h3" className="text-lg font-medium text-white mb-2">{name}</Heading>
           <div className="text-xs uppercase tracking-[0.15em] text-gold-500">
             {role}
           </div>

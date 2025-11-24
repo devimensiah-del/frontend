@@ -10,8 +10,8 @@ export function PublicNav() {
           <Logo />
         </Link>
         <div className="flex items-center gap-4">
-          <Link 
-            href="/auth/login" 
+          <Link
+            href="/login"
             className="text-sm font-medium hover:text-primary transition-colors"
           >
             Entrar
