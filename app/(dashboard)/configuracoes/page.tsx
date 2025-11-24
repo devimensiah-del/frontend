@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Save, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Save, Eye, EyeOff, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,14 +17,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { authApi } from '@/lib/api/client';
+import { authApi, userApi } from '@/lib/api/client';
 import { useToast } from '@/components/ui/use-toast';
-import { publicRoutes } from '@/lib/config/site';
 import { Section, Container } from '@/components/editorial/Section';
 import { Heading, Eyebrow, Text } from '@/components/ui/Typography';
 
 export default function ConfiguracoesPage() {
-  const router = useRouter();
   const { toast } = useToast();
 
   // Password change state
@@ -42,17 +39,10 @@ export default function ConfiguracoesPage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
-  // Notification preferences state
-  const [notifications, setNotifications] = useState({
-    emailUpdates: true,
-    analysisComplete: true,
-    weeklyDigest: false,
-  });
-  const [notificationsLoading, setNotificationsLoading] = useState(false);
-
   // Delete account dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Handle password change
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -70,13 +60,19 @@ export default function ConfiguracoesPage() {
       return;
     }
 
+    // Require at least one special character for stronger passwords
+    if (!/[!@#$%^&*()_+[\]{};':"\\|,.<>/?~-]/.test(passwordForm.newPassword)) {
+      setPasswordError('Use pelo menos um caractere especial.');
+      return;
+    }
+
     setPasswordLoading(true);
 
     try {
       await authApi.updatePassword(passwordForm.currentPassword, passwordForm.newPassword);
 
       toast({
-        title: 'Senha Alterada',
+        title: 'Senha alterada',
         description: 'Sua senha foi alterada com sucesso!',
         variant: 'success',
       });
@@ -93,49 +89,22 @@ export default function ConfiguracoesPage() {
     }
   };
 
-  // Handle notification preferences save
-  const handleNotificationsSave = async () => {
-    setNotificationsLoading(true);
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== 'EXCLUIR') return;
 
+    setDeleteLoading(true);
     try {
-      // TODO: Call API to save notification preferences
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      toast({
-        title: 'Preferências Salvas',
-        description: 'Suas preferências foram atualizadas com sucesso!',
-        variant: 'success',
-      });
-    } catch (error) {
+      await userApi.deleteAccount();
+      await authApi.logout();
+      window.location.href = '/';
+    } catch (error: any) {
       toast({
         title: 'Erro',
-        description: 'Erro ao salvar preferências. Tente novamente.',
+        description: error?.message || 'Erro ao excluir conta. Tente novamente.',
         variant: 'error',
       });
     } finally {
-      setNotificationsLoading(false);
-    }
-  };
-
-  // Handle account deletion
-  const handleDeleteAccount = async () => {
-    if (deleteConfirmation !== 'EXCLUIR') {
-      return;
-    }
-
-    try {
-      // TODO: Call API to delete account
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Logout and redirect
-      await authApi.logout();
-      router.push(publicRoutes.home);
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao excluir conta. Tente novamente.',
-        variant: 'error',
-      });
+      setDeleteLoading(false);
     }
   };
 
@@ -148,7 +117,7 @@ export default function ConfiguracoesPage() {
             <Eyebrow className="mb-2">Sua Conta</Eyebrow>
             <Heading variant="section">Configurações</Heading>
             <Text className="mt-2 text-text-secondary">
-              Gerencie sua conta, senha e preferências de notificações.
+              Gerencie sua conta, senha e preferências.
             </Text>
           </div>
 
@@ -198,7 +167,7 @@ export default function ConfiguracoesPage() {
                   label="Nova Senha"
                   id="newPassword"
                   required
-                  helperText="Mínimo de 8 caracteres"
+                  helperText="Mínimo de 8 caracteres e 1 caractere especial"
                 >
                   <div className="relative">
                     <Input
@@ -293,99 +262,6 @@ export default function ConfiguracoesPage() {
             </CardContent>
           </Card>
 
-          {/* Notification Preferences Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Preferências de Notificações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Email Updates */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">Atualizações por Email</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Receba emails sobre atualizações importantes da plataforma.
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={notifications.emailUpdates}
-                      onChange={(e) =>
-                        setNotifications({ ...notifications, emailUpdates: e.target.checked })
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gold-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
-                  </label>
-                </div>
-
-                {/* Analysis Complete */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">Análise Concluída</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Seja notificado quando sua análise estiver pronta.
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={notifications.analysisComplete}
-                      onChange={(e) =>
-                        setNotifications({ ...notifications, analysisComplete: e.target.checked })
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gold-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
-                  </label>
-                </div>
-
-                {/* Weekly Digest */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">Resumo Semanal</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Receba um resumo semanal de suas análises e estatísticas.
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={notifications.weeklyDigest}
-                      onChange={(e) =>
-                        setNotifications({ ...notifications, weeklyDigest: e.target.checked })
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gold-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
-                  </label>
-                </div>
-
-                {/* Save Button */}
-                <Button
-                  onClick={handleNotificationsSave}
-                  disabled={notificationsLoading}
-                  variant="architect"
-                  className="w-full sm:w-auto"
-                >
-                  {notificationsLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Salvando...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Salvar Preferências
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Delete Account Section */}
           <Card className="border-red-200 bg-red-50">
             <CardHeader>
@@ -396,8 +272,7 @@ export default function ConfiguracoesPage() {
                 <div>
                   <p className="font-medium text-red-900">Excluir Conta</p>
                   <p className="text-sm text-red-700 mt-1">
-                    Ação permanente. Todos os seus dados, análises e histórico serão removidos
-                    definitivamente.
+                    Ação permanente. Sua conta será desativada e o acesso removido.
                   </p>
                 </div>
 
@@ -412,8 +287,7 @@ export default function ConfiguracoesPage() {
                     <DialogHeader>
                       <DialogTitle>Tem certeza absoluta?</DialogTitle>
                       <DialogDescription>
-                        Esta ação não pode ser desfeita. Isso excluirá permanentemente sua conta e
-                        removerá todos os seus dados de nossos servidores.
+                        Esta ação não pode ser desfeita. Isso desativará permanentemente sua conta e removerá seu acesso.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
@@ -439,10 +313,10 @@ export default function ConfiguracoesPage() {
                       </Button>
                       <Button
                         onClick={handleDeleteAccount}
-                        disabled={deleteConfirmation !== 'EXCLUIR'}
+                        disabled={deleteConfirmation !== 'EXCLUIR' || deleteLoading}
                         className="bg-red-600 hover:bg-red-700 text-white"
                       >
-                        Excluir Permanentemente
+                        {deleteLoading ? 'Excluindo...' : 'Excluir Permanentemente'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>

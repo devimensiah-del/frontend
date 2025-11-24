@@ -484,6 +484,15 @@ export const userApi = {
 
     return response.user;
   },
+
+  /**
+   * Delete (deactivate) current user account
+   */
+  async deleteAccount(): Promise<{ message: string }> {
+    return apiRequest('/user', {
+      method: 'DELETE',
+    });
+  },
 };
 
 /**
