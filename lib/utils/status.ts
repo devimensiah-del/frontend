@@ -4,9 +4,7 @@
  * Workflow tracked via Enrichment and Analysis statuses
  */
 
-// Using string types directly to avoid import issues during build
-type EnrichmentStatus = 'pending' | 'finished' | 'approved';
-type AnalysisStatus = 'pending' | 'completed' | 'approved' | 'sent';
+import type { EnrichmentStatus, AnalysisStatus } from '@/types';
 
 export type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'error' | 'gold';
 
@@ -46,7 +44,7 @@ export function getEnrichmentStatusVariant(status: EnrichmentStatus): BadgeVaria
   switch (status) {
     case 'pending':
       return 'warning'; // Yellow - waiting
-    case 'finished':
+    case 'completed':
       return 'gold'; // Gold - ready for review
     case 'approved':
       return 'success'; // Green - approved
@@ -59,9 +57,9 @@ export function getEnrichmentStatusVariant(status: EnrichmentStatus): BadgeVaria
  * Get human-readable label for enrichment status
  */
 export function getEnrichmentStatusLabel(status: EnrichmentStatus): string {
-  const labels: Record<EnrichmentStatus, string> = {
+  const labels: Partial<Record<EnrichmentStatus, string>> = {
     pending: 'Pendente',
-    finished: 'Aguardando Aprovação',
+    completed: 'Pronto',
     approved: 'Aprovado',
   };
 
@@ -75,7 +73,7 @@ export function getEnrichmentStatusDescription(status: EnrichmentStatus): string
   switch (status) {
     case 'pending':
       return 'Aguardando início do enriquecimento de dados.';
-    case 'finished':
+    case 'completed':
       return 'Enriquecimento concluído. Aguardando revisão administrativa.';
     case 'approved':
       return 'Dados enriquecidos aprovados. Pronto para análise estratégica.';
@@ -110,7 +108,7 @@ export function getAnalysisStatusVariant(status: AnalysisStatus): BadgeVariant {
  * Get human-readable label for analysis status
  */
 export function getAnalysisStatusLabel(status: AnalysisStatus): string {
-  const labels: Record<AnalysisStatus, string> = {
+  const labels: Partial<Record<AnalysisStatus, string>> = {
     pending: 'Pendente',
     completed: 'Aguardando Aprovação',
     approved: 'Aprovado',
@@ -146,7 +144,7 @@ export function getAnalysisStatusDescription(status: AnalysisStatus): string {
  * Check if enrichment can be approved
  */
 export function canApproveEnrichment(status: EnrichmentStatus): boolean {
-  return status === 'finished';
+  return status === 'completed';
 }
 
 /**

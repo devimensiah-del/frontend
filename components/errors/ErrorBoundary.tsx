@@ -41,7 +41,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console (in production, send to error tracking service like Sentry)
+    // Log error to console
     console.error("ErrorBoundary caught an error:", error, errorInfo);
 
     this.setState({
@@ -49,8 +49,20 @@ export class ErrorBoundary extends Component<Props, State> {
       errorInfo,
     });
 
-    // TODO: Log to error tracking service (Sentry, LogRocket, etc.)
-    // Example: Sentry.captureException(error, { extra: errorInfo });
+    // Log to error tracking service (Sentry integration ready - see lib/utils/error-tracking.ts)
+    if (typeof window !== 'undefined') {
+      import('@/lib/utils/error-tracking').then(({ logError }) => {
+        logError(error, {
+          tags: {
+            component: 'ErrorBoundary',
+            errorBoundary: 'true',
+          },
+          extra: {
+            componentStack: errorInfo.componentStack,
+          },
+        });
+      });
+    }
   }
 
   handleReset = () => {

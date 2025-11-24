@@ -61,8 +61,11 @@ export async function middleware(request: NextRequest) {
 
   // If no token, redirect to login
   if (!accessToken) {
+    console.log('[AUTH MIDDLEWARE] No access token found, redirecting to /login');
+    console.log('[AUTH MIDDLEWARE] Requested path:', pathname);
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
+    console.log('[AUTH MIDDLEWARE] Redirect URL:', loginUrl.toString());
     return NextResponse.redirect(loginUrl);
   }
 
@@ -75,8 +78,12 @@ export async function middleware(request: NextRequest) {
 
     if (error || !user) {
       // Invalid token, redirect to login
+      console.log('[AUTH MIDDLEWARE] Invalid or expired token, redirecting to /login');
+      console.log('[AUTH MIDDLEWARE] Requested path:', pathname);
+      console.log('[AUTH MIDDLEWARE] Auth error:', error?.message || 'No user found');
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
+      console.log('[AUTH MIDDLEWARE] Redirect URL:', loginUrl.toString());
       const response = NextResponse.redirect(loginUrl);
 
       // Clear invalid cookies
@@ -99,8 +106,12 @@ export async function middleware(request: NextRequest) {
       // Allow both 'admin' and 'super_admin' roles to access admin routes
       if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
         // Not an admin, redirect to user dashboard
+        console.log('[AUTH MIDDLEWARE] User is not an admin, redirecting to /painel');
+        console.log('[AUTH MIDDLEWARE] User role:', profile?.role || 'no profile');
         return NextResponse.redirect(new URL('/painel', request.url));
       }
+      console.log('[AUTH MIDDLEWARE] Admin access granted for:', pathname);
+      console.log('[AUTH MIDDLEWARE] User role:', profile.role);
     }
 
     // User is authenticated and authorized

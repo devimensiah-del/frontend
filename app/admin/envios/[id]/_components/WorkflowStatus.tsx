@@ -74,8 +74,8 @@ export function WorkflowStatus({ enrichment, analysis, hasPDF }: WorkflowStatusP
           <div className="grid grid-cols-2 gap-4">
             <StatItem
               label="Enriquecimento"
-              value={enrichmentStatus === "approved" ? "Aprovado" : enrichmentStatus === "finished" ? "Pronto" : "Pendente"}
-              variant={enrichmentStatus === "approved" ? "success" : enrichmentStatus === "finished" ? "warning" : "default"}
+              value={enrichmentStatus === "approved" ? "Aprovado" : enrichmentStatus === "completed" ? "Pronto" : "Pendente"}
+              variant={enrichmentStatus === "approved" ? "success" : enrichmentStatus === "completed" ? "warning" : "default"}
             />
             <StatItem
               label="Análise"
@@ -129,7 +129,7 @@ function getStepIcon(status: string) {
     case "sent":
     case "completed":
       return <CheckCircle2 className="w-5 h-5" />;
-    case "finished":
+    case "completed":
     case "pending":
       return <Clock className="w-5 h-5" />;
     default:
@@ -143,7 +143,7 @@ function getStepColor(status: string) {
     case "sent":
       return "text-green-600";
     case "completed":
-    case "finished":
+    case "completed":
       return "text-gold-500";
     case "pending":
       return "text-orange-500";

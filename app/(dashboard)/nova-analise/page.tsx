@@ -36,6 +36,9 @@ import { dashboardRoutes } from '@/lib/config/site';
 const formSchema = z.object({
   // Company Information (mandatory)
   companyName: z.string().min(2, { message: 'Nome da empresa é obrigatório.' }),
+  cnpj: z.string().regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$|^\d{14}$/, {
+    message: 'CNPJ inválido. Use o formato XX.XXX.XXX/XXXX-XX',
+  }).optional().or(z.literal('')),
   contactName: z.string().min(2, { message: 'Seu nome é obrigatório.' }),
   contactEmail: z.string().email({ message: 'Email inválido.' }),
   businessChallenge: z.string().min(10, {
@@ -47,6 +50,7 @@ const formSchema = z.object({
   companyIndustry: z.string().optional(),
   companySize: z.string().optional(),
   companyLocation: z.string().optional(),
+  competitivePosition: z.string().optional(),
   contactPhone: z.string().optional(),
   contactPosition: z.string().optional(),
   targetMarket: z.string().optional(),
@@ -75,10 +79,12 @@ export default function NovaAnalisePage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       companyName: '',
+      cnpj: '',
       companyWebsite: '',
       companyIndustry: '',
       companySize: '',
       companyLocation: '',
+      competitivePosition: '',
       contactName: '',
       contactEmail: '',
       contactPhone: '',
@@ -100,13 +106,13 @@ export default function NovaAnalisePage() {
       const submissionData = {
         // Required fields from new SubmissionFormData
         companyName: data.companyName,
-        cnpj: '00.000.000/0000-00', // TODO: Add CNPJ field to form
+        cnpj: data.cnpj || '',
         industry: data.companyIndustry || 'Não especificado',
         companySize: data.companySize || 'Não especificado',
         website: data.companyWebsite || undefined,
         strategicGoal: data.businessChallenge, // Map challenge to strategic goal
         currentChallenges: data.businessChallenge,
-        competitivePosition: 'Em análise', // TODO: Add competitive position field to form
+        competitivePosition: data.competitivePosition || 'Não informado',
         // Additional info containing all extra form data
         additionalInfo: JSON.stringify({
           contactName: data.contactName,
@@ -183,6 +189,28 @@ export default function NovaAnalisePage() {
                       <FormControl>
                         <Input placeholder="Acme Corp" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* CNPJ */}
+                <FormFieldWrapper
+                  control={form.control}
+                  name="cnpj"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CNPJ</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="00.000.000/0000-00"
+                          {...field}
+                          maxLength={18}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Formato: XX.XXX.XXX/XXXX-XX (opcional)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -345,7 +373,28 @@ export default function NovaAnalisePage() {
                       )}
                     />
 
-                    {/* Additional fields would go here... */}
+                    {/* Competitive Position */}
+                    <FormFieldWrapper
+                      control={form.control}
+                      name="competitivePosition"
+                      render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                          <FormLabel>Posição Competitiva</FormLabel>
+                          <Select {...field}>
+                            <SelectOption value="">Selecione (opcional)</SelectOption>
+                            <SelectOption value="Líder">Líder de Mercado</SelectOption>
+                            <SelectOption value="Challenger">Desafiante</SelectOption>
+                            <SelectOption value="Follower">Seguidor</SelectOption>
+                            <SelectOption value="Nicher">Nicho Especializado</SelectOption>
+                            <SelectOption value="Startup">Startup / Novo Entrante</SelectOption>
+                          </Select>
+                          <FormDescription className="text-xs">
+                            Como você classificaria a posição da sua empresa no mercado?
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </AccordionContent>
               </AccordionItem>

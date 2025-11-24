@@ -7,14 +7,8 @@ import { AdminInboxSkeleton } from "@/components/skeletons";
 import { toast } from "@/components/ui/use-toast";
 import { adminApi } from "@/lib/api/client";
 import type { SubmissionStatus, Submission } from "@/types";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, FileText, Calendar, Building2 } from "lucide-react";
+import { FileText, Calendar, Building2 } from "lucide-react";
 
 /* ============================================
    ADMIN ENVIOS - Lista de Envios com Dados do Formulário
@@ -69,19 +63,14 @@ export default function AdminEnvios() {
     );
   }
 
-  // NEW ARCHITECTURE: All submissions have status 'received'
-  // Show total count for now (can be enhanced with enrichment/analysis status later)
-  const pendingCount = 0; // All are received, none truly "pending"
-  const completedCount = 0; // Would need to check analysis status = 'sent'
-
   return (
     <div className="min-h-screen bg-surface-paper">
       {/* --- PAGE HEADER --- */}
       <header className="bg-white border-b border-line">
-        <div className="px-8 py-6">
+        <div className="px-4 sm:px-8 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="font-heading text-3xl font-medium tracking-tight text-navy-900">
+              <h1 className="font-heading text-2xl sm:text-3xl font-medium tracking-tight text-navy-900">
                 Envios
               </h1>
               <p className="text-sm text-text-secondary mt-1">
@@ -89,18 +78,16 @@ export default function AdminEnvios() {
               </p>
             </div>
 
-            {/* Stats Cards */}
-            <div className="flex gap-4">
+            {/* Stats Card - Only Total */}
+            <div className="flex justify-end">
               <StatsCard label="Total" value={submissions.length} />
-              <StatsCard label="Pendentes" value={pendingCount} variant="warning" />
-              <StatsCard label="Concluídos" value={completedCount} variant="success" />
             </div>
           </div>
         </div>
       </header>
 
       {/* --- SUBMISSIONS CONTENT --- */}
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         {submissions.length === 0 ? (
           <div className="bg-white border border-line p-12 text-center">
             <p className="text-text-secondary">
@@ -108,64 +95,137 @@ export default function AdminEnvios() {
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-line shadow-sm overflow-hidden">
-            {/* Table Header */}
-            <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-surface-paper border-b border-line">
-              <div className="col-span-3">
-                <TableHeader>Empresa</TableHeader>
+          <>
+            {/* Desktop Table View - Hidden on Mobile */}
+            <div className="hidden lg:block bg-white border border-line shadow-sm overflow-hidden">
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-surface-paper border-b border-line">
+                <div className="col-span-3">
+                  <TableHeader>Empresa</TableHeader>
+                </div>
+                <div className="col-span-3">
+                  <TableHeader>CNPJ</TableHeader>
+                </div>
+                <div className="col-span-2">
+                  <TableHeader>Status</TableHeader>
+                </div>
+                <div className="col-span-2">
+                  <TableHeader>Enviado</TableHeader>
+                </div>
+                <div className="col-span-2">
+                  <TableHeader>Ações</TableHeader>
+                </div>
               </div>
-              <div className="col-span-3">
-                <TableHeader>CNPJ</TableHeader>
-              </div>
-              <div className="col-span-2">
-                <TableHeader>Status</TableHeader>
-              </div>
-              <div className="col-span-2">
-                <TableHeader>Enviado</TableHeader>
-              </div>
-              <div className="col-span-2">
-                <TableHeader>Ações</TableHeader>
+
+              {/* Table Body */}
+              <div className="divide-y divide-line">
+                {submissions.map((submission) => (
+                  <div
+                    key={submission.id}
+                    className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-surface-paper transition-colors"
+                  >
+                    <div className="col-span-3 flex items-center">
+                      <div className="font-medium text-navy-900">
+                        {submission.companyName}
+                      </div>
+                    </div>
+                    <div className="col-span-3 flex items-center">
+                      <div className="text-sm text-text-secondary font-mono">
+                        {submission.cnpj || "—"}
+                      </div>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <StatusBadge status={submission.status} />
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <div className="text-sm text-text-secondary">
+                        {formatDate(submission.createdAt)}
+                      </div>
+                    </div>
+                    <div className="col-span-2 flex items-center justify-end">
+                      <Link href={`/admin/envios/${submission.id}`}>
+                        <Button variant="outline" size="sm">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Ver Detalhes
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Table Body */}
-            <div className="divide-y divide-line">
+            {/* Mobile Card View - Visible Only on Mobile */}
+            <div className="lg:hidden space-y-4">
               {submissions.map((submission) => (
-                <div
+                <SubmissionCard
                   key={submission.id}
-                  className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-surface-paper transition-colors"
-                >
-                  <div className="col-span-3 flex items-center">
-                    <div className="font-medium text-navy-900">
-                      {submission.companyName}
-                    </div>
-                  </div>
-                  <div className="col-span-3 flex items-center">
-                    <div className="text-sm text-text-secondary font-mono">
-                      {submission.cnpj || "—"}
-                    </div>
-                  </div>
-                  <div className="col-span-2 flex items-center">
-                    <StatusBadge status={submission.status} />
-                  </div>
-                  <div className="col-span-2 flex items-center">
-                    <div className="text-sm text-text-secondary">
-                      {formatDate(submission.createdAt)}
-                    </div>
-                  </div>
-                  <div className="col-span-2 flex items-center justify-end">
-                    <Link href={`/admin/envios/${submission.id}`}>
-                      <Button variant="outline" size="sm">
-                        <FileText className="w-4 h-4 mr-2" />
-                        Ver Detalhes
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+                  submission={submission}
+                />
               ))}
             </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================
+   MOBILE SUBMISSION CARD COMPONENT
+   ============================================ */
+
+interface SubmissionCardProps {
+  submission: Submission;
+}
+
+function SubmissionCard({ submission }: SubmissionCardProps) {
+  return (
+    <div className="bg-white border border-line p-4 hover:shadow-md transition-shadow">
+      {/* Header with Company Name and Status */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex-1 min-w-0 mr-2">
+          <h3 className="font-medium text-navy-900 truncate text-lg">
+            {submission.companyName}
+          </h3>
+          {submission.cnpj && (
+            <p className="text-xs text-text-secondary font-mono mt-1">
+              {submission.cnpj}
+            </p>
+          )}
+        </div>
+        <StatusBadge status={submission.status} />
+      </div>
+
+      {/* Metadata */}
+      <div className="flex items-center gap-4 text-xs text-text-secondary mb-4">
+        <div className="flex items-center gap-1">
+          <Calendar className="w-3 h-3" />
+          <span>{formatDate(submission.createdAt)}</span>
+        </div>
+        {submission.industry && (
+          <div className="flex items-center gap-1">
+            <Building2 className="w-3 h-3" />
+            <span>{submission.industry}</span>
           </div>
         )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2">
+        <Link
+          href={`/admin/envios/${submission.id}`}
+          className="flex-1"
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Ver Detalhes
+          </Button>
+        </Link>
       </div>
     </div>
   );
@@ -196,7 +256,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
   const variant = variants[status] || variants.received;
 
   return (
-    <span className={cn("inline-flex items-center px-2 py-1 text-xs font-bold uppercase tracking-wider", variant.bg, variant.text)}>
+    <span className={cn("inline-flex items-center px-2 py-1 text-xs font-bold uppercase tracking-wider whitespace-nowrap", variant.bg, variant.text)}>
       {variant.label}
     </span>
   );
@@ -217,8 +277,8 @@ function StatsCard({ label, value, variant = "default" }: StatsCardProps) {
 
   return (
     <div className={cn("border px-4 py-3 bg-white", variants[variant])}>
-      <div className="text-2xl font-light font-heading">{value}</div>
-      <div className="text-xs uppercase tracking-widest text-text-secondary">{label}</div>
+      <div className="text-xl sm:text-2xl font-light font-heading">{value}</div>
+      <div className="text-xs uppercase tracking-widest text-text-secondary mt-0.5">{label}</div>
     </div>
   );
 }

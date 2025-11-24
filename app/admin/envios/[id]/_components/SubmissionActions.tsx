@@ -40,7 +40,7 @@ export function SubmissionActions({ submissionId, enrichment, analysis, pdfUrl }
             Editar Enriquecimento
             {enrichment?.status && (
               <span className="ml-auto text-xs text-text-tertiary">
-                {enrichment.status === "approved" ? "Aprovado" : enrichment.status === "finished" ? "Pronto" : "Pendente"}
+                {enrichment.status === "approved" ? "Aprovado" : enrichment.status === "completed" ? "Pronto" : "Pendente"}
               </span>
             )}
           </Button>

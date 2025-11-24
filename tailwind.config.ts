@@ -13,20 +13,33 @@ const config: Config = {
       colors: {
         // Navy palette
         navy: {
-          900: "#0A101D",
-          800: "#162032",
+          50: "#F0F3F7",
+          100: "#E1E7EF",
+          200: "#C3CFE0",
+          300: "#A5B7D0",
+          400: "#879FC1",
+          500: "#6987B1",
+          600: "#4B6FA2",
           700: "#1F2937",
+          800: "#162032",
+          900: "#0A101D",
         },
         // Gold palette
         gold: {
+          50: "#FAF8F3",
+          100: "#F5F1E7",
+          200: "#EBE5D9",
+          300: "#D4C9AD",
+          400: "#BDAD81",
           500: "#B89E68",
           600: "#A18852",
-          light: "#EBE5D9",
+          700: "#8A723C",
         },
         // Surfaces
         surface: {
           paper: "#F7F6F4",
           white: "#FFFFFF",
+          border: "#E5E0D6",
         },
         // Line color
         line: "#E5E0D6",

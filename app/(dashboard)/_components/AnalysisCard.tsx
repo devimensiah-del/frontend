@@ -1,142 +1,322 @@
 'use client';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
+import {
+  FileText,
+  Lightbulb,
+  CheckCircle,
+  Download,
+  Send,
+  Globe,
+  Shield,
+  Target,
+  TrendingUp,
+  DollarSign,
+  Users,
+  Zap,
+  MapPin,
+  BarChart,
+  GitBranch,
+  Calendar,
+} from 'lucide-react';
+import {
+  Section,
+  SWOTQuadrant,
+  FrameworkBadge,
+  StatusBadge,
+} from '@/components/workflow';
+import { getFrameworkCompletion } from '@/lib/utils/workflow-helpers';
 import type { Analysis } from '@/types';
 
 interface AnalysisCardProps {
   analysis: Analysis;
 }
 
+const frameworkIcons: Record<string, React.ReactNode> = {
+  PESTEL: <Globe className="w-3.5 h-3.5" />,
+  Porter: <Shield className="w-3.5 h-3.5" />,
+  SWOT: <Target className="w-3.5 h-3.5" />,
+  'TAM/SAM/SOM': <TrendingUp className="w-3.5 h-3.5" />,
+  Benchmarking: <BarChart className="w-3.5 h-3.5" />,
+  'Blue Ocean': <MapPin className="w-3.5 h-3.5" />,
+  'Growth Hacking': <Zap className="w-3.5 h-3.5" />,
+  Scenarios: <GitBranch className="w-3.5 h-3.5" />,
+  OKRs: <Target className="w-3.5 h-3.5" />,
+  BSC: <BarChart className="w-3.5 h-3.5" />,
+  'Decision Matrix': <CheckCircle className="w-3.5 h-3.5" />,
+};
+
 export function AnalysisCard({ analysis }: AnalysisCardProps) {
+  const { toast } = useToast();
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
-      month: '2-digit',
+      month: 'long',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     });
   };
 
-  const getStatusBadge = () => {
-    if (analysis.status === 'sent') {
-      return <Badge className="bg-blue-100 text-blue-800 border border-blue-300">Enviado</Badge>;
-    }
-    if (analysis.status === 'approved') {
-      return <Badge className="bg-green-100 text-green-800 border border-green-300">Aprovado</Badge>;
-    }
-    if (analysis.status === 'completed') {
-      return <Badge className="bg-gold-100 text-gold-800 border border-gold-300">Concluído</Badge>;
-    }
-    return <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-300">Pendente</Badge>;
-  };
+  const { completed, total } = getFrameworkCompletion(analysis);
 
   return (
-    <Card className="p-6">
-      <div className="space-y-6">
-        {/* Header */}
+    <Card>
+      <CardHeader>
         <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Análise Estratégica
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Atualizado em {formatDate(analysis.updatedAt)}
-            </p>
+          <div className="flex items-center gap-2 flex-1">
+            <FileText className="w-5 h-5 text-gold-600" />
+            <div>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-navy-900">Relatório Estratégico</CardTitle>
+                {analysis.version > 1 && (
+                  <Badge variant="outline" className="text-xs">
+                    v{analysis.version}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <Calendar className="w-3 h-3 text-text-secondary" />
+                <p className="text-xs text-text-secondary">
+                  Atualizado em {formatDate(analysis.updatedAt)}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            {getStatusBadge()}
+          <div className="flex items-center gap-2">
+            {analysis.status === 'sent' && (
+              <Badge variant="default" className="bg-blue-50 text-blue-700 border-blue-200">
+                <Send className="w-3 h-3 mr-1" />
+                Enviado
+              </Badge>
+            )}
+            {analysis.status === 'approved' && (
+              <Badge variant="default" className="bg-gold-50 text-gold-700 border-gold-200">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Aprovado
+              </Badge>
+            )}
           </div>
         </div>
 
+        {/* Framework Completion */}
+        <div className="mt-4 p-3 bg-surface-paper rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-navy-900 uppercase tracking-wider">
+                Frameworks Aplicados
+              </p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                {completed} de {total} análises completas
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-12 h-12 rounded-full border-4 border-gold-200 flex items-center justify-center">
+                <span className="text-sm font-bold text-gold-600">
+                  {Math.round((completed / total) * 100)}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
         {/* Executive Summary */}
         {analysis.analysis?.synthesis?.executiveSummary && (
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 mb-2">Sumário Executivo</p>
-            <p className="text-sm text-gray-900 leading-relaxed">{analysis.analysis.synthesis.executiveSummary}</p>
+          <div className="p-4 bg-navy-50 border border-navy-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <FileText className="w-5 h-5 text-navy-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-navy-900 mb-2">Sumário Executivo</h4>
+                <p className="text-sm text-navy-900 leading-relaxed">
+                  {analysis.analysis.synthesis.executiveSummary}
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Key Findings */}
-        {analysis.analysis?.synthesis?.keyFindings && analysis.analysis.synthesis.keyFindings.length > 0 && (
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">
-              Principais Descobertas
-            </p>
-            <ul className="space-y-2">
-              {analysis.analysis.synthesis.keyFindings.map((finding, index) => (
-                <li
-                  key={index}
-                  className="flex items-start space-x-2 text-sm text-gray-900"
-                >
-                  <span className="text-[#00a859] mt-1">→</span>
-                  <span className="leading-relaxed">{finding}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {analysis.analysis?.synthesis?.keyFindings &&
+          analysis.analysis.synthesis.keyFindings.length > 0 && (
+            <Section title="Principais Descobertas" icon={<Lightbulb />}>
+              <ul className="space-y-3">
+                {analysis.analysis.synthesis.keyFindings.map((finding, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-gold-600 mt-1 flex-shrink-0" />
+                    <span className="text-sm text-navy-900 leading-relaxed">{finding}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
 
         {/* Strategic Priorities */}
-        {analysis.analysis?.synthesis?.strategicPriorities && analysis.analysis.synthesis.strategicPriorities.length > 0 && (
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">
-              Prioridades Estratégicas
-            </p>
-            <div className="space-y-2">
-              {analysis.analysis.synthesis.strategicPriorities.map((priority, index) => (
-                <div key={index} className="p-3 bg-blue-50 border border-blue-200 rounded">
-                  <span className="text-sm text-blue-900">{priority}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {analysis.analysis?.synthesis?.strategicPriorities &&
+          analysis.analysis.synthesis.strategicPriorities.length > 0 && (
+            <Section title="Prioridades Estratégicas" icon={<Target />}>
+              <div className="space-y-2">
+                {analysis.analysis.synthesis.strategicPriorities.map((priority, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 p-3 bg-gold-50 border border-gold-200 rounded-lg"
+                  >
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-600 text-white flex items-center justify-center text-xs font-bold">
+                      {index + 1}
+                    </div>
+                    <span className="text-sm text-navy-900">{priority}</span>
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
 
-        {/* SWOT Analysis Summary */}
+        {/* SWOT Grid */}
         {analysis.analysis?.swot && (
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">Análise SWOT</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-green-50 p-3 rounded">
-                <p className="text-xs font-semibold text-green-700 uppercase mb-1">Forças</p>
-                <p className="text-sm text-gray-900">{analysis.analysis.swot.strengths.length} identificadas</p>
-              </div>
-              <div className="bg-red-50 p-3 rounded">
-                <p className="text-xs font-semibold text-red-700 uppercase mb-1">Fraquezas</p>
-                <p className="text-sm text-gray-900">{analysis.analysis.swot.weaknesses.length} identificadas</p>
-              </div>
-              <div className="bg-blue-50 p-3 rounded">
-                <p className="text-xs font-semibold text-blue-700 uppercase mb-1">Oportunidades</p>
-                <p className="text-sm text-gray-900">{analysis.analysis.swot.opportunities.length} identificadas</p>
-              </div>
-              <div className="bg-orange-50 p-3 rounded">
-                <p className="text-xs font-semibold text-orange-700 uppercase mb-1">Ameaças</p>
-                <p className="text-sm text-gray-900">{analysis.analysis.swot.threats.length} identificadas</p>
-              </div>
+          <Section title="Análise SWOT">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <SWOTQuadrant
+                title="Forças"
+                items={analysis.analysis.swot.strengths}
+                color="green"
+              />
+              <SWOTQuadrant
+                title="Fraquezas"
+                items={analysis.analysis.swot.weaknesses}
+                color="red"
+              />
+              <SWOTQuadrant
+                title="Oportunidades"
+                items={analysis.analysis.swot.opportunities}
+                color="blue"
+              />
+              <SWOTQuadrant
+                title="Ameaças"
+                items={analysis.analysis.swot.threats}
+                color="yellow"
+              />
             </div>
-          </div>
+          </Section>
         )}
 
-        {/* Analysis Frameworks Summary */}
-        <div className="pt-4 border-t border-gray-200">
-          <p className="text-sm font-medium text-gray-700 mb-3">Frameworks Aplicados</p>
-          <div className="grid grid-cols-2 gap-2">
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">PESTEL</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Porter</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">SWOT</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">TAM-SAM-SOM</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Benchmarking</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Blue Ocean</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Growth Hacking</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Scenarios</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">OKRs</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">BSC</Badge>
-            <Badge variant="default" className="bg-gray-50 text-gray-700 justify-center">Decision Matrix</Badge>
+        {/* Frameworks Grid */}
+        <Section title="Frameworks Estratégicos">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            <FrameworkBadge
+              name="PESTEL"
+              completed={!!analysis.analysis?.pestel}
+              icon={frameworkIcons.PESTEL}
+            />
+            <FrameworkBadge
+              name="Porter"
+              completed={!!analysis.analysis?.porter}
+              icon={frameworkIcons.Porter}
+            />
+            <FrameworkBadge
+              name="SWOT"
+              completed={!!analysis.analysis?.swot}
+              icon={frameworkIcons.SWOT}
+            />
+            <FrameworkBadge
+              name="TAM/SAM/SOM"
+              completed={!!analysis.analysis?.tamSamSom}
+              icon={frameworkIcons['TAM/SAM/SOM']}
+            />
+            <FrameworkBadge
+              name="Benchmarking"
+              completed={!!analysis.analysis?.benchmarking}
+              icon={frameworkIcons.Benchmarking}
+            />
+            <FrameworkBadge
+              name="Blue Ocean"
+              completed={!!analysis.analysis?.blueOcean}
+              icon={frameworkIcons['Blue Ocean']}
+            />
+            <FrameworkBadge
+              name="Growth Hacking"
+              completed={!!analysis.analysis?.growthHacking}
+              icon={frameworkIcons['Growth Hacking']}
+            />
+            <FrameworkBadge
+              name="Scenarios"
+              completed={!!analysis.analysis?.scenarios}
+              icon={frameworkIcons.Scenarios}
+            />
+            <FrameworkBadge
+              name="OKRs"
+              completed={!!analysis.analysis?.okrs}
+              icon={frameworkIcons.OKRs}
+            />
+            <FrameworkBadge
+              name="BSC"
+              completed={!!analysis.analysis?.bsc}
+              icon={frameworkIcons.BSC}
+            />
+            <FrameworkBadge
+              name="Decision Matrix"
+              completed={!!analysis.analysis?.decisionMatrix}
+              icon={frameworkIcons['Decision Matrix']}
+            />
           </div>
-        </div>
-      </div>
+        </Section>
+
+        {/* Download PDF Button */}
+        {analysis.status === 'sent' && (
+          <div className="pt-4 border-t border-surface-border">
+            <Button
+              variant="architect"
+              className="w-full"
+              onClick={async () => {
+                // Get PDF URL from the submission's pdfUrl field
+                // Note: Backend should populate submission.pdfUrl when analysis is sent
+                const pdfUrl = (analysis as any).pdfUrl || (analysis as any).pdf_url;
+
+                if (!pdfUrl) {
+                  toast({
+                    title: 'PDF não disponível',
+                    description: 'O relatório ainda está sendo gerado. Por favor, aguarde alguns instantes.',
+                    variant: 'destructive',
+                  });
+                  return;
+                }
+
+                try {
+                  // Open PDF in new tab (works for most browsers)
+                  window.open(pdfUrl, '_blank');
+
+                  // Also trigger download
+                  const link = document.createElement('a');
+                  link.href = pdfUrl;
+                  link.download = `relatorio-estrategico-${analysis.id}.pdf`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+
+                  toast({
+                    title: 'Download iniciado',
+                    description: 'Seu relatório está sendo baixado.',
+                  });
+                } catch (error) {
+                  console.error('Error downloading PDF:', error);
+                  toast({
+                    title: 'Erro no download',
+                    description: 'Não foi possível baixar o PDF. Tente novamente.',
+                    variant: 'destructive',
+                  });
+                }
+              }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Baixar Relatório Completo (PDF)
+            </Button>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }

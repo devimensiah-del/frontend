@@ -12,6 +12,8 @@
 export type {
   // Status and enum types
   SubmissionStatus,
+  EnrichmentStatus,
+  AnalysisStatus,
   UserRole,
 
   // User types
@@ -27,8 +29,10 @@ export type {
   Analysis,
   PESTELAnalysis,
   PorterAnalysis,
+  PorterForce,
   TamSamSomAnalysis,
   SWOTAnalysis,
+  SWOTItem,
   BenchmarkingAnalysis,
   BlueOceanAnalysis,
   GrowthHackingAnalysis,

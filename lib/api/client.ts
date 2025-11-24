@@ -395,6 +395,17 @@ export const adminApi = {
     return apiRequest('/admin/analytics');
   },
 
+      /**
+     * Get enrichment by submission ID (admin only)
+     */
+    async getEnrichmentBySubmissionId(submissionId: string): Promise<Enrichment> {
+      const response = await apiRequest<{ enrichment: Enrichment }>(
+        `/admin/submissions/${submissionId}/enrichment`
+      );
+      return response.enrichment;
+    },
+
+
   /**
    * Update enrichment fields (admin only) - status remains unchanged
    */

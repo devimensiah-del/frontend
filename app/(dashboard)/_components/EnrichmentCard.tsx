@@ -1,7 +1,23 @@
 'use client';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import {
+  Sparkles,
+  Building2,
+  DollarSign,
+  TrendingUp,
+  CheckCircle,
+  Globe,
+  Target,
+} from 'lucide-react';
+import {
+  Section,
+  DataGrid,
+  StatusBadge,
+} from '@/components/workflow';
+import { ProgressRing } from '@/components/ui/ProgressRing';
+import { getEnrichmentCompletion, getDataQualityScore } from '@/lib/utils/workflow-helpers';
 import type { Enrichment } from '@/types';
 
 interface EnrichmentCardProps {
@@ -19,178 +35,183 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
     });
   };
 
-  const getStatusBadge = () => {
-    if (enrichment.status === 'approved') {
-      return <Badge className="bg-green-100 text-green-800 border border-green-300">Aprovado</Badge>;
-    }
-    if (enrichment.status === 'finished') {
-      return <Badge className="bg-gold-100 text-gold-800 border border-gold-300">Pronto</Badge>;
-    }
-    return <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-300">Pendente</Badge>;
-  };
+  const completionPercentage = getEnrichmentCompletion(enrichment);
+  const qualityScore = getDataQualityScore(enrichment);
 
   return (
-    <Card className="p-6">
-      <div className="space-y-6">
-        {/* Header */}
+    <Card>
+      <CardHeader>
         <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Dados de Enriquecimento
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Atualizado em {formatDate(enrichment.updatedAt)}
-            </p>
+          <div className="flex items-center gap-2 flex-1">
+            <Sparkles className="w-5 h-5 text-gold-600" />
+            <div>
+              <CardTitle className="text-navy-900">Análise de Mercado</CardTitle>
+              <p className="text-xs text-text-secondary mt-1">
+                Atualizado em {formatDate(enrichment.updatedAt)}
+              </p>
+            </div>
           </div>
-          {getStatusBadge()}
+          <div className="flex items-center gap-2">
+            {enrichment.status === 'approved' && (
+              <Badge variant="default" className="bg-gold-50 text-gold-700 border-gold-200">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Concluído
+              </Badge>
+            )}
+            {enrichment.status === 'completed' && (
+              <StatusBadge status="completed" size="sm" />
+            )}
+            {enrichment.status === 'pending' && (
+              <StatusBadge status="processing" size="sm" />
+            )}
+          </div>
         </div>
 
-        {/* Company Overview */}
-        {enrichment.data?.overview && (
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">Visão Geral da Empresa</p>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-900 leading-relaxed">{enrichment.data.overview.description}</p>
-              </div>
-              {enrichment.data.overview.sources && enrichment.data.overview.sources.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Fontes</p>
-                  <ul className="space-y-1">
-                    {enrichment.data.overview.sources.map((source, index) => (
-                      <li key={index} className="text-xs text-gray-600 flex items-start">
-                        <span className="text-[#00a859] mr-2">•</span>
-                        {source}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+        {/* Quality Score */}
+        {qualityScore && (
+          <div className="mt-4 flex items-center gap-4 p-3 bg-surface-paper rounded-lg">
+            <ProgressRing percentage={qualityScore} size="sm" />
+            <div>
+              <p className="text-xs font-semibold text-navy-900 uppercase tracking-wider">
+                Qualidade dos Dados
+              </p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                {qualityScore >= 80
+                  ? 'Excelente cobertura de dados'
+                  : qualityScore >= 60
+                  ? 'Boa cobertura de dados'
+                  : 'Dados básicos coletados'}
+              </p>
             </div>
           </div>
         )}
+      </CardHeader>
 
-        {/* Digital Presence */}
-        {enrichment.data?.digitalPresence && (
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">Presença Digital</p>
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">Website</p>
-                <a
-                  href={enrichment.data.digitalPresence.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-[#00a859] hover:underline"
-                >
-                  {enrichment.data.digitalPresence.websiteUrl}
-                </a>
-              </div>
-              {enrichment.data.digitalPresence.recentNews && enrichment.data.digitalPresence.recentNews.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Notícias Recentes</p>
-                  <ul className="space-y-1">
-                    {enrichment.data.digitalPresence.recentNews.map((news, index) => (
-                      <li key={index} className="text-sm text-gray-900 flex items-start">
-                        <span className="text-[#00a859] mr-2">•</span>
-                        {news}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
+      <CardContent className="space-y-6">
+
+        {/* Profile Overview */}
+        {enrichment.data?.profile_overview && (
+          <Section title="Visão Geral" icon={<Building2 />}>
+            <DataGrid items={enrichment.data.profile_overview} />
+          </Section>
+        )}
+
+        {/* Financials */}
+        {enrichment.data?.financials && (
+          <Section title="Contexto Financeiro" icon={<DollarSign />}>
+            <DataGrid items={enrichment.data.financials} />
+          </Section>
         )}
 
         {/* Market Position */}
-        {enrichment.data?.marketPosition && (
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">Posição de Mercado</p>
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">Indústria</p>
-                <p className="text-sm text-gray-900">{enrichment.data.marketPosition.industry}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-gray-600 uppercase">Diferencial-Chave</p>
-                <p className="text-sm text-gray-900 leading-relaxed">{enrichment.data.marketPosition.keyDifferentiator}</p>
-              </div>
-              {enrichment.data.marketPosition.competitors && enrichment.data.marketPosition.competitors.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Principais Concorrentes</p>
+        {enrichment.data?.market_position && (
+          <Section title="Posicionamento de Mercado" icon={<TrendingUp />}>
+            <DataGrid items={enrichment.data.market_position} />
+
+            {/* Competitors */}
+            {enrichment.data.competitive_landscape?.competitors &&
+              enrichment.data.competitive_landscape.competitors.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">
+                    Principais Concorrentes
+                  </p>
                   <div className="flex flex-wrap gap-2">
-                    {enrichment.data.marketPosition.competitors.map((competitor, index) => (
-                      <Badge
-                        key={index}
-                        variant="default"
-                        className="bg-orange-50 text-orange-700 border-orange-200"
-                      >
-                        {competitor}
-                      </Badge>
-                    ))}
+                    {enrichment.data.competitive_landscape.competitors.map(
+                      (competitor: string, index: number) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="bg-orange-50 text-orange-700 border-orange-200"
+                        >
+                          {competitor}
+                        </Badge>
+                      )
+                    )}
                   </div>
                 </div>
               )}
-            </div>
-          </div>
+          </Section>
         )}
 
-        {/* Strategic Inference */}
-        {enrichment.data?.strategicInference && (
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">Inferência Estratégica</p>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Tom da Marca</p>
-                  <p className="text-sm text-gray-900">{enrichment.data.strategicInference.brandTone}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Maturidade Digital</p>
-                  <p className="text-sm text-gray-900">{enrichment.data.strategicInference.digitalMaturity}/10</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Arquétipo de Valor</p>
-                  <p className="text-sm text-gray-900">{enrichment.data.strategicInference.valueArchetype}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Segmento de Cliente</p>
-                  <p className="text-sm text-gray-900">{enrichment.data.strategicInference.customerSegment}</p>
-                </div>
-              </div>
-
-              {enrichment.data.strategicInference.strengths && enrichment.data.strategicInference.strengths.length > 0 && (
-                <div className="bg-green-50 p-3 rounded">
-                  <p className="text-xs font-semibold text-green-700 uppercase mb-2">Forças</p>
-                  <ul className="space-y-1">
-                    {enrichment.data.strategicInference.strengths.map((strength, index) => (
-                      <li key={index} className="text-sm text-gray-900 flex items-start">
-                        <span className="text-green-600 mr-2">→</span>
-                        {strength}
-                      </li>
-                    ))}
-                  </ul>
+        {/* Strategic Assessment */}
+        {enrichment.data?.strategic_assessment && (
+          <Section title="Avaliação Estratégica" icon={<Target />}>
+            <div className="space-y-4">
+              {enrichment.data.strategic_assessment.digital_maturity && (
+                <div className="flex items-center gap-4">
+                  <ProgressRing
+                    percentage={enrichment.data.strategic_assessment.digital_maturity * 10}
+                    size="sm"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold text-navy-900 uppercase tracking-wider">
+                      Maturidade Digital
+                    </p>
+                    <p className="text-sm text-text-secondary">
+                      {enrichment.data.strategic_assessment.digital_maturity}/10
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {enrichment.data.strategicInference.weaknesses && enrichment.data.strategicInference.weaknesses.length > 0 && (
-                <div className="bg-red-50 p-3 rounded">
-                  <p className="text-xs font-semibold text-red-700 uppercase mb-2">Fraquezas</p>
-                  <ul className="space-y-1">
-                    {enrichment.data.strategicInference.weaknesses.map((weakness, index) => (
-                      <li key={index} className="text-sm text-gray-900 flex items-start">
-                        <span className="text-red-600 mr-2">→</span>
-                        {weakness}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {enrichment.data.strategic_assessment.strengths &&
+                enrichment.data.strategic_assessment.strengths.length > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-xs font-semibold text-green-700 uppercase tracking-wider mb-2">
+                      Forças Identificadas
+                    </p>
+                    <ul className="space-y-2">
+                      {enrichment.data.strategic_assessment.strengths.map(
+                        (strength: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2 text-sm text-navy-900">
+                            <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span>{strength}</span>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+              {enrichment.data.strategic_assessment.weaknesses &&
+                enrichment.data.strategic_assessment.weaknesses.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-xs font-semibold text-red-700 uppercase tracking-wider mb-2">
+                      Pontos de Atenção
+                    </p>
+                    <ul className="space-y-2">
+                      {enrichment.data.strategic_assessment.weaknesses.map(
+                        (weakness: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2 text-sm text-navy-900">
+                            <span className="text-red-600 mt-1 flex-shrink-0">→</span>
+                            <span>{weakness}</span>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+            </div>
+          </Section>
+        )}
+
+        {/* Data Sources */}
+        {enrichment.data?.data_sources && enrichment.data.data_sources.length > 0 && (
+          <div className="pt-4 border-t border-surface-border">
+            <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">
+              Fontes de Dados
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {enrichment.data.data_sources.map((source: string, index: number) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  <Globe className="w-3 h-3 mr-1" />
+                  {source}
+                </Badge>
+              ))}
             </div>
           </div>
         )}
-      </div>
+      </CardContent>
     </Card>
   );
 }

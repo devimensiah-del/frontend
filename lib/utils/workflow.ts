@@ -3,13 +3,26 @@
  *
  * Workflow based on Enrichment and Analysis statuses:
  * - Submission: Always 'received'
- * - Enrichment: pending → finished → approved
+ * * - Enrichment: pending → processing → completed → approved
  * - Analysis: pending → completed → approved → sent
  */
 
 import type { Enrichment, Analysis } from "@/types";
 
 export type WorkflowStage = 'submission' | 'enrichment' | 'analysis' | 'complete';
+
+/**
+ * Convert workflow stage name to numeric index (1-based)
+ */
+export function getStageNumber(stage: WorkflowStage): number {
+  const stageMap: Record<WorkflowStage, number> = {
+    submission: 1,
+    enrichment: 2,
+    analysis: 3,
+    complete: 4,
+  };
+  return stageMap[stage];
+}
 
 export interface WorkflowAction {
   label: string;
@@ -80,7 +93,7 @@ export function getEnrichmentActions(enrichment: Enrichment | null): {
         message: 'Aguardando worker processar',
       };
 
-    case 'finished':
+    case 'completed':
       return {
         canEdit: true,
         canApprove: true,
@@ -294,7 +307,7 @@ export function getWorkflowProgress(
     switch (enrichment?.status) {
       case 'approved':
         return 55;
-      case 'finished':
+      case 'completed':
         return 45;
       case 'pending':
         return 20;

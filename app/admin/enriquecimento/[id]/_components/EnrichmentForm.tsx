@@ -24,42 +24,72 @@ export function EnrichmentForm({
 }: EnrichmentFormProps) {
   // Helper to map backend nested structure to flat form data
   const mapBackendDataToForm = (data: any) => {
-    if (!data) return {};
+    console.log('[EnrichmentForm] mapBackendDataToForm called with:', data);
+    console.log('[EnrichmentForm] data type:', typeof data);
+
+    if (!data) {
+      console.log('[EnrichmentForm] No data provided, returning empty object');
+      return {};
+    }
+
+    // CRITICAL FIX: If data is a JSON string, parse it first
+    let parsedData = data;
+    if (typeof data === 'string') {
+      console.log('[EnrichmentForm] Data is a string, parsing JSON...');
+      try {
+        parsedData = JSON.parse(data);
+        console.log('[EnrichmentForm] Successfully parsed JSON:', parsedData);
+      } catch (error) {
+        console.error('[EnrichmentForm] Failed to parse JSON:', error);
+        return {};
+      }
+    }
 
     // If data is already flat (legacy or edited), return it
-    if (data.companyDescription || data.foundedYear) return data;
+    if (parsedData.companyDescription || parsedData.foundedYear) {
+      console.log('[EnrichmentForm] Data is already flat, returning as-is');
+      return parsedData;
+    }
 
     // Map nested structure to flat form fields
-    return {
+    const mapped = {
       // Profile
-      companyDescription: data.profile_overview?.legal_name || "", // Fallback as description isn't explicit
-      foundedYear: data.profile_overview?.foundation_year || "",
-      headquarters: data.profile_overview?.headquarters || "",
-      websiteUrl: data.profile_overview?.website || "",
+      companyDescription: parsedData.profile_overview?.legal_name || "", // Fallback as description isn't explicit
+      foundedYear: parsedData.profile_overview?.foundation_year || "",
+      headquarters: parsedData.profile_overview?.headquarters || "",
+      websiteUrl: parsedData.profile_overview?.website || "",
 
       // Financials
-      employeeCount: data.financials?.employees_range || "",
-      revenueEstimate: data.financials?.revenue_estimate || "",
+      employeeCount: parsedData.financials?.employees_range || "",
+      revenueEstimate: parsedData.financials?.revenue_estimate || "",
 
       // Market Position
-      industry: data.market_position?.sector || "",
-      targetSegment: data.market_position?.target_audience || "",
-      keyDifferentiator: data.market_position?.value_proposition || "",
+      industry: parsedData.market_position?.sector || "",
+      targetSegment: parsedData.market_position?.target_audience || "",
+      keyDifferentiator: parsedData.market_position?.value_proposition || "",
 
       // Strategic Assessment
-      digitalMaturityScore: data.strategic_assessment?.digital_maturity || 5,
-      keyWeaknesses: Array.isArray(data.strategic_assessment?.weaknesses)
-        ? data.strategic_assessment.weaknesses.join("\n")
-        : (data.strategic_assessment?.weaknesses || ""),
+      digitalMaturityScore: parsedData.strategic_assessment?.digital_maturity || 5,
+      keyWeaknesses: Array.isArray(parsedData.strategic_assessment?.weaknesses)
+        ? parsedData.strategic_assessment.weaknesses.join("\n")
+        : (parsedData.strategic_assessment?.weaknesses || ""),
 
       // Competitive Landscape
-      competitors: Array.isArray(data.competitive_landscape?.competitors)
-        ? data.competitive_landscape.competitors.join(", ")
-        : (data.competitive_landscape?.competitors || ""),
+      competitors: Array.isArray(parsedData.competitive_landscape?.competitors)
+        ? parsedData.competitive_landscape.competitors.join(", ")
+        : (parsedData.competitive_landscape?.competitors || ""),
 
-      // Preserve other fields if they exist
-      ...data
+      // Digital Presence (if available)
+      linkedinUrl: parsedData.profile_overview?.linkedinUrl || "",
+      recentNews: "",
+
+      // Value Archetype and Brand Tone (if available in future)
+      valueArchetype: "",
+      brandTone: "",
     };
+
+    console.log('[EnrichmentForm] Mapped data:', mapped);
+    return mapped;
   };
 
   const [formData, setFormData] = useState<Record<string, any>>(
@@ -67,8 +97,13 @@ export function EnrichmentForm({
   );
 
   useEffect(() => {
+    console.log('[EnrichmentForm] useEffect triggered, enrichment:', enrichment);
     if ((enrichment as any)?.data) {
-      setFormData(mapBackendDataToForm((enrichment as any).data));
+      console.log('[EnrichmentForm] Setting form data from enrichment.data');
+      const mapped = mapBackendDataToForm((enrichment as any).data);
+      setFormData(mapped);
+    } else {
+      console.log('[EnrichmentForm] No enrichment data available');
     }
   }, [enrichment]);
 

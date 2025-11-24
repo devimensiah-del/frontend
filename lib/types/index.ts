@@ -82,10 +82,10 @@ export interface Submission {
 // Enrichment Types (The Researcher Agent)
 // ============================================================================
 
-// Enrichment workflow: pending → finished → approved
+// Enrichment workflow: pending → completed → approved
 export type EnrichmentStatus =
   | 'pending'      // Initial state, waiting for worker
-  | 'finished'     // Worker completed, waiting for admin review
+  | 'completed'    // Worker completed, waiting for admin review
   | 'approved';    // Admin approved, ready for analysis
 
 // Macro-Economic & Industry Context (Addresses "Brazil blind spot")
@@ -139,35 +139,42 @@ export interface Enrichment {
   id: string;
   submissionId: string;
 
-  // The JSONMap stored in Postgres
+  // The JSONMap stored in Postgres - matches backend UnifiedProfile structure
   data: {
-    overview?: {
-      description: string;
-      sources: string[] | null;
+    profile_overview?: {
+      legal_name: string;
+      website: string;
+      foundation_year: string;
+      headquarters: string;
     };
-    digitalPresence?: {
-      websiteUrl: string;
-      recentNews: string[] | null;
+    financials?: {
+      employees_range: string;
+      revenue_estimate: string;
+      business_model: string;
     };
-    marketPosition?: {
-      industry: string;
-      keyDifferentiator: string;
-      competitors: string[];
+    market_position?: {
+      sector: string;
+      target_audience: string;
+      value_proposition: string;
     };
-    strategicInference?: {
-      brandTone: string;
-      digitalMaturity: number;
-      valueArchetype: string;
-      customerSegment: string;
+    strategic_assessment?: {
+      digital_maturity: number;
       strengths: string[];
       weaknesses: string[];
     };
-    macro_context?: MacroContext; // NEW: Real-time macro-economic data
+    competitive_landscape?: {
+      competitors: string[];
+      market_share_status: string;
+    };
+    macro_context?: MacroContext; // Real-time macro-economic data
+    // Allow any additional fields from AI
+    [key: string]: any;
   };
 
   status: EnrichmentStatus;
   progress: number;  // Worker progress percentage (0-100)
   currentStep: string;  // Current step description
+  isLocked?: boolean; // Admin lock flag
   createdAt: string;
   updatedAt: string;
 }

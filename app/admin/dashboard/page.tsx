@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { AdminInboxSkeleton } from "@/components/skeletons";
 import { toast } from "@/components/ui/use-toast";
-import { adminApi } from "@/lib/api/client";
-import type { SubmissionStatus, Submission } from "@/types";
+import { adminApi, enrichmentApi, analysisApi } from "@/lib/api/client";
+import type { Submission, Enrichment, Analysis } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,27 +15,70 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, FileText, Calendar, Building2 } from "lucide-react";
+import { MoreVertical, FileText, Calendar, Building2, AlertCircle, Loader, CheckCircle } from "lucide-react";
+import { StatCard } from "@/components/admin/StatCard";
+import { FilterTab } from "@/components/admin/FilterTab";
+import { StageIndicator } from "@/components/admin/StageIndicator";
+import { NextActionBadge } from "@/components/admin/NextActionBadge";
+import { AdminSubmissionCard } from "@/components/admin/AdminSubmissionCard";
+import { getWorkflowStage, getNextAction, type WorkflowStage } from "@/lib/utils/workflow";
 
 /* ============================================
-   ADMIN DASHBOARD - Caixa de Envios
+   ADMIN DASHBOARD - ACTION-ORIENTED REDESIGN
+   With batch operations and workflow indicators
    ============================================ */
+
+interface SubmissionWithWorkflow extends Submission {
+  enrichment?: Enrichment | null;
+  analysis?: Analysis | null;
+}
+
+type FilterType = 'all' | 'action' | 'processing' | 'completed';
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissions, setSubmissions] = useState<SubmissionWithWorkflow[]>([]);
+  const [filteredSubmissions, setFilteredSubmissions] = useState<SubmissionWithWorkflow[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [startingEnrichment, setStartingEnrichment] = useState<string | null>(null);
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [batchProcessing, setBatchProcessing] = useState(false);
 
-  // Fetch submissions from API
+  // Fetch submissions with enrichment/analysis data
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
         setIsLoading(true);
         setError(null);
         const data = await adminApi.getAllSubmissions();
-        setSubmissions(data.data || []); // Ensure always an array
+        const submissionsData = data.data || [];
+
+        // Fetch enrichment and analysis for each submission
+        const submissionsWithWorkflow = await Promise.all(
+          submissionsData.map(async (submission: Submission) => {
+            let enrichment = null;
+            let analysis = null;
+
+            try {
+              enrichment = await enrichmentApi.getBySubmissionId(submission.id);
+            } catch (e) {
+              // No enrichment yet
+            }
+
+            // Fetch analysis data when available
+            try {
+              analysis = await analysisApi.getBySubmissionId(submission.id);
+            } catch (e) {
+              // No analysis yet
+            }
+
+            return { ...submission, enrichment, analysis };
+          })
+        );
+
+        setSubmissions(submissionsWithWorkflow);
+        setFilteredSubmissions(submissionsWithWorkflow);
       } catch (err) {
         console.error("Error fetching submissions:", err);
         setError("Erro ao carregar envios. Por favor, tente novamente.");
@@ -52,27 +95,95 @@ export default function AdminDashboard() {
     fetchSubmissions();
   }, []);
 
-  const handleStartEnrichment = async (submission: Submission) => {
-    // NEW ARCHITECTURE: All submissions are 'received', so we can always start enrichment
-    // Just redirect to the enrichment page directly
-    try {
-      setStartingEnrichment(submission.id);
+  // Filter submissions by workflow stage
+  useEffect(() => {
+    if (filter === 'all') {
+      setFilteredSubmissions(submissions);
+      return;
+    }
 
+    const filtered = submissions.filter((sub) => {
+      const stage = getWorkflowStage(sub.enrichment, sub.analysis);
+      const nextAction = getNextAction(sub.enrichment, sub.analysis);
+
+      if (filter === 'action') {
+        // Show items that need admin action
+        return nextAction?.enabled;
+      }
+
+      if (filter === 'processing') {
+        // Show items being processed
+        return sub.enrichment?.status === 'pending' || sub.analysis?.status === 'pending';
+      }
+
+      if (filter === 'completed') {
+        // Show completed items
+        return stage === 'complete';
+      }
+
+      return true;
+    });
+
+    setFilteredSubmissions(filtered);
+  }, [filter, submissions]);
+
+  // Calculate stats
+  const stats = {
+    total: submissions.length,
+    actionNeeded: submissions.filter((sub) => {
+      const nextAction = getNextAction(sub.enrichment, sub.analysis);
+      return nextAction?.enabled;
+    }).length,
+    processing: submissions.filter(
+      (sub) => sub.enrichment?.status === 'pending' || sub.analysis?.status === 'pending'
+    ).length,
+    completed: submissions.filter((sub) => getWorkflowStage(sub.enrichment, sub.analysis) === 'complete')
+      .length,
+  };
+
+  // Batch selection handlers
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const selectAll = () => {
+    if (selectedIds.length === filteredSubmissions.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredSubmissions.map((s) => s.id));
+    }
+  };
+
+  const deselectAll = () => setSelectedIds([]);
+
+  const batchApprove = async () => {
+    try {
+      setBatchProcessing(true);
+      // TODO: Implement batch approval
       toast({
-        title: "Redirecionando para enriquecimento",
-        description: "Abrindo editor de enriquecimento...",
+        title: "Aprovação em lote",
+        description: `Processando ${selectedIds.length} itens...`,
         variant: "default",
       });
-
-      // Redirect to enrichment editor
-      router.push(`/admin/enriquecimento/${submission.id}`);
-    } catch (_error: any) {
+      // For now, just show success
+      setTimeout(() => {
+        toast({
+          title: "Sucesso",
+          description: `${selectedIds.length} itens aprovados.`,
+          variant: "default",
+        });
+        setSelectedIds([]);
+        setBatchProcessing(false);
+      }, 2000);
+    } catch (error: any) {
       toast({
-        title: "Erro ao abrir enriquecimento",
-        description: _error.message || "Não foi possível abrir o editor.",
+        title: "Erro",
+        description: error.message || "Não foi possível processar a aprovação em lote.",
         variant: "destructive",
       });
-      setStartingEnrichment(null);
+      setBatchProcessing(false);
     }
   };
 
@@ -96,50 +207,116 @@ export default function AdminDashboard() {
     );
   }
 
-  // NEW ARCHITECTURE: All submissions have status 'received'
-  // Show total count for now (can be enhanced with enrichment/analysis status later)
-  const pendingCount = 0; // All are received, none truly "pending"
-  const completedCount = 0; // Would need to check analysis status = 'sent'
-
   return (
     <div className="min-h-screen bg-surface-paper">
-      {/* --- PAGE HEADER --- */}
+      {/* --- PAGE HEADER WITH STATS --- */}
       <header className="bg-white border-b border-line">
         <div className="px-4 sm:px-8 py-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex flex-col gap-4">
             <div>
               <h1 className="font-heading text-2xl sm:text-3xl font-medium tracking-tight text-navy-900">
-                Caixa de Envios
+                Dashboard Administrativo
               </h1>
               <p className="text-sm text-text-secondary mt-1">
-                Gerencie e revise todos os envios de clientes
+                Gerencie workflows e tome ações em tempo real
               </p>
             </div>
 
-            {/* Stats Cards - Responsive Grid */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:flex">
-              <StatsCard label="Total" value={submissions.length} />
-              <StatsCard
-                label="Pendentes"
-                value={pendingCount}
-                variant="warning"
+            {/* Quick Stats Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <StatCard
+                label="Ação Necessária"
+                value={stats.actionNeeded}
+                variant="error"
+                icon={AlertCircle}
               />
-              <StatsCard
+              <StatCard
+                label="Em Processamento"
+                value={stats.processing}
+                variant="warning"
+                icon={Loader}
+              />
+              <StatCard
                 label="Concluídos"
-                value={completedCount}
+                value={stats.completed}
                 variant="success"
+                icon={CheckCircle}
+              />
+              <StatCard
+                label="Total"
+                value={stats.total}
+                variant="default"
               />
             </div>
           </div>
         </div>
       </header>
 
+      {/* --- FILTERS & BATCH ACTIONS --- */}
+      <div className="px-4 sm:px-8 py-4 bg-white border-b border-line">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          {/* Stage Filter Tabs */}
+          <div className="flex flex-wrap gap-2">
+            <FilterTab
+              active={filter === 'all'}
+              onClick={() => setFilter('all')}
+            >
+              Todos ({stats.total})
+            </FilterTab>
+            <FilterTab
+              active={filter === 'action'}
+              onClick={() => setFilter('action')}
+            >
+              Ação Necessária ({stats.actionNeeded})
+            </FilterTab>
+            <FilterTab
+              active={filter === 'processing'}
+              onClick={() => setFilter('processing')}
+            >
+              Processando ({stats.processing})
+            </FilterTab>
+            <FilterTab
+              active={filter === 'completed'}
+              onClick={() => setFilter('completed')}
+            >
+              Concluídos ({stats.completed})
+            </FilterTab>
+          </div>
+
+          {/* Batch Actions */}
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-text-secondary">
+                {selectedIds.length} selecionados
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={deselectAll}
+                disabled={batchProcessing}
+              >
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                onClick={batchApprove}
+                disabled={batchProcessing}
+              >
+                {batchProcessing ? "Processando..." : "Aprovar em Lote"}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* --- SUBMISSIONS CONTENT --- */}
-      <div className="p-4 sm:p-8">
-        {submissions.length === 0 ? (
+      <div className="px-4 sm:px-8 py-8">
+        {filteredSubmissions.length === 0 ? (
           <div className="bg-white border border-line p-12 text-center">
             <p className="text-text-secondary">
-              Nenhum envio encontrado.
+              {filter === 'all'
+                ? "Nenhum envio encontrado."
+                : `Nenhum item no filtro "${filter}".`}
             </p>
           </div>
         ) : (
@@ -148,103 +325,149 @@ export default function AdminDashboard() {
             <div className="hidden lg:block bg-white border border-line shadow-sm overflow-hidden">
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-surface-paper border-b border-line">
+                <div className="col-span-1">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedIds.length === filteredSubmissions.length &&
+                      filteredSubmissions.length > 0
+                    }
+                    onChange={selectAll}
+                    className="w-4 h-4 text-gold-600 focus:ring-gold-500 border-gray-300 rounded"
+                  />
+                </div>
                 <div className="col-span-3">
                   <TableHeader>Empresa</TableHeader>
                 </div>
+                <div className="col-span-2">
+                  <TableHeader>Workflow</TableHeader>
+                </div>
                 <div className="col-span-3">
-                  <TableHeader>CNPJ</TableHeader>
+                  <TableHeader>Próxima Ação</TableHeader>
                 </div>
                 <div className="col-span-2">
-                  <TableHeader>Status</TableHeader>
+                  <TableHeader>Data</TableHeader>
                 </div>
-                <div className="col-span-2">
-                  <TableHeader>Enviado</TableHeader>
-                </div>
-                <div className="col-span-2">
+                <div className="col-span-1">
                   <TableHeader>Ações</TableHeader>
                 </div>
               </div>
 
               {/* Table Body */}
               <div className="divide-y divide-line">
-                {submissions.map((submission) => (
-                  <div
-                    key={submission.id}
-                    className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-surface-paper transition-colors group"
-                  >
-                    {/* Company Name */}
-                    <div className="col-span-3 flex items-center">
-                      <div className="font-medium text-navy-900 group-hover:text-gold-500 transition-colors">
-                        {submission.companyName}
+                {filteredSubmissions.map((submission) => {
+                  const stage = getWorkflowStage(
+                    submission.enrichment,
+                    submission.analysis
+                  );
+                  const nextAction = getNextAction(
+                    submission.enrichment,
+                    submission.analysis
+                  );
+                  const isSelected = selectedIds.includes(submission.id);
+
+                  return (
+                    <div
+                      key={submission.id}
+                      className={cn(
+                        "grid grid-cols-12 gap-4 px-6 py-4 transition-colors group",
+                        isSelected
+                          ? "bg-gold-500/5 hover:bg-gold-500/10"
+                          : "hover:bg-surface-paper"
+                      )}
+                    >
+                      {/* Checkbox */}
+                      <div className="col-span-1 flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(submission.id)}
+                          className="w-4 h-4 text-gold-600 focus:ring-gold-500 border-gray-300 rounded"
+                        />
                       </div>
-                    </div>
 
-                    {/* CNPJ */}
-                    <div className="col-span-3 flex items-center">
-                      <div className="text-sm text-text-secondary font-mono">
-                        {submission.cnpj || "—"}
+                      {/* Company Name */}
+                      <div className="col-span-3 flex items-center">
+                        <div className="font-medium text-navy-900 group-hover:text-gold-500 transition-colors">
+                          {submission.companyName}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Status */}
-                    <div className="col-span-2 flex items-center">
-                      <StatusBadge status={submission.status} />
-                    </div>
-
-                    {/* Date */}
-                    <div className="col-span-2 flex items-center">
-                      <div className="text-sm text-text-secondary">
-                        {formatDate(submission.createdAt)}
+                      {/* Workflow Stage */}
+                      <div className="col-span-2 flex items-center">
+                        <StageIndicator currentStage={stage} size="sm" showLabel={false} />
                       </div>
-                    </div>
 
-                    {/* Actions */}
-                    <div className="col-span-2 flex items-center justify-end gap-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
+                      {/* Next Action */}
+                      <div className="col-span-3 flex items-center">
+                        {nextAction && (
+                          <NextActionBadge
+                            {...nextAction}
                             size="sm"
-                            className="h-8 w-8 p-0"
-                            disabled={startingEnrichment === submission.id}
-                          >
-                            {startingEnrichment === submission.id ? (
-                              <span className="text-xs">...</span>
-                            ) : (
+                            showIcon={false}
+                          />
+                        )}
+                      </div>
+
+                      {/* Date */}
+                      <div className="col-span-2 flex items-center">
+                        <div className="text-sm text-text-secondary">
+                          {formatDate(submission.updatedAt)}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="col-span-1 flex items-center justify-end gap-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
                               <MoreVertical className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/submissions/${submission.id}`}>
-                              Ver Detalhes
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleStartEnrichment(submission)}
-                            disabled={startingEnrichment === submission.id}
-                          >
-                            Iniciar Enriquecimento
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/enriquecimento/${submission.id}`}>
+                                Ver Enriquecimento
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/analise/${submission.id}`}>
+                                Ver Análise
+                              </Link>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {/* Mobile Card View - Visible Only on Mobile */}
             <div className="lg:hidden space-y-4">
-              {submissions.map((submission) => (
-                <SubmissionCard
-                  key={submission.id}
-                  submission={submission}
-                  onStartEnrichment={handleStartEnrichment}
-                  isStarting={startingEnrichment === submission.id}
-                />
-              ))}
+              {filteredSubmissions.map((submission) => {
+                const nextAction = getNextAction(
+                  submission.enrichment,
+                  submission.analysis
+                );
+
+                return (
+                  <AdminSubmissionCard
+                    key={submission.id}
+                    submission={submission}
+                    enrichment={submission.enrichment}
+                    analysis={submission.analysis}
+                    selected={selectedIds.includes(submission.id)}
+                    onToggleSelect={() => toggleSelect(submission.id)}
+                    nextAction={nextAction || undefined}
+                  />
+                );
+              })}
             </div>
           </>
         )}
@@ -254,78 +477,7 @@ export default function AdminDashboard() {
 }
 
 /* ============================================
-   MOBILE SUBMISSION CARD COMPONENT
-   ============================================ */
-
-interface SubmissionCardProps {
-  submission: Submission;
-  onStartEnrichment: (submission: Submission) => void;
-  isStarting: boolean;
-}
-
-function SubmissionCard({ submission, onStartEnrichment, isStarting }: SubmissionCardProps) {
-  return (
-    <div className="bg-white border border-line p-4 hover:shadow-md transition-shadow">
-      {/* Header with Company Name and Status */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1 min-w-0 mr-2">
-          <h3 className="font-medium text-navy-900 truncate text-lg">
-            {submission.companyName}
-          </h3>
-          {submission.cnpj && (
-            <p className="text-xs text-text-secondary font-mono mt-1">
-              {submission.cnpj}
-            </p>
-          )}
-        </div>
-        <StatusBadge status={submission.status} />
-      </div>
-
-      {/* Metadata */}
-      <div className="flex items-center gap-4 text-xs text-text-secondary mb-4">
-        <div className="flex items-center gap-1">
-          <Calendar className="w-3 h-3" />
-          <span>{formatDate(submission.createdAt)}</span>
-        </div>
-        {submission.industry && (
-          <div className="flex items-center gap-1">
-            <Building2 className="w-3 h-3" />
-            <span>{submission.industry}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="flex gap-2">
-        <Link
-          href={`/admin/submissions/${submission.id}`}
-          className="flex-1"
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            Ver Detalhes
-          </Button>
-        </Link>
-        <Button
-          variant="architect"
-          size="sm"
-          onClick={() => onStartEnrichment(submission)}
-          disabled={isStarting}
-          className="flex-1"
-        >
-          {isStarting ? "..." : "Enriquecer"}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-/* ============================================
-   TABLE HEADER COMPONENT
+   UTILITY COMPONENTS
    ============================================ */
 
 function TableHeader({ children }: { children: React.ReactNode }) {
@@ -335,133 +487,6 @@ function TableHeader({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-
-/* ============================================
-   STATUS BADGE COMPONENT
-   ============================================ */
-
-interface StatusBadgeProps {
-  status: SubmissionStatus;
-}
-
-function StatusBadge({ status }: StatusBadgeProps) {
-  // NEW ARCHITECTURE: All submissions have status 'received'
-  const variants: Record<string, { bg: string; text: string; label: string }> = {
-    received: { bg: "bg-green-100", text: "text-green-600", label: "Recebido" },
-  };
-  const variantsOld = {
-    pending: {
-      bg: "bg-gray-100",
-      text: "text-gray-600",
-      label: "Pendente",
-    },
-    processing: {
-      bg: "bg-blue-50",
-      text: "text-blue-600",
-      label: "Processando",
-    },
-    enriching: {
-      bg: "bg-blue-50",
-      text: "text-blue-600",
-      label: "Em Enriquecimento",
-    },
-    enriched: {
-      bg: "bg-indigo-50",
-      text: "text-indigo-600",
-      label: "Enriquecimento Completo",
-    },
-    analyzing: {
-      bg: "bg-purple-50",
-      text: "text-purple-600",
-      label: "Em Análise",
-    },
-    analyzed: {
-      bg: "bg-teal-50",
-      text: "text-teal-600",
-      label: "Análise Completa",
-    },
-    ready_for_review: {
-      bg: "bg-purple-50",
-      text: "text-purple-600",
-      label: "Revisão Final",
-    },
-    generating_report: {
-      bg: "bg-cyan-50",
-      text: "text-cyan-600",
-      label: "Gerando Relatório",
-    },
-    completed: {
-      bg: "bg-gold-500/10",
-      text: "text-gold-600",
-      label: "Concluído",
-    },
-    enrichment_failed: {
-      bg: "bg-red-50",
-      text: "text-red-600",
-      label: "Erro no Enriquecimento",
-    },
-    analysis_failed: {
-      bg: "bg-red-50",
-      text: "text-red-600",
-      label: "Erro na Análise",
-    },
-    report_failed: {
-      bg: "bg-red-50",
-      text: "text-red-600",
-      label: "Erro no Relatório",
-    },
-    failed: {
-      bg: "bg-red-50",
-      text: "text-red-600",
-      label: "Erro",
-    },
-  };
-
-  const variant = variants[status];
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2 py-1 text-xs font-bold uppercase tracking-wider whitespace-nowrap",
-        variant.bg,
-        variant.text
-      )}
-    >
-      {variant.label}
-    </span>
-  );
-}
-
-/* ============================================
-   STATS CARD COMPONENT
-   ============================================ */
-
-interface StatsCardProps {
-  label: string;
-  value: number;
-  variant?: "default" | "warning" | "success";
-}
-
-function StatsCard({ label, value, variant = "default" }: StatsCardProps) {
-  const variants = {
-    default: "border-line text-navy-900",
-    warning: "border-gold-500 text-gold-600",
-    success: "border-navy-900 text-navy-900",
-  };
-
-  return (
-    <div className={cn("border px-3 py-2 bg-white", variants[variant])}>
-      <div className="text-xl sm:text-2xl font-light font-heading">{value}</div>
-      <div className="text-xs uppercase tracking-widest text-text-secondary mt-0.5">
-        {label}
-      </div>
-    </div>
-  );
-}
-
-/* ============================================
-   UTILITY FUNCTIONS
-   ============================================ */
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);

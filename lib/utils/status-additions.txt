@@ -1,0 +1,17 @@
+Add these cases to getEnrichmentStatusVariant (after case 'pending'):
+    case 'processing':
+      return 'default'; // Gray - actively processing
+    case 'failed':
+      return 'error'; // Red - error state
+
+Add these to EnrichmentStatus labels (in getEnrichmentStatusLabel):
+    processing: 'Processando',
+    failed: 'Erro',
+
+Add these cases to getEnrichmentStatusDescription (after case 'pending'):
+    case 'processing':
+      return 'Análise de mercado em andamento.';
+    case 'failed':
+      return 'Erro no processamento. Requer atenção administrativa.';
+
+Add these to Analysis (same pattern for getAnalysisStatus* functions)

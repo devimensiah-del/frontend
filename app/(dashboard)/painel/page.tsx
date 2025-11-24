@@ -4,18 +4,24 @@ import Link from 'next/link';
 import { SubmissionCard } from '../_components/SubmissionCard';
 import { EnrichmentCard } from '../_components/EnrichmentCard';
 import { AnalysisCard } from '../_components/AnalysisCard';
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@/components/ui/accordion';
 import { DashboardSkeleton } from '@/components/skeletons';
 import { useEffect, useState } from 'react';
 import { useAuthContext } from '@/lib/providers/AuthProvider';
 import { submissionsApi, enrichmentApi, analysisApi } from '@/lib/api/client';
 import { toast } from '@/components/ui/use-toast';
 import type { Submission, Enrichment, Analysis } from '@/types';
+import {
+  ProgressStepper,
+  StatusTimeline,
+  NextActionCard,
+} from '@/components/workflow';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  getWorkflowStages,
+  getTimelineEvents,
+  getNextAction,
+} from '@/lib/utils/workflow-helpers';
+import { getStageNumber, getWorkflowStage } from '@/lib/utils/workflow';
 
 export default function PainelPage() {
   const { user } = useAuthContext();
@@ -113,148 +119,74 @@ export default function PainelPage() {
     );
   }
 
-  const hasEnrichment = enrichment !== null;
-  const hasAnalysis = analysis !== null;
-
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Meu Painel</h1>
-        <p className="text-gray-600 mt-2">
-          Acompanhe o status da sua submissão e acesse os resultados da análise.
-        </p>
+    <div className="min-h-screen bg-surface-paper">
+      {/* Progress Header */}
+      <div className="bg-white border-b border-line">
+        <div className="container mx-auto px-4 py-6">
+          <h1 className="font-heading text-2xl md:text-3xl font-medium text-navy-900 mb-6">
+            Seu Relatório Estratégico
+          </h1>
+          <ProgressStepper
+            currentStage={getStageNumber(getWorkflowStage(enrichment, analysis))}
+            stages={getWorkflowStages()}
+            estimatedCompletion="2-3 dias"
+          />
+        </div>
       </div>
 
-      {/* Accordion Sections */}
-      <Accordion type="single" collapsible defaultValue="submission" className="space-y-4">
-        {/* 1. Submission Data - Always visible */}
-        <AccordionItem value="submission" className="border border-gray-200 rounded-lg bg-white">
-          <AccordionTrigger className="px-6 py-4 hover:bg-gray-50">
-            <div className="flex items-center justify-between w-full mr-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-[#00a859] text-white rounded-full flex items-center justify-center font-semibold">
-                  1
-                </div>
-                <span className="text-lg font-semibold text-gray-900">
-                  Dados de Envio
-                </span>
-              </div>
-              <span className="text-sm text-gray-500">
-                Sempre visível
-              </span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6">
+      {/* Main Content: 2-column layout */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column: Main content (2/3 width on desktop) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Submission Data Card - Always visible */}
             <SubmissionCard submission={submission} />
-          </AccordionContent>
-        </AccordionItem>
 
-        {/* 2. Enrichment Data - Dropdown, only if enriched */}
-        {hasEnrichment && (
-          <AccordionItem value="enrichment" className="border border-gray-200 rounded-lg bg-white">
-            <AccordionTrigger className="px-6 py-4 hover:bg-gray-50">
-              <div className="flex items-center justify-between w-full mr-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold">
-                    2
-                  </div>
-                  <span className="text-lg font-semibold text-gray-900">
-                    Enriquecimento de Dados
-                  </span>
-                </div>
-                <span className="text-sm text-indigo-600 font-medium">
-                  Disponível
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6">
-              <EnrichmentCard enrichment={enrichment} />
-            </AccordionContent>
-          </AccordionItem>
-        )}
+            {/* Enrichment Card - Show when exists */}
+            {enrichment && <EnrichmentCard enrichment={enrichment} />}
 
-        {/* 3. Analysis/Report - Dropdown, only when admin sends it */}
-        {hasAnalysis && (
-          <AccordionItem value="analysis" className="border border-gray-200 rounded-lg bg-white">
-            <AccordionTrigger className="px-6 py-4 hover:bg-gray-50">
-              <div className="flex items-center justify-between w-full mr-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-semibold">
-                    3
-                  </div>
-                  <span className="text-lg font-semibold text-gray-900">
-                    Análise e Relatório
-                  </span>
-                </div>
-                <span className="text-sm text-green-600 font-medium">
-                  Relatório disponível
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6">
-              <AnalysisCard analysis={analysis} />
-            </AccordionContent>
-          </AccordionItem>
-        )}
-      </Accordion>
+            {/* Analysis Card - Show when sent */}
+            {analysis?.status === 'sent' && <AnalysisCard analysis={analysis} />}
 
-      {/* Status Messages */}
-      {!hasEnrichment && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start space-x-3">
-            <svg
-              className="w-5 h-5 text-blue-600 mt-0.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <div>
-              <p className="text-sm font-medium text-blue-900">
-                Sua submissão está em análise
-              </p>
-              <p className="text-sm text-blue-700 mt-1">
-                Estamos processando seus dados. O enriquecimento estará disponível em breve.
-              </p>
-            </div>
+            {/* Next Action Card */}
+            <NextActionCard {...getNextAction(enrichment, analysis)} />
+          </div>
+
+          {/* Right Column: Sidebar (1/3 width on desktop) */}
+          <div className="space-y-6">
+            {/* Status Timeline */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-navy-900">Timeline</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StatusTimeline
+                  events={getTimelineEvents(submission, enrichment, analysis)}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Help Card */}
+            <Card className="bg-navy-50 border-navy-200">
+              <CardHeader>
+                <CardTitle className="text-navy-900">Precisa de Ajuda?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-text-secondary mb-4">
+                  Nossa equipe está disponível para esclarecer dúvidas sobre seu relatório.
+                </p>
+                <Link
+                  href="mailto:contato@imensiah.com"
+                  className="inline-block w-full px-4 py-2 bg-navy-900 text-white text-sm font-medium text-center uppercase tracking-wider hover:bg-navy-800 transition-colors"
+                >
+                  Entrar em Contato
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      )}
-
-      {hasEnrichment && !hasAnalysis && (
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-          <div className="flex items-start space-x-3">
-            <svg
-              className="w-5 h-5 text-purple-600 mt-0.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
-            <div>
-              <p className="text-sm font-medium text-purple-900">
-                Análise em andamento
-              </p>
-              <p className="text-sm text-purple-700 mt-1">
-                Nossos especialistas estão revisando seu caso. O relatório final será disponibilizado em breve.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

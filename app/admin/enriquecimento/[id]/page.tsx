@@ -3,14 +3,30 @@
 import React, { use, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEnrichment } from "@/lib/hooks/use-enrichment";
+import { useAdminEnrichmentQuery } from "@/lib/hooks/use-admin-enrichment-query";
 import { useAdminEnrichment } from "@/lib/hooks/use-admin-enrichment";
 import { adminApi } from "@/lib/api/client";
 import { toast } from "@/components/ui/use-toast";
 import { EnrichmentEditorSkeleton } from "@/components/skeletons";
 import { SubmissionSummary } from "./_components/SubmissionSummary";
 import { EnrichmentForm } from "./_components/EnrichmentForm";
-import { EnrichmentActions } from "./_components/EnrichmentActions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from "@/components/ui/alert";
+import { StatusIcon } from "@/components/admin/StatusIcon";
+import { StatusTimeline } from "@/components/admin/StatusTimeline";
+import { CheckCircle, AlertCircle } from "lucide-react";
 import type { Submission } from "@/types";
 
 /* ============================================
@@ -37,12 +53,12 @@ export default function EnrichmentEditorPage({
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(
     null
   );
-
+  
   const {
     enrichment,
     isLoading,
     refetch,
-  } = useEnrichment(submissionId);
+  } = useAdminEnrichmentQuery(submissionId);
 
   const adminEnrichment = useAdminEnrichment();
 
@@ -183,6 +199,49 @@ export default function EnrichmentEditorPage({
     return <EnrichmentEditorSkeleton />;
   }
 
+  // Calculate data quality score (simple heuristic)
+  const calculateQualityScore = (): number => {
+    if (!localEnrichmentData) return 0;
+
+    const fields = Object.values(localEnrichmentData).filter(
+      (val) => val !== null && val !== undefined && val !== ""
+    );
+
+    const totalFields = Object.keys(localEnrichmentData).length;
+    if (totalFields === 0) return 0;
+
+    return (fields.length / totalFields) * 100;
+  };
+
+  const qualityScore = calculateQualityScore();
+
+  // Get score variant
+  const getScoreVariant = (score: number): "error" | "warning" | "success" => {
+    if (score >= 80) return "success";
+    if (score >= 50) return "warning";
+    return "error";
+  };
+
+  // Validation warnings
+  const getValidationWarnings = (): string[] => {
+    const warnings: string[] = [];
+
+    if (!localEnrichmentData || Object.keys(localEnrichmentData).length === 0) {
+      warnings.push("Nenhum dado enriquecido disponível.");
+    }
+
+    if (qualityScore < 50) {
+      warnings.push(
+        "Qualidade dos dados abaixo de 50%. Considere adicionar mais informações."
+      );
+    }
+
+    return warnings;
+  };
+
+  const validationWarnings = getValidationWarnings();
+  const canApprove = qualityScore >= 50 && enrichment?.status !== "approved";
+
   return (
     <div className="min-h-screen bg-surface-paper pb-20">
       {/* --- BREADCRUMB HEADER --- */}
@@ -221,33 +280,166 @@ export default function EnrichmentEditorPage({
 
       {/* --- MAIN CONTENT --- */}
       <div className="px-8 py-8">
-        <div className="grid grid-cols-12 gap-8">
-          {/* Left Panel: Submission Data (Read-only) */}
-          <div className="col-span-4">
-            <div className="sticky top-8">
-              <SubmissionSummary submission={submission} />
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Main Editor (3/4 width) */}
+          <div className="lg:col-span-3">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Dados Enriquecidos</CardTitle>
+                  {enrichment && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-text-secondary">
+                        Qualidade:
+                      </span>
+                      <Badge variant={getScoreVariant(qualityScore)}>
+                        {qualityScore.toFixed(0)}%
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <EnrichmentForm
+                  enrichment={enrichment || null}
+                  onChange={handleEnrichmentChange}
+                  disabled={
+                    adminEnrichment.isUpdating || adminEnrichment.isApproving
+                  }
+                />
+              </CardContent>
+
+              <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSaveDraft(false)}
+                    disabled={adminEnrichment.isUpdating}
+                  >
+                    Salvar Rascunho
+                  </Button>
+                  <Button
+                    onClick={handleApprove}
+                    disabled={!canApprove || adminEnrichment.isApproving}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Aprovar e Iniciar Análise
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
+
+            {/* Validation Warnings */}
+            {validationWarnings.length > 0 && (
+              <Alert variant="warning" className="mt-4">
+                <AlertCircle className="w-4 h-4" />
+                <AlertTitle>Avisos de Validação</AlertTitle>
+                <AlertDescription>
+                  <ul className="list-disc list-inside space-y-1">
+                    {validationWarnings.map((warning, index) => (
+                      <li key={index}>{warning}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
 
-          {/* Right Panel: Enrichment Editor */}
-          <div className="col-span-8">
-            <EnrichmentForm
-              enrichment={enrichment || null}
-              onChange={handleEnrichmentChange}
-              disabled={adminEnrichment.isUpdating || adminEnrichment.isApproving}
-            />
+          {/* Sidebar (1/4 width) */}
+          <div className="space-y-6">
+            {/* Status Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <StatusIcon
+                    status={enrichment?.status || "pending"}
+                    size="md"
+                  />
+                  <Badge
+                    variant={
+                      enrichment?.status === "approved"
+                        ? "success"
+                        : enrichment?.status === "completed"
+                        ? "gold"
+                        : "warning"
+                    }
+                  >
+                    {enrichment?.status === "approved"
+                      ? "Aprovado"
+                      : enrichment?.status === "completed"
+                      ? "Pronto"
+                      : "Pendente"}
+                  </Badge>
+                </div>
+                {enrichment?.progress !== undefined && (
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-xs text-text-secondary mb-1">
+                      <span>Progresso</span>
+                      <span>{enrichment.progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gold-500 h-2 rounded-full transition-all"
+                        style={{ width: `${enrichment.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Processing Timeline */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Timeline</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StatusTimeline
+                  events={[
+                    {
+                      type: "created",
+                      timestamp: enrichment?.createdAt,
+                      label: "Criado",
+                    },
+                    {
+                      type: "processing",
+                      timestamp:
+                        enrichment?.status === "pending"
+                          ? undefined
+                          : enrichment?.updatedAt,
+                      label: "Processado",
+                    },
+                    {
+                      type: "completed",
+                      timestamp:
+                        enrichment?.status === "completed" ||
+                        enrichment?.status === "approved"
+                          ? enrichment?.updatedAt
+                          : undefined,
+                      label: "Concluído",
+                    },
+                    {
+                      type: "approved",
+                      timestamp:
+                        enrichment?.status === "approved"
+                          ? enrichment?.updatedAt
+                          : undefined,
+                      label: "Aprovado",
+                    },
+                  ]}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Submission Summary */}
+            <SubmissionSummary submission={submission} />
           </div>
         </div>
       </div>
-
-      {/* --- ACTION BUTTONS (Sticky Footer) --- */}
-      <EnrichmentActions
-        onSaveDraft={handleSaveDraft}
-        onApprove={handleApprove}
-        isSaving={adminEnrichment.isUpdating}
-        isApproving={adminEnrichment.isApproving}
-        disabled={isLoading || enrichment?.status === 'approved'}
-      />
     </div>
   );
 }

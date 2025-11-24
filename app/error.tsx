@@ -17,11 +17,19 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to console (in production, send to error tracking service)
+    // Log the error to console
     console.error("Error page caught an error:", error);
 
-    // TODO: Log to error tracking service (Sentry, LogRocket, etc.)
-    // Example: Sentry.captureException(error);
+    // Log to error tracking service (Sentry integration ready - see lib/utils/error-tracking.ts)
+    import('@/lib/utils/error-tracking').then(({ logError }) => {
+      logError(error, {
+        tags: {
+          page: 'error-page',
+          errorType: 'page-error',
+          ...(error.digest && { digest: error.digest }),
+        },
+      });
+    });
   }, [error]);
 
   return (

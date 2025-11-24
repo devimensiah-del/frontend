@@ -112,8 +112,8 @@ export function SubmissionForm() {
         industry: data.companyIndustry || "",
         companySize: data.companySize || "",
         website: data.companyWebsite || null,
-        strategicGoal: data.businessChallenge,
-        currentChallenges: data.businessChallenge,
+        strategicGoal: data.businessChallenge,  // User's strategic goal/challenge
+        currentChallenges: "",  // Leave empty - will be filled during enrichment
         competitivePosition: "Em análise",
         additionalInfo: JSON.stringify(additionalInfoData),
       }
