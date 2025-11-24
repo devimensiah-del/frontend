@@ -2,299 +2,53 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Download, Loader2 } from 'lucide-react';
-import { analysisApi } from '@/lib/api/client';
-import { useToast } from '@/components/ui/use-toast';
+import { ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-// Mock data - same structure as the analysis preview
-const MOCK_ANALYSIS = {
-  previewHtml: `
-    <div style="font-family: 'Georgia', serif; color: #1a1a1a; line-height: 1.8;">
-      <!-- Header -->
-      <div style="text-align: center; padding: 48px 0 32px; border-bottom: 2px solid #d4af37;">
-        <h1 style="font-size: 36px; font-weight: 600; color: #1a1a1a; margin: 0 0 8px;">Imensiah</h1>
-        <p style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Name Analysis Report</p>
-      </div>
-
-      <!-- Client Info -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <p style="margin: 8px 0; font-size: 16px;"><strong style="color: #666;">Name:</strong> Sarah Johnson</p>
-        <p style="margin: 8px 0; font-size: 16px;"><strong style="color: #666;">Date of Birth:</strong> March 15, 1990</p>
-        <p style="margin: 8px 0; font-size: 16px;"><strong style="color: #666;">Report Date:</strong> ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-      </div>
-
-      <!-- Introduction -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 16px;">Introduction</h2>
-        <p style="margin: 0 0 16px; color: #333;">
-          This comprehensive analysis explores the vibrational essence and energetic patterns encoded within your name.
-          Through the ancient wisdom of numerology and the sacred art of name interpretation, we uncover the hidden
-          forces that shape your personality, destiny, and life path.
-        </p>
-        <p style="margin: 0; color: #333;">
-          Your name carries a unique frequency that resonates with cosmic energies, influencing your experiences,
-          relationships, and personal growth journey.
-        </p>
-      </div>
-
-      <!-- Core Numbers -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 24px;">Core Numerological Profile</h2>
-
-        <div style="margin-bottom: 24px;">
-          <h3 style="font-size: 18px; color: #1a1a1a; margin: 0 0 12px;">Life Path Number: 7</h3>
-          <p style="color: #333; margin: 0 0 12px;">
-            As a Life Path 7, you are a natural seeker of truth and wisdom. Your analytical mind and intuitive
-            insights guide you toward deep understanding of life's mysteries. You possess a contemplative nature
-            that drives you to explore both the material and spiritual realms.
-          </p>
-          <p style="color: #666; font-style: italic; margin: 0;">
-            <strong>Key Traits:</strong> Introspective, analytical, spiritual, perfectionist, independent
-          </p>
-        </div>
-
-        <div style="margin-bottom: 24px;">
-          <h3 style="font-size: 18px; color: #1a1a1a; margin: 0 0 12px;">Expression Number: 5</h3>
-          <p style="color: #333; margin: 0 0 12px;">
-            Your Expression Number reveals your natural talents and abilities. The energy of 5 brings versatility,
-            adaptability, and a love for freedom. You express yourself through change, adventure, and dynamic communication.
-          </p>
-          <p style="color: #666; font-style: italic; margin: 0;">
-            <strong>Strengths:</strong> Adaptable, energetic, curious, persuasive, progressive
-          </p>
-        </div>
-
-        <div style="margin-bottom: 0;">
-          <h3 style="font-size: 18px; color: #1a1a1a; margin: 0 0 12px;">Soul Urge Number: 3</h3>
-          <p style="color: #333; margin: 0 0 12px;">
-            Your Soul Urge Number represents your innermost desires and motivations. The vibration of 3 indicates
-            a deep need for creative self-expression, social connection, and joyful communication. You are driven
-            by the desire to inspire and uplift others.
-          </p>
-          <p style="color: #666; font-style: italic; margin: 0;">
-            <strong>Inner Desires:</strong> Creative expression, social harmony, optimism, artistic pursuits
-          </p>
-        </div>
-      </div>
-
-      <!-- Personality Analysis -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 16px;">Personality & Character Insights</h2>
-        <p style="color: #333; margin: 0 0 16px;">
-          The combination of your Life Path 7 and Expression 5 creates a fascinating duality in your personality.
-          While you possess a deep, introspective nature that seeks wisdom and understanding, you also have a
-          dynamic, adventurous spirit that craves new experiences and freedom.
-        </p>
-        <p style="color: #333; margin: 0 0 16px;">
-          This blend manifests as someone who can be both a contemplative philosopher and an enthusiastic explorer.
-          You may find yourself drawn to intellectual pursuits that also involve travel, cultural exploration, or
-          innovative thinking. Your Soul Urge 3 adds a creative and social dimension, suggesting that you share
-          your discoveries and insights in creative, engaging ways.
-        </p>
-        <p style="color: #333; margin: 0;">
-          <strong style="color: #1a1a1a;">Challenge to Embrace:</strong> Balancing your need for solitude and
-          reflection with your desire for social interaction and new experiences. Learning to integrate your
-          introspective wisdom with your dynamic expression will unlock your fullest potential.
-        </p>
-      </div>
-
-      <!-- Destiny & Life Purpose -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 16px;">Destiny & Life Purpose</h2>
-        <p style="color: #333; margin: 0 0 16px;">
-          Your numerological blueprint suggests a life path centered around the pursuit and sharing of knowledge.
-          You are here to explore the deeper meaning of existence, to question conventional wisdom, and to
-          communicate your unique insights in ways that inspire others to think differently.
-        </p>
-        <p style="color: #333; margin: 0 0 16px;">
-          Your destiny involves bridging the gap between the known and the unknown, the material and the spiritual.
-          Whether through teaching, writing, research, or creative expression, you are meant to illuminate truths
-          that others may overlook.
-        </p>
-        <p style="color: #333; margin: 0;">
-          <strong style="color: #1a1a1a;">Potential Career Paths:</strong> Research, philosophy, teaching, writing,
-          spiritual guidance, psychology, innovation consulting, cultural anthropology, or any field that combines
-          analytical thinking with creative communication.
-        </p>
-      </div>
-
-      <!-- Relationships & Compatibility -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 16px;">Relationships & Compatibility</h2>
-        <p style="color: #333; margin: 0 0 16px;">
-          In relationships, you seek partners who can appreciate both your need for independence and your desire
-          for meaningful connection. You are most compatible with individuals who respect your introspective nature
-          while also encouraging your adventurous spirit.
-        </p>
-        <p style="color: #333; margin: 0 0 16px;">
-          <strong style="color: #1a1a1a;">Most Compatible With:</strong> Life Paths 3, 5, and 9 - These numbers
-          complement your energy, offering either creative partnership, shared love of freedom, or spiritual depth.
-        </p>
-        <p style="color: #333; margin: 0;">
-          <strong style="color: #1a1a1a;">Relationship Advice:</strong> Communicate your need for alone time clearly,
-          and seek partners who have their own passions and interests. Ideal relationships for you provide both
-          intellectual stimulation and emotional freedom.
-        </p>
-      </div>
-
-      <!-- Challenges & Growth -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 16px;">Challenges & Opportunities for Growth</h2>
-        <div style="margin-bottom: 16px;">
-          <h3 style="font-size: 16px; color: #1a1a1a; margin: 0 0 8px;">Potential Challenges:</h3>
-          <ul style="margin: 0; padding-left: 20px; color: #333;">
-            <li style="margin-bottom: 8px;">Tendency toward isolation or becoming too withdrawn</li>
-            <li style="margin-bottom: 8px;">Difficulty making decisions due to over-analysis</li>
-            <li style="margin-bottom: 8px;">Restlessness when confined to routine or structure</li>
-            <li style="margin-bottom: 0;">Impatience with those who don't share your intellectual depth</li>
-          </ul>
-        </div>
-        <div>
-          <h3 style="font-size: 16px; color: #1a1a1a; margin: 0 0 8px;">Growth Opportunities:</h3>
-          <ul style="margin: 0; padding-left: 20px; color: #333;">
-            <li style="margin-bottom: 8px;">Develop trust in your intuition alongside your analytical abilities</li>
-            <li style="margin-bottom: 8px;">Practice grounding techniques to balance your exploratory energy</li>
-            <li style="margin-bottom: 8px;">Share your wisdom more freely, even when it feels incomplete</li>
-            <li style="margin-bottom: 0;">Cultivate patience and compassion for different learning styles</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Current Year Forecast -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 16px;">Personal Year Number: 6</h2>
-        <p style="color: #333; margin: 0 0 16px;">
-          You are currently in a Personal Year 6, which emphasizes themes of responsibility, service, and harmony.
-          This is a year focused on relationships, home, and community. You may find yourself taking on more
-          responsibilities in your personal life or feeling called to nurture and support others.
-        </p>
-        <p style="color: #333; margin: 0 0 16px;">
-          <strong style="color: #1a1a1a;">Key Themes for This Year:</strong> Family matters, domestic improvements,
-          healing relationships, service to others, finding balance between personal needs and obligations.
-        </p>
-        <p style="color: #333; margin: 0;">
-          <strong style="color: #1a1a1a;">Advice:</strong> While you may feel pulled toward taking care of others,
-          remember to maintain your own need for independence and personal growth. This year offers opportunities
-          to deepen connections while staying true to your authentic self.
-        </p>
-      </div>
-
-      <!-- Spiritual Insights -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 16px;">Spiritual Insights & Guidance</h2>
-        <p style="color: #333; margin: 0 0 16px;">
-          Your name carries the vibration of a spiritual seeker and truth-finder. You are on a journey to
-          understand the mysteries of existence, and your path is one of continuous learning and evolution.
-          Trust that your questioning nature is not a weakness but a sacred gift.
-        </p>
-        <p style="color: #333; margin: 0 0 16px;">
-          The universe speaks to you through patterns, synchronicities, and moments of deep insight. Pay attention
-          to your dreams, intuitive hunches, and the wisdom that emerges during quiet contemplation. Your spiritual
-          practice benefits from both solitary reflection and diverse experiences.
-        </p>
-        <p style="color: #333; margin: 0;">
-          <strong style="color: #1a1a1a;">Recommended Practices:</strong> Meditation, journaling, nature walks,
-          studying philosophy or metaphysics, travel to sacred sites, or any practice that combines intellectual
-          exploration with spiritual development.
-        </p>
-      </div>
-
-      <!-- Affirmations -->
-      <div style="padding: 32px 0; border-bottom: 1px solid #e5e5e5;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 16px;">Personal Affirmations</h2>
-        <p style="color: #333; margin: 0 0 16px;">These affirmations are specifically aligned with your numerological profile:</p>
-        <ul style="margin: 0; padding-left: 20px; color: #333; list-style: none;">
-          <li style="margin-bottom: 12px; padding-left: 24px; position: relative;">
-            <span style="position: absolute; left: 0; color: #d4af37;">✦</span>
-            I trust my inner wisdom and intuitive knowing.
-          </li>
-          <li style="margin-bottom: 12px; padding-left: 24px; position: relative;">
-            <span style="position: absolute; left: 0; color: #d4af37;">✦</span>
-            I embrace change and new experiences with an open heart.
-          </li>
-          <li style="margin-bottom: 12px; padding-left: 24px; position: relative;">
-            <span style="position: absolute; left: 0; color: #d4af37;">✦</span>
-            I express my unique insights with confidence and creativity.
-          </li>
-          <li style="margin-bottom: 12px; padding-left: 24px; position: relative;">
-            <span style="position: absolute; left: 0; color: #d4af37;">✦</span>
-            I balance solitude with connection, honoring both needs.
-          </li>
-          <li style="margin-bottom: 0; padding-left: 24px; position: relative;">
-            <span style="position: absolute; left: 0; color: #d4af37;">✦</span>
-            I am a bridge between wisdom and wonder, depth and delight.
-          </li>
-        </ul>
-      </div>
-
-      <!-- Conclusion -->
-      <div style="padding: 32px 0;">
-        <h2 style="font-size: 24px; color: #d4af37; margin: 0 0 16px;">Closing Thoughts</h2>
-        <p style="color: #333; margin: 0 0 16px;">
-          Your name is more than a label—it is a key to understanding the unique energetic blueprint you carry
-          through this lifetime. The numbers and patterns revealed in this analysis offer guidance, but remember
-          that you are the ultimate authority on your own journey.
-        </p>
-        <p style="color: #333; margin: 0 0 16px;">
-          Use this information as a compass, not a constraint. Let it illuminate your strengths, clarify your
-          challenges, and inspire you to live more authentically. Your greatest gift to the world is being fully,
-          unapologetically yourself.
-        </p>
-        <p style="color: #333; margin: 0;">
-          May this analysis serve you well on your path of self-discovery and personal evolution.
-        </p>
-      </div>
-
-      <!-- Footer -->
-      <div style="text-align: center; padding: 32px 0 0; border-top: 2px solid #d4af37; margin-top: 32px;">
-        <p style="font-size: 14px; color: #666; margin: 0 0 8px;">
-          Prepared with care by <strong style="color: #1a1a1a;">Imensiah</strong>
-        </p>
-        <p style="font-size: 12px; color: #999; margin: 0;">
-          For questions or guidance, please contact us through our website.
-        </p>
-      </div>
-    </div>
-  `,
-};
+// ... imports
 
 export default function ReportPage() {
   const params = useParams();
-  const reportId = params.id as string;
+  const id = params.id as string;
+  const router = useRouter();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
 
-  useEffect(() => {
-    // Simulate loading the report
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  // 1. Check Auth & Role
+  const { data: user, isLoading: isUserLoading } = useQuery({
+    queryKey: ['user'],
+    queryFn: authApi.getCurrentUser,
+  });
+
+  // 2. Fetch Analysis
+  const { data: analysis, isLoading: isAnalysisLoading, error } = useQuery({
+    queryKey: ['analysis', id],
+    queryFn: () => analysisApi.getBySubmissionId(id), // Use submission ID to get analysis
+  });
+
+  const isLoading = isUserLoading || isAnalysisLoading;
 
   const handleDownloadPDF = async () => {
+    if (!analysis) return;
     setDownloading(true);
     try {
-      // Call the API to publish/get the PDF URL
-      const response = await analysisApi.publishReport(reportId);
-
+      // analysisApi.downloadReport expects submissionId
+      const response = await analysisApi.downloadReport(analysis.submissionId);
+      
       if (response && response.pdf_url) {
-        // Open PDF in new tab
         window.open(response.pdf_url, '_blank');
-
         toast({
           title: 'PDF Aberto',
           description: 'O relatório foi aberto em uma nova guia.',
           variant: 'success',
         });
       } else {
-        throw new Error('O servidor não retornou a URL do PDF.');
+        throw new Error('URL do PDF indisponível.');
       }
     } catch (error: any) {
-      console.error('Error opening PDF:', error);
-
       toast({
-        title: 'Erro ao Baixar PDF',
-        description: error.message || 'Não foi possível baixar o PDF. Tente novamente.',
+        title: 'Erro',
+        description: 'Não foi possível baixar o PDF. Tente novamente mais tarde.',
         variant: 'destructive',
       });
     } finally {
@@ -302,60 +56,260 @@ export default function ReportPage() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-gold-500 mx-auto mb-4" />
-          <p className="text-gray-600 text-lg">Loading your report...</p>
+      <div className="min-h-screen flex items-center justify-center bg-surface-paper">
+        <Spinner size={40} />
+      </div>
+    );
+  }
+
+  if (error || !analysis) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-paper">
+        <div className="text-center max-w-md px-4">
+          <Heading variant="subtitle" className="mb-2 text-red-600">Erro ao carregar relatório</Heading>
+          <Text>Não foi possível encontrar o relatório para este ID ou você não tem permissão para visualizá-lo.</Text>
+          <Button variant="outline" className="mt-6" onClick={() => router.push('/dashboard')}>Voltar ao Painel</Button>
         </div>
       </div>
     );
   }
 
+  const { analysis: data } = analysis;
+
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      {/* Download Button - Fixed Position */}
-      <button
-        onClick={handleDownloadPDF}
-        disabled={downloading}
-        className="fixed top-8 right-8 z-50 bg-gold-500 hover:bg-gold-600 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {downloading ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Preparing PDF...</span>
-          </>
-        ) : (
-          <>
-            <Download className="w-5 h-5" />
-            <span>Download PDF</span>
-          </>
-        )}
-      </button>
-
-      {/* Document Container */}
-      <div className="max-w-4xl mx-auto">
-        {/* A4 Document */}
-        <div
-          className="bg-white shadow-2xl rounded-sm overflow-hidden"
-          style={{
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1)',
-          }}
+    <div className="bg-surface-paper min-h-screen font-sans print:bg-white">
+      {/* Navigation & Actions */}
+      <div className="fixed top-8 left-8 z-50 print:hidden">
+        <Button 
+            variant="outline" 
+            className="bg-white/80 backdrop-blur border-none shadow-sm hover:bg-white"
+            onClick={() => router.push(`/submissions/${id}`)}
         >
-          {/* Report Content */}
-          <div
-            className="p-12 sm:p-16"
-            dangerouslySetInnerHTML={{ __html: MOCK_ANALYSIS.previewHtml }}
-          />
-        </div>
-
-        {/* Subtle Footer */}
-        <div className="text-center mt-8 text-gray-500 text-sm">
-          <p>This report is confidential and prepared exclusively for you.</p>
-          <p className="mt-2">© {new Date().getFullYear()} Imensiah. All rights reserved.</p>
-        </div>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+        </Button>
       </div>
+
+      <div className="fixed bottom-8 right-8 z-50 print:hidden">
+        <Button 
+          onClick={handleDownloadPDF} 
+          disabled={downloading}
+          className="shadow-2xl btn-architect rounded-full px-8 py-6 h-auto text-sm"
+        >
+          {downloading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download className="w-4 h-4 mr-2" />}
+          Baixar PDF Oficial
+        </Button>
+      </div>
+
+      {/* REPORT HEADER */}
+      <Section className="bg-navy-900 text-white text-center py-24">
+        <Container>
+          <Eyebrow className="text-gold-500 mb-6">Relatório de Inteligência Estratégica</Eyebrow>
+          <Heading as="h1" className="text-4xl md:text-6xl font-light text-white mb-8 leading-tight">
+            {data.synthesis.executiveSummary.split('.')[0] || "Análise Executiva"}
+          </Heading>
+          <div className="flex justify-center gap-4 text-sm uppercase tracking-widest text-gray-400">
+            <span>Confidencial</span>
+            <span>•</span>
+            <span>{new Date(analysis.createdAt).toLocaleDateString('pt-BR')}</span>
+          </div>
+        </Container>
+      </Section>
+
+      {/* EXECUTIVE SUMMARY */}
+      <Section className="bg-white">
+        <Container className="max-w-4xl">
+          <div className="prose prose-lg prose-headings:font-heading prose-headings:font-medium max-w-none">
+            <h2 className="text-3xl text-navy-900 mb-8">Síntese Executiva</h2>
+            <div className="whitespace-pre-wrap leading-relaxed text-gray-600">
+              {data.synthesis.executiveSummary}
+            </div>
+            
+            <div className="mt-12 grid md:grid-cols-2 gap-8 not-prose">
+              <div className="bg-surface-paper p-8 border border-line">
+                <h3 className="font-heading font-medium text-xl mb-4 text-navy-900">Principais Descobertas</h3>
+                <ul className="space-y-3">
+                  {data.synthesis.keyFindings.map((item, i) => (
+                    <li key={i} className="flex gap-3 text-sm text-gray-600">
+                      <span className="text-gold-500 font-bold">0{i+1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-navy-900 p-8 text-white">
+                <h3 className="font-heading font-medium text-xl mb-4 text-white">Prioridades Estratégicas</h3>
+                <ul className="space-y-3">
+                  {data.synthesis.strategicPriorities.map((item, i) => (
+                    <li key={i} className="flex gap-3 text-sm text-gray-300">
+                      <span className="text-gold-500 font-bold">→</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </Section>
+
+      {/* SWOT ANALYSIS */}
+      <Section className="bg-surface-paper">
+        <Container>
+          <div className="text-center mb-16">
+            <Eyebrow className="mb-4">Análise Interna & Externa</Eyebrow>
+            <Heading variant="section">Matriz SWOT</Heading>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-1 max-w-6xl mx-auto border border-gray-200 bg-gray-200">
+            {/* Strengths */}
+            <div className="bg-white p-10">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded">FORÇAS</span>
+              </div>
+              <ul className="space-y-4">
+                {data.swot.strengths.map((item, i) => (
+                  <li key={i} className="text-sm text-gray-600 border-l-2 border-green-500 pl-4">
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Weaknesses */}
+            <div className="bg-white p-10">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-xs font-bold bg-red-100 text-red-700 px-2 py-1 rounded">FRAQUEZAS</span>
+              </div>
+              <ul className="space-y-4">
+                {data.swot.weaknesses.map((item, i) => (
+                  <li key={i} className="text-sm text-gray-600 border-l-2 border-red-500 pl-4">
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Opportunities */}
+            <div className="bg-white p-10">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded">OPORTUNIDADES</span>
+              </div>
+              <ul className="space-y-4">
+                {data.swot.opportunities.map((item, i) => (
+                  <li key={i} className="text-sm text-gray-600 border-l-2 border-blue-500 pl-4">
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Threats */}
+            <div className="bg-white p-10">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-xs font-bold bg-orange-100 text-orange-700 px-2 py-1 rounded">AMEAÇAS</span>
+              </div>
+              <ul className="space-y-4">
+                {data.swot.threats.map((item, i) => (
+                  <li key={i} className="text-sm text-gray-600 border-l-2 border-orange-500 pl-4">
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Container>
+      </Section>
+
+      {/* PESTEL & PORTER GRID */}
+      <Section className="bg-white">
+        <Container>
+          <div className="grid lg:grid-cols-2 gap-16 max-w-6xl mx-auto">
+            {/* PESTEL */}
+            <div>
+              <Eyebrow className="mb-4">Macroambiente</Eyebrow>
+              <Heading variant="title" className="mb-8">Análise PESTEL</Heading>
+              <div className="space-y-6">
+                <PestelItem label="Político" items={data.pestel.political} />
+                <PestelItem label="Econômico" items={data.pestel.economic} />
+                <PestelItem label="Social" items={data.pestel.social} />
+                <PestelItem label="Tecnológico" items={data.pestel.technological} />
+                <PestelItem label="Ambiental" items={data.pestel.environmental} />
+                <PestelItem label="Legal" items={data.pestel.legal} />
+              </div>
+            </div>
+
+            {/* PORTER */}
+            <div>
+              <Eyebrow className="mb-4">Microambiente</Eyebrow>
+              <Heading variant="title" className="mb-8">5 Forças de Porter</Heading>
+              <div className="space-y-6">
+                {data.porter.forces.map((force, i) => (
+                  <div key={i} className="bg-surface-paper p-6 border border-line">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium text-navy-900">{force.force}</h4>
+                      <span className="text-xs font-bold bg-white border border-gray-200 px-2 py-1 rounded">{force.intensity}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 leading-relaxed">{force.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Container>
+      </Section>
+
+      {/* ROADMAP */}
+      <Section className="bg-navy-900 text-white">
+        <Container className="max-w-4xl">
+          <div className="text-center mb-16">
+            <Eyebrow className="mb-4">Próximos Passos</Eyebrow>
+            <Heading as="h2" className="text-3xl font-medium text-white">Roadmap Estratégico</Heading>
+          </div>
+
+          <div className="space-y-8">
+            {data.synthesis.roadmap.map((step, i) => (
+              <div key={i} className="flex gap-6 group">
+                <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center border border-white/20 rounded-full text-gold-500 font-heading font-medium group-hover:bg-gold-500 group-hover:text-navy-900 transition-colors">
+                  {i + 1}
+                </div>
+                <div className="pt-2 border-b border-white/10 pb-8 w-full group-last:border-0">
+                  <p className="text-lg text-gray-200 leading-relaxed">{step}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      {/* FOOTER */}
+      <footer className="bg-white border-t border-line py-12 text-center">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-xs text-gray-400 uppercase tracking-widest mb-2">Powered by Imensiah AI</p>
+          <p className="text-sm text-gray-500">
+            &copy; {new Date().getFullYear()} Imensiah. Todos os direitos reservados.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// Helper Component
+function PestelItem({ label, items }: { label: string; items: string[] }) {
+  return (
+    <div className="border-b border-line pb-4 last:border-0">
+      <h4 className="font-medium text-navy-900 mb-2 flex items-center gap-2">
+        <span className="w-2 h-2 bg-gold-500 rounded-full"></span>
+        {label}
+      </h4>
+      <ul className="pl-4 space-y-1">
+        {items.map((item, i) => (
+          <li key={i} className="text-sm text-gray-600">• {item}</li>
+        ))}
+      </ul>
     </div>
   );
 }

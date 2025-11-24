@@ -32,20 +32,20 @@ export default function DashboardLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link href="/painel" className="flex items-center">
+            <Link href="/dashboard" className="flex items-center">
               <Logo className="w-32 h-8" />
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8" role="navigation" aria-label="Navegação do painel">
               <Link
-                href="/painel"
+                href="/dashboard"
                 className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
               >
                 Painel
               </Link>
               <Link
-                href="/painel/configuracoes"
+                href="/dashboard/configuracoes"
                 className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
               >
                 Configurações
@@ -100,14 +100,14 @@ export default function DashboardLayout({
           {isMobileMenuOpen && (
             <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
               <Link
-                href="/painel"
+                href="/dashboard"
                 onClick={closeMobileMenu}
                 className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
               >
                 Painel
               </Link>
               <Link
-                href="/painel/configuracoes"
+                href="/dashboard/configuracoes"
                 onClick={closeMobileMenu}
                 className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
               >

@@ -1,0 +1,33 @@
+
+> imensiah-frontend@1.0.0 build
+> next build
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\pradord\Documents\Projects\package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * C:\Users\pradord\Documents\Projects\imensiah_new\frontend\package-lock.json
+
+   ▲ Next.js 15.5.6
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 9.8s
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./app/admin/dashboard/page.tsx:404:28
+Type error: Property 'type' is missing in type '{ size: "sm"; showIcon: false; label: string; description: string; route?: string | undefined; action?: string | undefined; enabled: boolean; disabledReason?: string | undefined; }' but required in type 'NextActionBadgeProps'.
+
+[0m [90m 402 |[39m                       [33m<[39m[33mdiv[39m className[33m=[39m[32m"col-span-3 flex items-center"[39m[33m>[39m
+ [90m 403 |[39m                         {nextAction [33m&&[39m (
+[31m[1m>[22m[39m[90m 404 |[39m                           [33m<[39m[33mNextActionBadge[39m
+ [90m     |[39m                            [31m[1m^[22m[39m
+ [90m 405 |[39m                             {[33m...[39mnextAction}
+ [90m 406 |[39m                             size[33m=[39m[32m"sm"[39m
+ [90m 407 |[39m                             showIcon[33m=[39m{[36mfalse[39m}[0m
+Next.js build worker exited with code: 1 and signal: null

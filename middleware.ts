@@ -50,9 +50,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check if Supabase is configured
-  if (!supabaseUrl || !supabaseAnonKey) {
-    // Supabase not configured - allow all routes during build/development
-    console.warn('Supabase not configured - authentication middleware disabled');
+  if (!supabaseUrl || !supabaseAnonKey || process.env.NODE_ENV === 'development') {
+    // Supabase not configured or in dev mode - allow all routes
+    console.warn('Auth middleware disabled (Dev mode or missing config)');
     return NextResponse.next();
   }
 
