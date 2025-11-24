@@ -378,14 +378,19 @@ export type AnalysisStatus =
 export { type AnalysisStatus as AnalysisStatusType };
 
 // The Master Analysis Object (matches backend AnalysisResponse)
+// NOTE: No versioning - each submission has exactly one analysis record
 export interface Analysis {
   id: string;
   submissionId: string;
-  version: string;                    // Version string ("v1", "v2", ...)
-  parentId?: string | null;           // Reference to previous version (backend uses "parentId" not "parentAnalysisId")
   status: AnalysisStatus;
   pdfUrl?: string;
   pdf_url?: string;
+
+  // Tracking fields (from backend)
+  sentAt?: string;
+  sentTo?: string;
+  errorMessage?: string;
+  completedAt?: string;
 
   // ALL FRAMEWORKS NESTED IN "analysis" OBJECT (matches backend response structure)
   analysis: {

@@ -161,9 +161,9 @@ export function getAnalysisActions(analysis: Analysis | null): {
 
     case 'approved':
       return {
-        canEdit: true, // Can still edit and create new version
+        canEdit: false, // Cannot edit after approval (PDF already generated)
         canApprove: false,
-        canGeneratePDF: true,
+        canGeneratePDF: true, // PDF already generated, can re-download
         canSend: true,
         message: 'Aprovado - Pronto para enviar',
       };

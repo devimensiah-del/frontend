@@ -7,9 +7,9 @@ import { SubmissionCard } from "@/components/dashboard/SubmissionCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Section, Container } from "@/components/editorial/Section";
 import { Heading, Eyebrow, Text } from "@/components/ui/Typography";
-import { Spinner } from "@/components/ui/loading-indicator";
 import { Loader, CheckCircle, BarChart3 } from "lucide-react";
 import type { Submission } from "@/lib/types";
+import { LoadingState, EmptyState } from "@/components/ui/state-components";
 
 export default function DashboardPage() {
   // Fetch current user to check role
@@ -44,9 +44,14 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <Container className="flex items-center justify-center min-h-[60vh]">
-        <Spinner size={40} />
-      </Container>
+      <Section className="bg-surface-paper border-0 min-h-screen">
+        <Container>
+          <LoadingState
+            message="Carregando seus projetos..."
+            size="lg"
+          />
+        </Container>
+      </Section>
     );
   }
 
@@ -54,70 +59,84 @@ export default function DashboardPage() {
   const submissions = submissionsData?.submissions || [];
 
   return (
-    <Section className="bg-gray-50 border-0">
-      <Container className="py-8">
-        <div className="mb-10">
-          <Eyebrow className="mb-2">
+    <Section className="bg-surface-paper border-0 min-h-screen">
+      <Container>
+        {/* Header Section */}
+        <div className="mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <Eyebrow className="mb-4">
             {isAdmin ? "Visão Geral Administrativa" : "Seus Projetos"}
           </Eyebrow>
-          <Heading variant="section">
+          <Heading variant="section" className="mb-6">
             {isAdmin ? "Painel de Controle" : "Envios Recentes"}
           </Heading>
-          {isAdmin ? (
-            <Text className="text-text-secondary mt-2">
-              Acompanhe o fluxo: recebidos, enriquecimento, análise e aprovação/envio do relatório.
-            </Text>
-          ) : (
-            <Text className="text-text-secondary mt-2">
-              Veja o status dos seus envios enquanto avançam por enriquecimento e análise.
-            </Text>
-          )}
+          <Text variant="lead" className="max-w-2xl">
+            {isAdmin
+              ? "Acompanhe o fluxo completo: recebidos, enriquecimento, análise e aprovação do relatório final."
+              : "Veja o status dos seus envios enquanto avançam pelas etapas de enriquecimento e análise estratégica."}
+          </Text>
         </div>
 
         {/* Admin Analytics Cards */}
         {isAdmin && analytics && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
-            <StatCard
-              label="Total"
-              value={analytics.totalSubmissions}
-              icon={BarChart3}
-            />
-            <StatCard
-              label="Em Andamento"
-              value={analytics.activeSubmissions}
-              variant="warning"
-              icon={Loader}
-            />
-            <StatCard
-              label="Concluídos"
-              value={analytics.completedSubmissions}
-              variant="success"
-              icon={CheckCircle}
-            />
-          </div>
-        )}
-
-        {isAdmin && (
-          <Heading variant="subtitle" className="mb-6">
-            Todos os Envios
-          </Heading>
-        )}
-
-        {submissions.length === 0 ? (
-          <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-lg">
-            <p className="text-text-secondary">Nenhum envio encontrado.</p>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {submissions.map((submission: any) => (
-              <SubmissionCard
-                key={submission.id}
-                submission={submission}
-                isAdmin={isAdmin}
+          <div className="mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+            <Eyebrow className="mb-6">Métricas do Sistema</Eyebrow>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <StatCard
+                label="Total de Envios"
+                value={analytics.totalSubmissions}
+                icon={BarChart3}
               />
-            ))}
+              <StatCard
+                label="Em Andamento"
+                value={analytics.activeSubmissions}
+                variant="warning"
+                icon={Loader}
+              />
+              <StatCard
+                label="Concluídos"
+                value={analytics.completedSubmissions}
+                variant="success"
+                icon={CheckCircle}
+              />
+            </div>
           </div>
         )}
+
+        {/* Submissions Section */}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+          {isAdmin && (
+            <div className="mb-8">
+              <Heading variant="subtitle">
+                Todos os Envios
+              </Heading>
+              <Text variant="small" className="mt-2">
+                {submissions.length} {submissions.length === 1 ? "projeto" : "projetos"} no sistema
+              </Text>
+            </div>
+          )}
+
+          {submissions.length === 0 ? (
+            <EmptyState
+              variant="inbox"
+              title="Nenhum projeto ainda"
+              description={
+                isAdmin
+                  ? "Aguardando novos envios de clientes. Quando houver projetos, eles aparecerão aqui."
+                  : "Você ainda não enviou nenhum projeto. Comece criando seu primeiro envio para receber análises estratégicas detalhadas."
+              }
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {submissions.map((submission: any) => (
+                <SubmissionCard
+                  key={submission.id}
+                  submission={submission}
+                  isAdmin={isAdmin}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </Container>
     </Section>
   );

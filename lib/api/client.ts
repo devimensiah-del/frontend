@@ -20,110 +20,6 @@ import { handleApiError, handleNetworkError } from './error-handler';
 // Get API base URL from environment
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 
-// --- MOCK DATA FOR DEVELOPMENT ---
-const MOCK_DATA = {
-  submission: {
-    id: 'mock-id-1',
-    userId: 'mock-admin-id',
-    companyName: 'TechNova Solutions',
-    website: 'https://technova.example.com',
-    industry: 'SaaS / Artificial Intelligence',
-    companySize: '51-200',
-    businessChallenge: 'Estamos buscando expandir nossa operação para o mercado corporativo brasileiro, mas enfrentamos resistência devido à complexidade regulatória e concorrentes locais bem estabelecidos.',
-    contactName: 'Ana Souza',
-    contactEmail: 'ana@technova.example.com',
-    status: 'received',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  enrichment: {
-    id: 'mock-enrichment-1',
-    submissionId: 'mock-id-1',
-    status: 'approved',
-    progress: 100,
-    currentStep: 'Completed',
-    data: {
-      profile_overview: {
-        legal_name: 'TechNova Solutions Ltda.',
-        founded: '2018',
-        headquarters: 'São Paulo, SP',
-        description: 'Provider of AI-driven analytics for retail.'
-      },
-      market_context: {
-        segment: 'B2B Enterprise',
-        growth_rate: '15% YoY'
-      }
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  analysis: {
-    id: 'mock-analysis-1',
-    submissionId: 'mock-id-1',
-    status: 'approved',
-    version: "v1",
-    pdf_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-    analysis: {
-      synthesis: {
-        executiveSummary: 'A TechNova possui uma forte vantagem tecnológica, mas precisa navegar cuidadosamente o cenário regulatório brasileiro. Recomendamos uma estratégia de parcerias locais para mitigar riscos.',
-        keyFindings: [
-          'Tecnologia superior aos concorrentes locais.',
-          'Marca ainda pouco conhecida no setor Enterprise.',
-          'Alta demanda por analytics no varejo brasileiro.'
-        ],
-        strategicPriorities: [
-          'Estabelecer parcerias com consultorias locais.',
-          'Adequação total à LGPD.',
-          'Campanha de brand awareness focada em casos de uso.'
-        ],
-        roadmap: [
-          'Q1: Auditoria Legal e Compliance',
-          'Q2: Programa de Canais e Parcerias',
-          'Q3: Lançamento da suíte Enterprise V2'
-        ],
-        overallRecommendation: 'Expandir com cautela.'
-      },
-      swot: {
-        summary: 'Posição tecnológica forte, mas vulnerável legalmente.',
-        strengths: [{ content: 'Algoritmos proprietários de IA' }, { content: 'Equipe técnica ágil' }],
-        weaknesses: [{ content: 'Fluxo de caixa limitado' }, { content: 'Falta de networking local' }],
-        opportunities: [{ content: 'Digitalização do varejo pós-pandemia' }, { content: 'Incentivos fiscais para inovação' }],
-        threats: [{ content: 'Entrada de players globais (Google, MS)' }, { content: 'Mudanças na legislação de dados' }]
-      },
-      pestel: {
-        summary: 'Ambiente regulatório é o fator crítico.',
-        political: ['Instabilidade política afeta investimentos'],
-        economic: ['Taxa de juros alta encarece capital'],
-        social: ['Adoção massiva de canais digitais'],
-        technological: ['Infraestrutura de nuvem em expansão'],
-        environmental: ['Pressão por TI verde'],
-        legal: ['LGPD rigorosa e complexidade tributária']
-      },
-      porter: {
-        summary: 'Rivalidade moderada, mas barreiras de entrada altas.',
-        forces: [
-          { force: 'Rivalidade entre Concorrentes', intensity: 'Alta', description: 'Muitas startups de nicho.' },
-          { force: 'Poder de Permuta dos Clientes', intensity: 'Médio', description: 'Clientes Enterprise exigem customização.' },
-          { force: 'Poder de Permuta dos Fornecedores', intensity: 'Baixo', description: 'Dependência de cloud commodity.' },
-          { force: 'Ameaça de Novos Entrantes', intensity: 'Média', description: 'Barreiras tecnológicas existem.' },
-          { force: 'Ameaça de Produtos Substitutos', intensity: 'Alta', description: 'Excel e BI tradicional.' }
-        ]
-      },
-      // Add empty placeholders for other required fields to satisfy TS
-      tamSamSom: { tam: '', sam: '', som: '', assumptions: [], cagr: '', summary: '' },
-      benchmarking: { competitorsAnalyzed: [], performanceGaps: [], bestPractices: [], summary: '' },
-      blueOcean: { eliminate: [], reduce: [], raise: [], create: [], newValueCurve: '', summary: '' },
-      growthHacking: { hypotheses: [], experiments: [], keyMetrics: [], summary: '' },
-      scenarios: { optimistic: '', realist: '', pessimistic: '', earlyWarningSignals: [], summary: '' },
-      okrs: { quarters: [], summary: '' },
-      bsc: { financial: [], customer: [], internal: [], learningGrowth: [], summary: '' },
-      decisionMatrix: { alternatives: [], criteria: [], finalRecommendation: '', summary: '' }
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
-};
-
 /**
  * Get auth token from localStorage
  */
@@ -208,30 +104,32 @@ async function apiRequest<T>(
 export const authApi = {
   /**
    * Login user
+   * Backend returns access_token (not token)
    */
-  async login(credentials: LoginFormData): Promise<{ user: User; token: string }> {
-    const response = await apiRequest<{ user: User; token: string }>('/auth/login', {
+  async login(credentials: LoginFormData): Promise<{ user: User; access_token: string }> {
+    const response = await apiRequest<{ user: User; access_token: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
 
-    // Save token to localStorage
-    setAuthToken(response.token);
+    // Save token to localStorage (backend uses access_token)
+    setAuthToken(response.access_token);
 
     return response;
   },
 
   /**
    * Signup new user
+   * Backend returns access_token (not token)
    */
-  async signup(data: SignupFormData): Promise<{ user: User; token: string }> {
-    const response = await apiRequest<{ user: User; token: string }>('/auth/signup', {
+  async signup(data: SignupFormData): Promise<{ user: User; access_token: string }> {
+    const response = await apiRequest<{ user: User; access_token: string }>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(data),
     });
 
-    // Save token to localStorage
-    setAuthToken(response.token);
+    // Save token to localStorage (backend uses access_token)
+    setAuthToken(response.access_token);
 
     return response;
   },
@@ -254,19 +152,6 @@ export const authApi = {
    * Get current user profile
    */
   async getCurrentUser(): Promise<User | null> {
-    // Bypass auth in development mode if configured
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[DEV] Bypassing auth - returning mock admin user');
-      return {
-        id: 'mock-admin-id',
-        email: 'admin@imensiah.com',
-        fullName: 'Admin Dev',
-        role: 'admin',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-    }
-
     const token = getAuthToken();
     if (!token) return null;
 
@@ -322,9 +207,6 @@ export const submissionsApi = {
    * Get single submission
    */
   async getById(id: string): Promise<Submission> {
-    if (process.env.NODE_ENV === 'development') {
-      return MOCK_DATA.submission as unknown as Submission;
-    }
     const response = await apiRequest<{ submission: Submission }>(`/submissions/${id}`);
     return response.submission;
   },
@@ -337,9 +219,6 @@ export const submissionsApi = {
     page?: number;
     pageSize?: number;
   }): Promise<{ submissions: Submission[]; total: number }> {
-    if (process.env.NODE_ENV === 'development') {
-      return { submissions: [MOCK_DATA.submission as unknown as Submission], total: 1 };
-    }
     return this.listSubmissions(params);
   },
 
@@ -411,9 +290,6 @@ export const enrichmentApi = {
    * Get enrichment data for submission
    */
   async getBySubmissionId(submissionId: string): Promise<Enrichment> {
-    if (process.env.NODE_ENV === 'development') {
-      return MOCK_DATA.enrichment as unknown as Enrichment;
-    }
     const response = await apiRequest<{ enrichment: Enrichment }>(`/submissions/${submissionId}/enrichment`);
     return response.enrichment;
   },
@@ -426,12 +302,9 @@ export const enrichmentApi = {
  */
 export const analysisApi = {
   /**
-   * Get analysis for submission (latest version)
+   * Get analysis for submission
    */
   async getBySubmissionId(submissionId: string): Promise<Analysis> {
-    if (process.env.NODE_ENV === 'development') {
-      return MOCK_DATA.analysis as unknown as Analysis;
-    }
     const response = await apiRequest<{ analysis: Analysis }>(`/submissions/${submissionId}/analysis`);
     return response.analysis;
   },
@@ -441,9 +314,6 @@ export const analysisApi = {
    * Returns JSON response with report_id and pdf_url (Supabase Storage link)
    */
   async publishReport(submissionId: string): Promise<{ report_id: string; pdf_url: string }> {
-    if (process.env.NODE_ENV === 'development') {
-      return { report_id: 'mock-report-id', pdf_url: MOCK_DATA.analysis.pdf_url };
-    }
     return apiRequest(`/submissions/${submissionId}/report/publish`, {
       method: 'POST',
     });
@@ -454,9 +324,6 @@ export const analysisApi = {
    * Returns PDF URL with metadata when report is ready
    */
   async downloadReport(submissionId: string): Promise<{ pdf_url: string; report_id: string; created_at: string }> {
-    if (process.env.NODE_ENV === 'development') {
-      return { pdf_url: MOCK_DATA.analysis.pdf_url, report_id: 'mock-report-id', created_at: new Date().toISOString() };
-    }
     return apiRequest(`/submissions/${submissionId}/report/download`);
   },
 };
@@ -507,15 +374,6 @@ export const adminApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PaginatedResponse<Submission>> {
-    if (process.env.NODE_ENV === 'development') {
-      return {
-        data: [MOCK_DATA.submission as unknown as Submission],
-        total: 1,
-        page: 1,
-        pageSize: 10,
-        totalPages: 1
-      };
-    }
     const queryParams = new URLSearchParams();
     if (params?.status) queryParams.append('status', params.status);
     if (params?.page) queryParams.append('page', params.page.toString());
@@ -531,9 +389,6 @@ export const adminApi = {
    * Get submission by ID (admin view)
    */
   async getSubmission(id: string): Promise<Submission> {
-    if (process.env.NODE_ENV === 'development') {
-      return MOCK_DATA.submission as unknown as Submission;
-    }
     const response = await apiRequest<{ submission: Submission }>(`/admin/submissions/${id}`);
     return response.submission;
   },
@@ -547,24 +402,13 @@ export const adminApi = {
     completedSubmissions: number;
     revenue: number;
   }> {
-    if (process.env.NODE_ENV === 'development') {
-      return {
-        totalSubmissions: 12,
-        activeSubmissions: 3,
-        completedSubmissions: 9,
-        revenue: 45000
-      };
-    }
     return apiRequest('/admin/analytics');
   },
 
   /**
- * Get enrichment by submission ID (admin only)
- */
+   * Get enrichment by submission ID (admin only)
+   */
   async getEnrichmentBySubmissionId(submissionId: string): Promise<Enrichment> {
-    if (process.env.NODE_ENV === 'development') {
-      return MOCK_DATA.enrichment as unknown as Enrichment;
-    }
     const response = await apiRequest<{ enrichment: Enrichment }>(
       `/admin/submissions/${submissionId}/enrichment`
     );
@@ -608,19 +452,8 @@ export const adminApi = {
     return response.analysis;
   },
 
-  /**
-   * Create new analysis version (admin only)
-   */
-  async createAnalysisVersion(analysisId: string, edits?: Record<string, any>): Promise<Analysis> {
-    const response = await apiRequest<{ analysis: Analysis }>(
-      `/admin/analysis/${analysisId}/version`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ edits }),
-      }
-    );
-    return response.analysis;
-  },
+  // NOTE: createAnalysisVersion removed - no versioning in new architecture
+  // Each submission has exactly one analysis record
 
   /**
    * Approve analysis (admin only) - changes status to 'approved' and triggers PDF generation

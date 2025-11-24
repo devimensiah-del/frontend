@@ -14,40 +14,65 @@ interface StatCardProps {
   icon?: LucideIcon;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ 
-  label, 
-  value, 
+export const StatCard: React.FC<StatCardProps> = ({
+  label,
+  value,
   variant = "default",
-  icon: Icon 
+  icon: Icon
 }) => {
   const variants = {
-    default: "bg-white border-gray-200 text-navy-900",
-    success: "bg-green-50 border-green-200 text-green-700",
-    warning: "bg-amber-50 border-amber-200 text-amber-700",
-    error: "bg-red-50 border-red-200 text-red-700",
+    default: "bg-white border-line text-navy-900 hover:bg-surface-paper",
+    success: "bg-white border-line text-green-700 hover:bg-green-50/50",
+    warning: "bg-white border-line text-amber-700 hover:bg-amber-50/50",
+    error: "bg-white border-line text-red-700 hover:bg-red-50/50",
   };
 
   const iconVariants = {
-    default: "text-gray-400",
-    success: "text-green-500",
-    warning: "text-amber-500",
-    error: "text-red-500",
+    default: "text-navy-900/20",
+    success: "text-green-500/30",
+    warning: "text-amber-500/30",
+    error: "text-red-500/30",
+  };
+
+  const valueVariants = {
+    default: "text-navy-900",
+    success: "text-green-700",
+    warning: "text-amber-700",
+    error: "text-red-700",
   };
 
   return (
-    <Card className={cn("border shadow-sm transition-all duration-200 hover:shadow-md", variants[variant])}>
-      <CardContent className="p-6 flex items-center justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest opacity-70 mb-1">
+    <Card className={cn(
+      "border transition-all duration-300 hover:shadow-md group relative overflow-hidden",
+      variants[variant]
+    )}>
+      {/* Background decoration - subtle grid pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.02] pointer-events-none"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }}
+      />
+
+      <CardContent className="p-8 flex items-start justify-between relative">
+        <div className="flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-tertiary mb-4">
             {label}
           </p>
-          <div className="text-3xl font-heading font-light">
+          <div className={cn(
+            "text-5xl font-heading font-light transition-colors",
+            valueVariants[variant]
+          )}>
             {value}
           </div>
         </div>
         {Icon && (
-          <div className={cn("p-3 rounded-full bg-white/50", iconVariants[variant])}>
-            <Icon className="w-6 h-6" />
+          <div className={cn(
+            "transition-all duration-300 group-hover:scale-110",
+            iconVariants[variant]
+          )}>
+            <Icon className="w-10 h-10" strokeWidth={1.5} />
           </div>
         )}
       </CardContent>

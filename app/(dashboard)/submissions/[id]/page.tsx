@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { ActionToolbar } from "@/components/dashboard/ActionToolbar";
 import { Section, Container } from "@/components/editorial/Section";
 import { Heading, Eyebrow } from "@/components/ui/Typography";
-import { Spinner } from "@/components/ui/loading-indicator";
+import { LoadingState, ErrorState, NoDataYet } from "@/components/ui/state-components";
 import { SubmissionDetails } from "@/app/(dashboard)/_components/SubmissionDetails";
 import { EnrichmentDetails } from "@/app/(dashboard)/_components/EnrichmentDetails";
 import { AnalysisDetails } from "@/app/(dashboard)/_components/AnalysisDetails";
@@ -144,22 +144,20 @@ export default function SubmissionPage() {
     }
   });
 
-  // Combined mutation: create new version, then update it with edited data
+  // Direct update mutation - no versioning in new architecture
+  // Only allowed when analysis.status === 'completed'
   const saveAnalysisEditsMutation = useMutation({
     mutationFn: async (data: any) => {
-      // First, create a new version (clones previous)
-      await adminApi.createAnalysisVersion(analysis!.id);
-      // Then update the new version with the edited data
       return adminApi.updateAnalysis(analysis!.id, data);
     },
     onSuccess: () => {
-      toast({ title: "Sucesso", description: "Nova versão criada com sucesso." });
+      toast({ title: "Sucesso", description: "Análise atualizada com sucesso." });
       queryClient.invalidateQueries({ queryKey: ["analysis", id] });
     },
     onError: (error) => {
       toast({
         title: "Erro",
-        description: "Não foi possível salvar as alterações.",
+        description: "Não foi possível salvar as alterações. Verifique se a análise está no status 'completed'.",
         variant: "destructive"
       });
       console.error("Error saving analysis edits:", error);
@@ -185,46 +183,74 @@ export default function SubmissionPage() {
   };
 
   if (isLoadingSubmission) {
-    return <Container className="flex justify-center py-20"><Spinner size={40} /></Container>;
+    return (
+      <Section className="bg-gray-50 min-h-screen border-0">
+        <Container>
+          <LoadingState
+            message="Carregando detalhes do projeto..."
+            size="lg"
+          />
+        </Container>
+      </Section>
+    );
   }
 
-  if (!submission) return <Container>Submission not found</Container>;
+  if (!submission) {
+    return (
+      <Section className="bg-gray-50 min-h-screen border-0">
+        <Container className="py-12">
+          <ErrorState
+            title="Projeto não encontrado"
+            message="O projeto que você está procurando não existe ou você não tem permissão para visualizá-lo."
+            variant="warning"
+          />
+        </Container>
+      </Section>
+    );
+  }
 
   return (
     <Section className="bg-gray-50 min-h-screen border-0">
-      <Container className="py-8">
+      <Container className="px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-12">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <Eyebrow className="mb-2">Detalhes do Projeto</Eyebrow>
-            <Heading variant="title" className="text-3xl">{submission.companyName}</Heading>
-            <div className="flex items-center gap-2 mt-2">
+        <div className="flex flex-col gap-6 mb-8">
+          <div className="flex flex-col gap-4">
+            <Eyebrow className="mb-0">Detalhes do Projeto</Eyebrow>
+            <Heading variant="title" className="text-2xl md:text-3xl leading-tight">{submission.companyName}</Heading>
+            <div className="flex flex-wrap items-center gap-3">
               <StatusBadge status={submission.status} />
-              <span className="text-sm text-gray-400">|</span>
+              <span className="text-sm text-gray-400 hidden sm:inline">|</span>
               <span className="text-sm text-gray-500">ID: {submission.id.slice(0, 8)}</span>
             </div>
           </div>
 
+          {/* Action Buttons - Full width on mobile */}
           {isAdmin && (
-            <ActionToolbar
-              type={analysis ? "analysis" : "enrichment"}
-              status={analysis?.status || enrichment?.status}
-              isAdmin={isAdmin}
-              disableSend={!pdfReady}
-              onDownload={downloadJson}
-              onApprove={() => {
-                if (analysis && analysis.status === 'completed') approveAnalysisMutation.mutate();
-                else if (enrichment && enrichment.status === 'completed') approveEnrichmentMutation.mutate();
-              }}
-              onSend={() => {
-                if (analysis && analysis.status === 'approved' && pdfReady) setShowSendDialog(true);
-              }}
-              isLoading={approveEnrichmentMutation.isPending || approveAnalysisMutation.isPending}
-            />
+            <div className="w-full">
+              <ActionToolbar
+                type={analysis ? "analysis" : "enrichment"}
+                status={analysis?.status || enrichment?.status}
+                isAdmin={isAdmin}
+                disableSend={!pdfReady}
+                onDownload={downloadJson}
+                onApprove={() => {
+                  if (analysis && analysis.status === 'completed') approveAnalysisMutation.mutate();
+                  else if (enrichment && enrichment.status === 'completed') approveEnrichmentMutation.mutate();
+                }}
+                onSend={() => {
+                  if (analysis && analysis.status === 'approved' && pdfReady) setShowSendDialog(true);
+                }}
+                isLoading={approveEnrichmentMutation.isPending || approveAnalysisMutation.isPending}
+              />
+            </div>
           )}
 
           {!isAdmin && analysis?.status === 'sent' && (
-            <Button variant="architect" onClick={() => window.open(analysis.pdf_url || analysis.pdfUrl || '#', '_blank')}>
+            <Button
+              variant="architect"
+              onClick={() => window.open(analysis.pdf_url || analysis.pdfUrl || '#', '_blank')}
+              className="w-full sm:w-auto min-h-[48px] text-base font-medium"
+            >
               Baixar Relatório PDF
             </Button>
           )}
@@ -258,9 +284,11 @@ export default function SubmissionPage() {
           </TabsList>
 
           <TabsContent value="submission" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <Card>
-              <CardHeader><CardTitle>Dados do Envio</CardTitle></CardHeader>
-              <CardContent>
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="px-4 py-5 sm:px-6 sm:py-6">
+                <CardTitle className="text-lg sm:text-xl font-semibold text-navy-900">Dados do Envio</CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-5 sm:px-6 sm:pb-6">
                 <SubmissionDetails
                   submission={submission}
                   isAdmin={isAdmin}
@@ -270,15 +298,27 @@ export default function SubmissionPage() {
           </TabsContent>
 
           <TabsContent value="enrichment" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <Card>
-              <CardHeader><CardTitle>Dados Enriquecidos (IA)</CardTitle></CardHeader>
-              <CardContent>
-                <EnrichmentDetails
-                  enrichment={enrichment}
-                  isAdmin={isAdmin}
-                  onUpdate={updateEnrichmentMutation.mutate}
-                  onRetry={retryEnrichmentMutation.mutate}
-                />
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="px-4 py-5 sm:px-6 sm:py-6">
+                <CardTitle className="text-lg sm:text-xl font-semibold text-navy-900">
+                  Dados Enriquecidos (IA)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-5 sm:px-6 sm:pb-6">
+                {!enrichment ? (
+                  <NoDataYet
+                    dataType="Enriquecimento"
+                    expectedWhen="Os dados serão gerados automaticamente. Aguarde alguns minutos."
+                    className="py-8"
+                  />
+                ) : (
+                  <EnrichmentDetails
+                    enrichment={enrichment}
+                    isAdmin={isAdmin}
+                    onUpdate={updateEnrichmentMutation.mutate}
+                    onRetry={retryEnrichmentMutation.mutate}
+                  />
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -286,25 +326,62 @@ export default function SubmissionPage() {
           {/* Only show Analysis tab content if Admin or Approved */}
           <TabsContent value="analysis" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {(!isAdmin && (!analysis || (analysis.status !== 'approved' && analysis.status !== 'sent'))) ? (
-              <WorkflowProgress
-                enrichmentStatus={enrichment?.status}
-                analysisStatus={analysis?.status}
-                isAdmin={false}
-              />
+              <div className="space-y-4">
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-gold-50/30 to-white">
+                  <CardHeader className="px-4 py-5 sm:px-6 sm:py-6">
+                    <CardTitle className="text-lg sm:text-xl font-semibold text-navy-900">
+                      Progresso da Análise
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-5 sm:px-6 sm:pb-6">
+                    <WorkflowProgress
+                      enrichmentStatus={enrichment?.status}
+                      analysisStatus={analysis?.status}
+                      isAdmin={false}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
             ) : (!isAdmin && (analysis?.status === 'approved' || analysis?.status === 'sent')) ? (
               // User view when analysis is ready
-              <AnalysisDetails
-                analysis={analysis}
-                isAdmin={false}
-                onUpdate={() => { }}
-              />
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="px-4 py-5 sm:px-6 sm:py-6">
+                  <CardTitle className="text-lg sm:text-xl font-semibold text-navy-900">
+                    Análise Estratégica
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-5 sm:px-6 sm:pb-6">
+                  <AnalysisDetails
+                    analysis={analysis}
+                    isAdmin={false}
+                    onUpdate={() => { }}
+                  />
+                </CardContent>
+              </Card>
             ) : (
               // Admin View
-              <AnalysisDetails
-                analysis={analysis}
-                isAdmin={isAdmin}
-                onUpdate={saveAnalysisEditsMutation.mutate}
-              />
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="px-4 py-5 sm:px-6 sm:py-6">
+                  <CardTitle className="text-lg sm:text-xl font-semibold text-navy-900">
+                    Análise Estratégica (Admin)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-5 sm:px-6 sm:pb-6">
+                  {!analysis ? (
+                    <NoDataYet
+                      dataType="Análise"
+                      expectedWhen="A análise será iniciada automaticamente após aprovação do enriquecimento."
+                      className="py-8"
+                    />
+                  ) : (
+                    <AnalysisDetails
+                      analysis={analysis}
+                      isAdmin={isAdmin}
+                      onUpdate={saveAnalysisEditsMutation.mutate}
+                    />
+                  )}
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
         </Tabs>

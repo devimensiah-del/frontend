@@ -98,11 +98,7 @@ export function AnalysisCard({ analysis, isAdmin }: AnalysisCardProps) {
             <div>
               <div className="flex items-center gap-2">
                 <CardTitle className="text-navy-900">Relatório Estratégico</CardTitle>
-                {analysis.version && analysis.version !== 'v1' && (
-                  <Badge variant="outline" className="text-xs">
-                    {analysis.version}
-                  </Badge>
-                )}
+                {/* NOTE: Version badge removed - no versioning in new architecture */}
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <Calendar className="w-3 h-3 text-text-secondary" />
