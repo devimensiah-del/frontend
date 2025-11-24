@@ -83,13 +83,13 @@ export const dashboardNav: NavSection[] = [
     items: [
       {
         title: 'Painel',
-        href: '/painel',
+        href: '/dashboard',
         icon: 'LayoutDashboard',
         description: 'Visão geral dos seus envios',
       },
       {
         title: 'Configurações',
-        href: '/painel/configuracoes',
+        href: '/configuracoes',
         icon: 'Settings',
         description: 'Configurações do perfil',
       },
@@ -181,8 +181,8 @@ export const authRoutes = {
 } as const;
 
 export const dashboardRoutes = {
-  main: '/painel',
-  configuracoes: '/painel/configuracoes',
+  main: '/dashboard',
+  configuracoes: '/configuracoes',
 } as const;
 
 export const adminRoutes = {
@@ -490,7 +490,7 @@ export function getDefaultRouteByRole(role: string | undefined): string {
       return adminRoutes.dashboard; // /admin/envios
     case 'user':
     default:
-      return dashboardRoutes.main; // /painel
+      return dashboardRoutes.main; // /dashboard
   }
 }
 

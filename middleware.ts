@@ -43,7 +43,10 @@ export async function middleware(request: NextRequest) {
   ];
 
   // Check if the current path is public
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.some(route => {
+    if (route === '/') return pathname === '/';
+    return pathname.startsWith(route);
+  });
 
   if (isPublicRoute) {
     return NextResponse.next();
@@ -106,9 +109,9 @@ export async function middleware(request: NextRequest) {
       // Allow both 'admin' and 'super_admin' roles to access admin routes
       if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
         // Not an admin, redirect to user dashboard
-        console.log('[AUTH MIDDLEWARE] User is not an admin, redirecting to /painel');
+        console.log('[AUTH MIDDLEWARE] User is not an admin, redirecting to /dashboard');
         console.log('[AUTH MIDDLEWARE] User role:', profile?.role || 'no profile');
-        return NextResponse.redirect(new URL('/painel', request.url));
+        return NextResponse.redirect(new URL('/dashboard', request.url));
       }
       console.log('[AUTH MIDDLEWARE] Admin access granted for:', pathname);
       console.log('[AUTH MIDDLEWARE] User role:', profile.role);
