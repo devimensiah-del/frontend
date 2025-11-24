@@ -1,13 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Sparkles,
-  Building2,
-  DollarSign,
-  TrendingUp,
-  Globe,
-  Target,
-} from 'lucide-react';
+import { Sparkles, Building2, DollarSign, TrendingUp, Globe, Target, CheckCircle } from 'lucide-react';
 import {
   Section,
   DataGrid,
