@@ -25,7 +25,7 @@ export default function SubmissionPage() {
   const id = params.id as string;
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = React.useState("submission");
+  const [activeTab, setActiveTab] = React.useState("enrichment");
   const [showSendDialog, setShowSendDialog] = React.useState(false);
 
   // 1. Fetch User Role
@@ -271,7 +271,6 @@ export default function SubmissionPage() {
             onChange={(e) => setActiveTab(e.target.value)}
             className="w-full"
           >
-            <SelectOption value="submission">Envio</SelectOption>
             <SelectOption value="enrichment">Enriquecimento</SelectOption>
             <SelectOption value="analysis">Análise</SelectOption>
           </Select>
@@ -279,10 +278,7 @@ export default function SubmissionPage() {
 
         {/* Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
-          <TabsList className="hidden md:grid w-full md:w-[600px] md:grid-cols-3 bg-white p-2 gap-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide">
-            <TabsTrigger value="submission" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-              Envio
-            </TabsTrigger>
+          <TabsList className="hidden md:grid w-full md:w-[400px] md:grid-cols-2 bg-white p-2 gap-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide">
             <TabsTrigger value="enrichment" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
               Enriquecimento
             </TabsTrigger>
@@ -290,20 +286,6 @@ export default function SubmissionPage() {
               Análise
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="submission" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="px-4 py-5 sm:px-6 sm:py-6">
-                <CardTitle className="text-lg sm:text-xl font-semibold text-navy-900">Dados do Envio</CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-5 sm:px-6 sm:pb-6">
-                <SubmissionDetails
-                  submission={submission}
-                  isAdmin={isAdmin}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="enrichment" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <Card className="border-0 shadow-lg">

@@ -41,6 +41,24 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
   // Get visibility status (handle both camelCase and snake_case)
   const isVisibleToUser = analysis.isVisibleToUser ?? analysis.is_visible_to_user ?? false;
 
+  // Normalize analysis data to support both snake_case (backend) and camelCase (frontend)
+  // Cast to any to handle snake_case keys from backend API
+  const rawAnalysis: any = analysis.analysis || {};
+  const normalizedAnalysis: any = {
+    pestel: rawAnalysis.pestel,
+    porter: rawAnalysis.porter,
+    swot: rawAnalysis.swot,
+    synthesis: rawAnalysis.synthesis,
+    tamSamSom: rawAnalysis.tamSamSom || rawAnalysis.tam_sam_som,
+    benchmarking: rawAnalysis.benchmarking,
+    blueOcean: rawAnalysis.blueOcean || rawAnalysis.blue_ocean,
+    growthHacking: rawAnalysis.growthHacking || rawAnalysis.growth_hacking,
+    scenarios: rawAnalysis.scenarios,
+    okrs: rawAnalysis.okrs,
+    bsc: rawAnalysis.bsc,
+    decisionMatrix: rawAnalysis.decisionMatrix || rawAnalysis.decision_matrix,
+  };
+
   // Check if PDF is actually available (has URL in database)
   const pdfUrl = (analysis as any).pdfUrl || (analysis as any).pdf_url;
   const hasPdfAvailable = !!pdfUrl;
@@ -232,24 +250,24 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* Synthesis Tab */}
           <TabsContent value="synthesis" className="space-y-6">
-            {analysis.analysis?.synthesis?.executiveSummary && (
+            {normalizedAnalysis.synthesis?.executiveSummary && (
               <div className="p-4 bg-navy-50 border border-navy-200 rounded-lg">
                 <div className="flex items-start gap-3">
                   <FileText className="w-5 h-5 text-navy-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-sm font-semibold text-navy-900 mb-2">Sumário Executivo</h4>
                     <p className="text-sm text-navy-900 leading-relaxed">
-                      {analysis.analysis.synthesis.executiveSummary}
+                      {normalizedAnalysis.synthesis.executiveSummary}
                     </p>
                   </div>
                 </div>
               </div>
             )}
 
-            {analysis.analysis?.synthesis?.keyFindings && analysis.analysis.synthesis.keyFindings.length > 0 && (
+            {normalizedAnalysis.synthesis?.keyFindings && normalizedAnalysis.synthesis.keyFindings.length > 0 && (
               <Section title="Principais Descobertas" icon={<Lightbulb />}>
                 <ul className="space-y-3">
-                  {analysis.analysis.synthesis.keyFindings.map((finding, index) => (
+                  {normalizedAnalysis.synthesis.keyFindings.map((finding: string, index: number) => (
                     <li key={index} className="flex items-start gap-2">
                       <CheckCircle className="w-4 h-4 text-gold-600 mt-1 flex-shrink-0" />
                       <span className="text-sm text-navy-900 leading-relaxed">{finding}</span>
@@ -259,10 +277,10 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
               </Section>
             )}
 
-            {analysis.analysis?.synthesis?.strategicPriorities && analysis.analysis.synthesis.strategicPriorities.length > 0 && (
+            {normalizedAnalysis.synthesis?.strategicPriorities && normalizedAnalysis.synthesis.strategicPriorities.length > 0 && (
               <Section title="Prioridades Estratégicas" icon={<Target />}>
                 <div className="space-y-2">
-                  {analysis.analysis.synthesis.strategicPriorities.map((priority, index) => (
+                  {normalizedAnalysis.synthesis.strategicPriorities.map((priority: string, index: number) => (
                     <div key={index} className="flex items-center gap-3 p-3 bg-gold-50 border border-gold-200 rounded-lg">
                       <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-600 text-white flex items-center justify-center text-xs font-bold">
                         {index + 1}
@@ -277,13 +295,13 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* SWOT Tab */}
           <TabsContent value="swot" className="space-y-6">
-            {analysis.analysis?.swot && (
+            {normalizedAnalysis.swot && (
               <Section title="Análise SWOT">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <SWOTQuadrant title="Forças" items={analysis.analysis.swot.strengths} color="green" />
-                  <SWOTQuadrant title="Fraquezas" items={analysis.analysis.swot.weaknesses} color="red" />
-                  <SWOTQuadrant title="Oportunidades" items={analysis.analysis.swot.opportunities} color="blue" />
-                  <SWOTQuadrant title="Ameaças" items={analysis.analysis.swot.threats} color="yellow" />
+                  <SWOTQuadrant title="Forças" items={normalizedAnalysis.swot.strengths} color="green" />
+                  <SWOTQuadrant title="Fraquezas" items={normalizedAnalysis.swot.weaknesses} color="red" />
+                  <SWOTQuadrant title="Oportunidades" items={normalizedAnalysis.swot.opportunities} color="blue" />
+                  <SWOTQuadrant title="Ameaças" items={normalizedAnalysis.swot.threats} color="yellow" />
                 </div>
               </Section>
             )}
@@ -291,16 +309,16 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* PESTEL Tab */}
           <TabsContent value="pestel" className="space-y-6">
-            {analysis.analysis?.pestel && (
+            {normalizedAnalysis.pestel && (
               <Section title="Análise PESTEL" icon={<Globe />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.pestel.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.pestel.summary}</p>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <ListSection title="Político" items={analysis.analysis.pestel.political} />
-                  <ListSection title="Econômico" items={analysis.analysis.pestel.economic} />
-                  <ListSection title="Social" items={analysis.analysis.pestel.social} />
-                  <ListSection title="Tecnológico" items={analysis.analysis.pestel.technological} />
-                  <ListSection title="Ambiental" items={analysis.analysis.pestel.environmental} />
-                  <ListSection title="Legal" items={analysis.analysis.pestel.legal} />
+                  <ListSection title="Político" items={normalizedAnalysis.pestel.political} />
+                  <ListSection title="Econômico" items={normalizedAnalysis.pestel.economic} />
+                  <ListSection title="Social" items={normalizedAnalysis.pestel.social} />
+                  <ListSection title="Tecnológico" items={normalizedAnalysis.pestel.technological} />
+                  <ListSection title="Ambiental" items={normalizedAnalysis.pestel.environmental} />
+                  <ListSection title="Legal" items={normalizedAnalysis.pestel.legal} />
                 </div>
               </Section>
             )}
@@ -308,11 +326,11 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* Porter Tab */}
           <TabsContent value="porter" className="space-y-6">
-            {analysis.analysis?.porter && (
+            {normalizedAnalysis.porter && (
               <Section title="5 Forças de Porter" icon={<Shield />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.porter.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.porter.summary}</p>
                 <div className="space-y-4">
-                  {(analysis.analysis.porter.forces || []).map((force: any, index: number) => (
+                  {(normalizedAnalysis.porter.forces || []).map((force: any, index: number) => (
                     <div key={index} className="p-4 border rounded-lg bg-gray-50 space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-sm">{force.force}</span>
@@ -328,26 +346,26 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* TAM/SAM/SOM Tab */}
           <TabsContent value="tam_sam_som" className="space-y-6">
-            {analysis.analysis?.tamSamSom && (
+            {normalizedAnalysis.tamSamSom && (
               <Section title="TAM / SAM / SOM" icon={<TrendingUp />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.tamSamSom.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.tamSamSom.summary}</p>
                 <div className="grid md:grid-cols-3 gap-6">
                   <div>
                     <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">TAM (Mercado Total)</h5>
-                    <p className="text-sm">{analysis.analysis.tamSamSom.tam}</p>
+                    <p className="text-sm">{normalizedAnalysis.tamSamSom.tam}</p>
                   </div>
                   <div>
                     <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">SAM (Mercado Endereçável)</h5>
-                    <p className="text-sm">{analysis.analysis.tamSamSom.sam}</p>
+                    <p className="text-sm">{normalizedAnalysis.tamSamSom.sam}</p>
                   </div>
                   <div>
                     <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">SOM (Mercado Obtenível)</h5>
-                    <p className="text-sm">{analysis.analysis.tamSamSom.som}</p>
+                    <p className="text-sm">{normalizedAnalysis.tamSamSom.som}</p>
                   </div>
                 </div>
-                {analysis.analysis.tamSamSom.assumptions && analysis.analysis.tamSamSom.assumptions.length > 0 && (
+                {normalizedAnalysis.tamSamSom.assumptions && normalizedAnalysis.tamSamSom.assumptions.length > 0 && (
                   <div className="mt-4">
-                    <ListSection title="Premissas" items={analysis.analysis.tamSamSom.assumptions} />
+                    <ListSection title="Premissas" items={normalizedAnalysis.tamSamSom.assumptions} />
                   </div>
                 )}
               </Section>
@@ -356,13 +374,13 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* Benchmarking Tab */}
           <TabsContent value="benchmarking" className="space-y-6">
-            {analysis.analysis?.benchmarking && (
+            {normalizedAnalysis.benchmarking && (
               <Section title="Benchmarking" icon={<BarChart />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.benchmarking.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.benchmarking.summary}</p>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <ListSection title="Competidores Analisados" items={analysis.analysis.benchmarking.competitorsAnalyzed} />
-                  <ListSection title="Gaps de Performance" items={analysis.analysis.benchmarking.performanceGaps} />
-                  <ListSection title="Melhores Práticas" items={analysis.analysis.benchmarking.bestPractices} />
+                  <ListSection title="Competidores Analisados" items={normalizedAnalysis.benchmarking.competitorsAnalyzed || normalizedAnalysis.benchmarking.competitors_analyzed} />
+                  <ListSection title="Gaps de Performance" items={normalizedAnalysis.benchmarking.performanceGaps || normalizedAnalysis.benchmarking.performance_gaps} />
+                  <ListSection title="Melhores Práticas" items={normalizedAnalysis.benchmarking.bestPractices || normalizedAnalysis.benchmarking.best_practices} />
                 </div>
               </Section>
             )}
@@ -370,14 +388,14 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* Blue Ocean Tab */}
           <TabsContent value="blue_ocean" className="space-y-6">
-            {analysis.analysis?.blueOcean && (
+            {normalizedAnalysis.blueOcean && (
               <Section title="Estratégia do Oceano Azul" icon={<MapPin />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.blueOcean.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.blueOcean.summary}</p>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <ListSection title="Eliminar" items={analysis.analysis.blueOcean.eliminate} />
-                  <ListSection title="Reduzir" items={analysis.analysis.blueOcean.reduce} />
-                  <ListSection title="Elevar" items={analysis.analysis.blueOcean.raise} />
-                  <ListSection title="Criar" items={analysis.analysis.blueOcean.create} />
+                  <ListSection title="Eliminar" items={normalizedAnalysis.blueOcean.eliminate} />
+                  <ListSection title="Reduzir" items={normalizedAnalysis.blueOcean.reduce} />
+                  <ListSection title="Elevar" items={normalizedAnalysis.blueOcean.raise} />
+                  <ListSection title="Criar" items={normalizedAnalysis.blueOcean.create} />
                 </div>
               </Section>
             )}
@@ -385,24 +403,24 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* Growth Hacking Tab */}
           <TabsContent value="growth_hacking" className="space-y-6">
-            {analysis.analysis?.growthHacking && (
+            {normalizedAnalysis.growthHacking && (
               <Section title="Growth Hacking" icon={<Zap />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.growthHacking.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.growthHacking.summary}</p>
                 <div className="grid md:grid-cols-2 gap-6">
-                  {analysis.analysis.growthHacking.leap_loop && (
+                  {(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop) && (
                     <div className="p-4 border rounded-lg">
-                      <h5 className="font-semibold mb-2">{analysis.analysis.growthHacking.leap_loop.name}</h5>
-                      <p className="text-sm text-gray-600 mb-2">{analysis.analysis.growthHacking.leap_loop.type}</p>
-                      <ListSection title="Passos" items={analysis.analysis.growthHacking.leap_loop.steps} />
-                      <ListSection title="Métricas" items={analysis.analysis.growthHacking.leap_loop.metrics} />
+                      <h5 className="font-semibold mb-2">{(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).name}</h5>
+                      <p className="text-sm text-gray-600 mb-2">{(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).type}</p>
+                      <ListSection title="Passos" items={(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).steps} />
+                      <ListSection title="Métricas" items={(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).metrics} />
                     </div>
                   )}
-                  {analysis.analysis.growthHacking.scale_loop && (
+                  {(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop) && (
                     <div className="p-4 border rounded-lg">
-                      <h5 className="font-semibold mb-2">{analysis.analysis.growthHacking.scale_loop.name}</h5>
-                      <p className="text-sm text-gray-600 mb-2">{analysis.analysis.growthHacking.scale_loop.type}</p>
-                      <ListSection title="Passos" items={analysis.analysis.growthHacking.scale_loop.steps} />
-                      <ListSection title="Métricas" items={analysis.analysis.growthHacking.scale_loop.metrics} />
+                      <h5 className="font-semibold mb-2">{(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).name}</h5>
+                      <p className="text-sm text-gray-600 mb-2">{(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).type}</p>
+                      <ListSection title="Passos" items={(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).steps} />
+                      <ListSection title="Métricas" items={(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).metrics} />
                     </div>
                   )}
                 </div>
@@ -412,29 +430,29 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* Scenarios Tab */}
           <TabsContent value="scenarios" className="space-y-6">
-            {analysis.analysis?.scenarios && (
+            {normalizedAnalysis.scenarios && (
               <Section title="Análise de Cenários" icon={<GitBranch />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.scenarios.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.scenarios.summary}</p>
                 <div className="grid md:grid-cols-3 gap-4">
-                  {analysis.analysis.scenarios.optimistic && (
+                  {normalizedAnalysis.scenarios.optimistic && (
                     <div className="p-4 border border-green-200 bg-green-50 rounded-lg">
-                      <h5 className="font-semibold text-green-900 mb-2">Otimista ({analysis.analysis.scenarios.optimistic.probability}%)</h5>
-                      <p className="text-sm mb-2">{analysis.analysis.scenarios.optimistic.description}</p>
-                      <ListSection title="Ações Necessárias" items={analysis.analysis.scenarios.optimistic.required_actions} />
+                      <h5 className="font-semibold text-green-900 mb-2">Otimista ({normalizedAnalysis.scenarios.optimistic.probability}%)</h5>
+                      <p className="text-sm mb-2">{normalizedAnalysis.scenarios.optimistic.description}</p>
+                      <ListSection title="Ações Necessárias" items={normalizedAnalysis.scenarios.optimistic.required_actions || normalizedAnalysis.scenarios.optimistic.requiredActions} />
                     </div>
                   )}
-                  {analysis.analysis.scenarios.realist && (
+                  {normalizedAnalysis.scenarios.realist && (
                     <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
-                      <h5 className="font-semibold text-blue-900 mb-2">Realista ({analysis.analysis.scenarios.realist.probability}%)</h5>
-                      <p className="text-sm mb-2">{analysis.analysis.scenarios.realist.description}</p>
-                      <ListSection title="Ações Necessárias" items={analysis.analysis.scenarios.realist.required_actions} />
+                      <h5 className="font-semibold text-blue-900 mb-2">Realista ({normalizedAnalysis.scenarios.realist.probability}%)</h5>
+                      <p className="text-sm mb-2">{normalizedAnalysis.scenarios.realist.description}</p>
+                      <ListSection title="Ações Necessárias" items={normalizedAnalysis.scenarios.realist.required_actions || normalizedAnalysis.scenarios.realist.requiredActions} />
                     </div>
                   )}
-                  {analysis.analysis.scenarios.pessimistic && (
+                  {normalizedAnalysis.scenarios.pessimistic && (
                     <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
-                      <h5 className="font-semibold text-red-900 mb-2">Pessimista ({analysis.analysis.scenarios.pessimistic.probability}%)</h5>
-                      <p className="text-sm mb-2">{analysis.analysis.scenarios.pessimistic.description}</p>
-                      <ListSection title="Ações Necessárias" items={analysis.analysis.scenarios.pessimistic.required_actions} />
+                      <h5 className="font-semibold text-red-900 mb-2">Pessimista ({normalizedAnalysis.scenarios.pessimistic.probability}%)</h5>
+                      <p className="text-sm mb-2">{normalizedAnalysis.scenarios.pessimistic.description}</p>
+                      <ListSection title="Ações Necessárias" items={normalizedAnalysis.scenarios.pessimistic.required_actions || normalizedAnalysis.scenarios.pessimistic.requiredActions} />
                     </div>
                   )}
                 </div>
@@ -444,18 +462,18 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* OKRs Tab */}
           <TabsContent value="okrs" className="space-y-6">
-            {analysis.analysis?.okrs && (
+            {normalizedAnalysis.okrs && (
               <Section title="OKRs (Objectives & Key Results)" icon={<Target />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.okrs.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.okrs.summary}</p>
                 <div className="space-y-4">
-                  {analysis.analysis.okrs.quarters && analysis.analysis.okrs.quarters.map((quarter: any, index: number) => (
+                  {normalizedAnalysis.okrs.quarters && normalizedAnalysis.okrs.quarters.map((quarter: any, index: number) => (
                     <div key={index} className="p-4 border rounded-lg">
                       <div className="flex justify-between items-start mb-2">
                         <h5 className="font-semibold">{quarter.quarter}</h5>
                         <span className="text-sm text-gray-500">{quarter.timeline}</span>
                       </div>
                       <p className="text-sm font-medium text-navy-900 mb-2">{quarter.objective}</p>
-                      <ListSection title="Key Results" items={quarter.keyResults} />
+                      <ListSection title="Key Results" items={quarter.keyResults || quarter.key_results} />
                       <p className="text-sm text-gray-600 mt-2">Investimento: {quarter.investment}</p>
                     </div>
                   ))}
@@ -466,14 +484,14 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* BSC Tab */}
           <TabsContent value="bsc" className="space-y-6">
-            {analysis.analysis?.bsc && (
+            {normalizedAnalysis.bsc && (
               <Section title="Balanced Scorecard" icon={<BarChart />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.bsc.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.bsc.summary}</p>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <ListSection title="Perspectiva Financeira" items={analysis.analysis.bsc.financial} />
-                  <ListSection title="Perspectiva do Cliente" items={analysis.analysis.bsc.customer} />
-                  <ListSection title="Processos Internos" items={analysis.analysis.bsc.internal_processes} />
-                  <ListSection title="Aprendizado e Crescimento" items={analysis.analysis.bsc.learning_growth} />
+                  <ListSection title="Perspectiva Financeira" items={normalizedAnalysis.bsc.financial} />
+                  <ListSection title="Perspectiva do Cliente" items={normalizedAnalysis.bsc.customer} />
+                  <ListSection title="Processos Internos" items={normalizedAnalysis.bsc.internal_processes || normalizedAnalysis.bsc.internalProcesses} />
+                  <ListSection title="Aprendizado e Crescimento" items={normalizedAnalysis.bsc.learning_growth || normalizedAnalysis.bsc.learningGrowth} />
                 </div>
               </Section>
             )}
@@ -481,26 +499,26 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
 
           {/* Decision Matrix Tab */}
           <TabsContent value="decision_matrix" className="space-y-6">
-            {analysis.analysis?.decisionMatrix && (
+            {normalizedAnalysis.decisionMatrix && (
               <Section title="Matriz de Decisão" icon={<CheckCircle />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{analysis.analysis.decisionMatrix.summary}</p>
+                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.decisionMatrix.summary}</p>
 
-                {analysis.analysis.decisionMatrix.final_recommendation && (
+                {(normalizedAnalysis.decisionMatrix.final_recommendation || normalizedAnalysis.decisionMatrix.finalRecommendation) && (
                   <div className="p-4 bg-gold-50 border border-gold-200 rounded-lg mb-4">
                     <h5 className="font-semibold text-gold-900 mb-2">Recomendação Final</h5>
-                    <p className="text-sm">{analysis.analysis.decisionMatrix.final_recommendation}</p>
+                    <p className="text-sm">{normalizedAnalysis.decisionMatrix.final_recommendation || normalizedAnalysis.decisionMatrix.finalRecommendation}</p>
                   </div>
                 )}
 
                 <div className="grid md:grid-cols-2 gap-6">
-                  <ListSection title="Alternativas" items={analysis.analysis.decisionMatrix.alternatives} />
-                  <ListSection title="Critérios" items={analysis.analysis.decisionMatrix.criteria} />
+                  <ListSection title="Alternativas" items={normalizedAnalysis.decisionMatrix.alternatives} />
+                  <ListSection title="Critérios" items={normalizedAnalysis.decisionMatrix.criteria} />
                 </div>
 
-                {analysis.analysis.decisionMatrix.priority_recommendations && analysis.analysis.decisionMatrix.priority_recommendations.length > 0 && (
+                {(normalizedAnalysis.decisionMatrix.priority_recommendations || normalizedAnalysis.decisionMatrix.priorityRecommendations) && (normalizedAnalysis.decisionMatrix.priority_recommendations || normalizedAnalysis.decisionMatrix.priorityRecommendations).length > 0 && (
                   <div className="mt-4 space-y-3">
                     <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recomendações Prioritárias</h5>
-                    {analysis.analysis.decisionMatrix.priority_recommendations.map((rec: any, index: number) => (
+                    {(normalizedAnalysis.decisionMatrix.priority_recommendations || normalizedAnalysis.decisionMatrix.priorityRecommendations).map((rec: any, index: number) => (
                       <div key={index} className="p-4 border rounded-lg">
                         <div className="flex items-start gap-3">
                           <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy-600 text-white flex items-center justify-center text-sm font-bold">
