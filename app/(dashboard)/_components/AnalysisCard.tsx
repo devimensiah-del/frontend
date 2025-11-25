@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
@@ -8,7 +8,8 @@ import {
   Lightbulb,
   CheckCircle,
   Download,
-  Send,
+  Eye,
+  EyeOff,
   Globe,
   Shield,
   Target,
@@ -17,13 +18,11 @@ import {
   MapPin,
   Zap,
   GitBranch,
-  Calendar,
 } from 'lucide-react';
 import {
   Section,
   SWOTQuadrant,
 } from '@/components/workflow';
-import { getFrameworkCompletion } from '@/lib/utils/workflow-helpers';
 import type { Analysis } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectOption } from "@/components/ui/Select";
@@ -31,27 +30,19 @@ import { Select, SelectOption } from "@/components/ui/Select";
 interface AnalysisCardProps {
   analysis: Analysis;
   isAdmin?: boolean;
+  onToggleVisibility?: (visible: boolean) => void;
 }
 
-export function AnalysisCard({ analysis, isAdmin }: AnalysisCardProps) {
+export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: AnalysisCardProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("synthesis");
+  const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const { completed, total } = getFrameworkCompletion(analysis);
+  // Get visibility status (handle both camelCase and snake_case)
+  const isVisibleToUser = analysis.isVisibleToUser ?? analysis.is_visible_to_user ?? false;
 
   const downloadPdf = async () => {
-    // Get PDF URL from the submission's pdfUrl field
-    // Note: Backend should populate submission.pdfUrl when analysis is sent
+    // Get PDF URL from the analysis
     const pdfUrl = (analysis as any).pdfUrl || (analysis as any).pdf_url;
 
     if (!pdfUrl) {
@@ -89,91 +80,90 @@ export function AnalysisCard({ analysis, isAdmin }: AnalysisCardProps) {
     }
   };
 
+  const handleToggleVisibility = async () => {
+    if (!onToggleVisibility) return;
+
+    setIsTogglingVisibility(true);
+    try {
+      await onToggleVisibility(!isVisibleToUser);
+      toast({
+        title: isVisibleToUser ? 'Análise ocultada' : 'Análise liberada',
+        description: isVisibleToUser
+          ? 'O usuário não poderá mais ver esta análise.'
+          : 'O usuário agora pode ver esta análise e baixar o PDF.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível alterar a visibilidade.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsTogglingVisibility(false);
+    }
+  };
+
+  // Check if PDF download should be available
+  // Admin: can download when approved (for review)
+  // User: can download when approved AND visible
+  const canDownloadPdf = analysis.status === 'approved' || analysis.status === 'sent';
+  const userCanDownload = canDownloadPdf && isVisibleToUser;
+
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2 flex-1">
-            <FileText className="w-5 h-5 text-gold-600" />
-            <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-navy-900">Relatório Estratégico</CardTitle>
-                {/* NOTE: Version badge removed - no versioning in new architecture */}
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <Calendar className="w-3 h-3 text-text-secondary" />
-                <p className="text-xs text-text-secondary">
-                  Atualizado em {formatDate(analysis.updatedAt)}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {analysis.status === 'sent' && (
-              <Badge variant="default" className="bg-blue-50 text-blue-700 border-blue-200">
-                <Send className="w-3 h-3 mr-1" />
-                Enviado
-              </Badge>
-            )}
-            {analysis.status === 'approved' && (
-              <Badge variant="default" className="bg-gold-50 text-gold-700 border-gold-200">
-                <CheckCircle className="w-3 h-3 mr-1" />
-                Aprovado
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        {/* Framework Completion */}
-        <div className="mt-4 p-3 bg-surface-paper rounded-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-navy-900 uppercase tracking-wider">
-                Frameworks Aplicados
-              </p>
-              <p className="text-xs text-text-secondary mt-0.5">
-                {completed} de {total} análises completas
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-12 h-12 rounded-full border-4 border-gold-200 flex items-center justify-center">
-                <span className="text-sm font-bold text-gold-600">
-                  {Math.round((completed / total) * 100)}%
+      <CardContent className="pt-6 space-y-6">
+        {/* Admin Controls - Visibility Toggle and PDF Download */}
+        {isAdmin && canDownloadPdf && (
+          <div className="pb-6 border-b border-surface-border">
+            <div className="flex flex-wrap gap-3 items-center justify-between">
+              {/* Visibility Toggle */}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant={isVisibleToUser ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleToggleVisibility}
+                  disabled={isTogglingVisibility}
+                  className={isVisibleToUser
+                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    : "border-gray-300 hover:bg-gray-100"
+                  }
+                >
+                  {isVisibleToUser ? (
+                    <>
+                      <Eye className="w-4 h-4 mr-2" />
+                      Visível para Usuário
+                    </>
+                  ) : (
+                    <>
+                      <EyeOff className="w-4 h-4 mr-2" />
+                      Oculto do Usuário
+                    </>
+                  )}
+                </Button>
+                <span className="text-xs text-gray-500">
+                  {isVisibleToUser
+                    ? "Usuário pode ver a análise e baixar o PDF"
+                    : "Usuário não pode acessar esta análise"
+                  }
                 </span>
               </div>
-            </div>
-          </div>
-        </div>
-      </CardHeader>
 
-      <CardContent className="space-y-6">
-        {/* Admin PDF Download - Shows when approved (for review before sending) */}
-        {isAdmin && analysis.status === 'approved' && (
-          <div className="pb-6 border-b border-surface-border">
-            <div className="p-4 bg-navy-50 border border-navy-200 rounded-lg">
-              <div className="flex items-start gap-3 mb-3">
-                <FileText className="w-5 h-5 text-navy-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-navy-900 mb-1">Relatório Aprovado</h4>
-                  <p className="text-xs text-navy-700">
-                    O PDF foi gerado e está pronto. Revise antes de enviar ao cliente.
-                  </p>
-                </div>
-              </div>
+              {/* Admin PDF Download */}
               <Button
                 variant="outline"
-                className="w-full border-navy-300 hover:bg-navy-100"
+                size="sm"
                 onClick={downloadPdf}
+                className="border-navy-300 hover:bg-navy-100"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Baixar PDF para Revisão
+                Baixar PDF
               </Button>
             </div>
           </div>
         )}
 
-        {/* User PDF Download - Shows when sent (final version for client) */}
-        {!isAdmin && analysis.status === 'sent' && (
+        {/* User PDF Download - Only when approved AND visible */}
+        {!isAdmin && userCanDownload && (
           <div className="pb-6 border-b border-surface-border">
             <Button
               variant="architect"
@@ -183,6 +173,18 @@ export function AnalysisCard({ analysis, isAdmin }: AnalysisCardProps) {
               <Download className="w-4 h-4 mr-2" />
               Baixar Relatório Completo (PDF)
             </Button>
+          </div>
+        )}
+
+        {/* User sees "not available" message if not visible */}
+        {!isAdmin && canDownloadPdf && !isVisibleToUser && (
+          <div className="pb-6 border-b border-surface-border">
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+              <EyeOff className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">
+                O relatório ainda não está disponível. Você será notificado quando estiver pronto.
+              </p>
+            </div>
           </div>
         )}
 

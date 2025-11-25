@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Enrichment } from "@/lib/types";
+import { Enrichment, SubmittedData, DiscoveredData } from "@/lib/types";
 import { EnrichmentEditor } from "./EnrichmentEditor";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
@@ -44,6 +44,14 @@ function parseEnrichmentData(data: any): Record<string, any> {
   return {};
 }
 
+/**
+ * Format currency value in Brazilian Real
+ */
+function formatCurrency(value: number | undefined): string {
+  if (value === undefined || value === null) return '—';
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+}
+
 export function EnrichmentDetails({
   enrichment,
   isAdmin,
@@ -52,7 +60,7 @@ export function EnrichmentDetails({
   onEdit: _onEdit,
 }: EnrichmentDetailsProps) {
   const [isEditing, setIsEditing] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState("overview");
+  const [activeTab, setActiveTab] = React.useState("submitted");
 
   if (!enrichment) {
     return (
@@ -91,6 +99,10 @@ export function EnrichmentDetails({
   // Parse data - handle double-encoded JSON from backend
   const parsedData = parseEnrichmentData(enrichment.data);
   const { status, progress, updatedAt } = enrichment;
+
+  // Extract submitted and discovered data
+  const submittedData = parsedData.submitted_data as SubmittedData | undefined;
+  const discoveredData = parsedData.discovered_data as DiscoveredData | undefined;
 
   // Helper components for read‑only fields
   const Field = ({ label, value, multiline }: { label: string; value: any; multiline?: boolean }) => (
@@ -136,20 +148,28 @@ export function EnrichmentDetails({
           onChange={(e) => setActiveTab(e.target.value)}
           className="w-full"
         >
-          <SelectOption value="overview">Visão Geral</SelectOption>
+          <SelectOption value="submitted">Dados Enviados</SelectOption>
+          <SelectOption value="discovered">Descobertos</SelectOption>
+          <SelectOption value="overview">Perfil</SelectOption>
           <SelectOption value="strategic">Estratégico</SelectOption>
           <SelectOption value="financial">Financeiro</SelectOption>
-          <SelectOption value="market">Mercado & Competição</SelectOption>
-          <SelectOption value="macro">Contexto Macro</SelectOption>
+          <SelectOption value="market">Mercado</SelectOption>
+          <SelectOption value="macro">Macro</SelectOption>
           <SelectOption value="metadata">Metadados</SelectOption>
         </Select>
       </div>
 
-      {/* Tabbed view - matches SubmissionDetails structure */}
+      {/* Tabbed view */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="hidden md:grid w-full grid-cols-6 bg-white p-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide">
+        <TabsList className="hidden md:grid w-full grid-cols-8 bg-white p-2 border border-gray-200 rounded-none text-[11px] md:text-xs font-semibold uppercase tracking-wide">
+          <TabsTrigger value="submitted" className="min-h-[48px] leading-tight data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
+            Enviados
+          </TabsTrigger>
+          <TabsTrigger value="discovered" className="min-h-[48px] leading-tight data-[state=active]:bg-green-50 data-[state=active]:text-green-700 data-[state=active]:border-b-2 data-[state=active]:border-green-500">
+            Descobertos
+          </TabsTrigger>
           <TabsTrigger value="overview" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Visão Geral
+            Perfil
           </TabsTrigger>
           <TabsTrigger value="strategic" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
             Estratégico
@@ -168,7 +188,112 @@ export function EnrichmentDetails({
           </TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab - Company Profile */}
+        {/* NEW: Submitted Data Tab - User form input preserved exactly */}
+        <TabsContent value="submitted" className="space-y-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <h3 className="text-sm font-semibold text-blue-800 mb-1">Dados Enviados pelo Usuário</h3>
+            <p className="text-xs text-blue-600">Informações fornecidas pelo usuário no formulário de submissão.</p>
+          </div>
+
+          {submittedData ? (
+            <>
+              {/* Company Information */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Informações da Empresa</h4>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Field label="Nome da Empresa" value={submittedData.company_name} />
+                  <Field label="CNPJ" value={submittedData.cnpj} />
+                  <Field label="Website" value={submittedData.website} />
+                  <Field label="Setor/Indústria" value={submittedData.industry} />
+                  <Field label="Tamanho da Empresa" value={submittedData.company_size} />
+                  <Field label="Localização" value={submittedData.location} />
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Informações de Contato</h4>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Field label="Nome do Contato" value={submittedData.contact_name} />
+                  <Field label="Email do Contato" value={submittedData.contact_email} />
+                  <Field label="Telefone" value={submittedData.contact_phone} />
+                  <Field label="Cargo" value={submittedData.contact_position} />
+                </div>
+              </div>
+
+              {/* Business Context */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Contexto de Negócio</h4>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Field label="Mercado Alvo" value={submittedData.target_market} />
+                  <Field label="Estágio de Financiamento" value={submittedData.funding_stage} />
+                  <Field label="Receita Anual (Mín)" value={formatCurrency(submittedData.annual_revenue_min)} />
+                  <Field label="Receita Anual (Máx)" value={formatCurrency(submittedData.annual_revenue_max)} />
+                </div>
+                <Field label="Desafio Principal" value={submittedData.business_challenge} multiline />
+                <Field label="Notas Adicionais" value={submittedData.additional_notes} multiline />
+              </div>
+
+              {/* Social Links */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Redes Sociais</h4>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Field label="LinkedIn" value={submittedData.linkedin_url} />
+                  <Field label="Twitter/X" value={submittedData.twitter_handle} />
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>Dados enviados não disponíveis para este enriquecimento.</p>
+              <p className="text-xs mt-2">Enriquecimentos anteriores podem não ter esta informação.</p>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* NEW: Discovered Data Tab - AI-enriched public information */}
+        <TabsContent value="discovered" className="space-y-6">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+            <h3 className="text-sm font-semibold text-green-800 mb-1">Dados Descobertos pela IA</h3>
+            <p className="text-xs text-green-600">Informações públicas encontradas automaticamente que não foram fornecidas pelo usuário.</p>
+          </div>
+
+          {discoveredData ? (
+            <>
+              {/* Discovered Company Info */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Informações Descobertas</h4>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Field label="CNPJ Descoberto" value={discoveredData.cnpj} />
+                  <Field label="Website Oficial" value={discoveredData.website} />
+                  <Field label="LinkedIn da Empresa" value={discoveredData.linkedin_url} />
+                  <Field label="Twitter/X" value={discoveredData.twitter_handle} />
+                  <Field label="Setor/Indústria" value={discoveredData.industry} />
+                  <Field label="Tamanho Estimado" value={discoveredData.company_size} />
+                  <Field label="Localização" value={discoveredData.location} />
+                  <Field label="Ano de Fundação" value={discoveredData.foundation_year} />
+                  <Field label="Estágio de Financiamento" value={discoveredData.funding_stage} />
+                  <Field label="Faturamento Estimado" value={discoveredData.annual_revenue_estimate} />
+                  <Field label="Mercado Alvo" value={discoveredData.target_market} />
+                </div>
+              </div>
+
+              {/* Comparison hint */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+                <p className="text-xs text-yellow-700">
+                  <strong>Dica:</strong> Compare estes dados com os "Dados Enviados" para identificar informações que o usuário não forneceu mas que são importantes para a análise.
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>Nenhum dado adicional foi descoberto pela IA.</p>
+              <p className="text-xs mt-2">O usuário pode ter fornecido todas as informações necessárias.</p>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Overview Tab - Company Profile (Existing) */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
             <Field label="Razão Social" value={parsedData.profile_overview?.legal_name} />

@@ -88,6 +88,52 @@ export type EnrichmentStatus =
   | 'completed'     // Worker completed, waiting for admin review
   | 'approved';    // Admin approved, ready for analysis
 
+// =================================================================
+// SUBMITTED DATA (User form input - preserved exactly as submitted)
+// Mirrors backend_v3/domain/enrichment/model.go SubmittedData struct
+// =================================================================
+export interface SubmittedData {
+  // Required fields (always present)
+  company_name: string;
+  contact_name: string;
+  contact_email: string;
+  business_challenge: string;
+
+  // Optional fields (may be empty)
+  cnpj?: string;
+  website?: string;
+  industry?: string;
+  company_size?: string;
+  location?: string;
+  contact_phone?: string;
+  contact_position?: string;
+  target_market?: string;
+  funding_stage?: string;
+  annual_revenue_min?: number;
+  annual_revenue_max?: number;
+  additional_notes?: string;
+  linkedin_url?: string;
+  twitter_handle?: string;
+}
+
+// =================================================================
+// DISCOVERED DATA (AI-enriched public information not provided by user)
+// Mirrors backend_v3/domain/enrichment/model.go DiscoveredData struct
+// =================================================================
+export interface DiscoveredData {
+  cnpj?: string;
+  website?: string;
+  linkedin_url?: string;
+  twitter_handle?: string;
+  industry?: string;
+  company_size?: string;
+  location?: string;
+  foundation_year?: string;
+  funding_stage?: string;
+  annual_revenue_estimate?: string;
+  target_market?: string;
+}
+
 // Macro-Economic & Industry Context (Addresses "Brazil blind spot")
 export interface EconomicIndicators {
   country: string;
@@ -141,6 +187,11 @@ export interface Enrichment {
 
   // The JSONMap stored in Postgres - matches backend UnifiedProfile structure
   data: {
+    // NEW: User form input preserved exactly as submitted
+    submitted_data?: SubmittedData;
+    // NEW: AI-discovered public data not provided by user
+    discovered_data?: DiscoveredData;
+    // Existing enrichment fields (profile intelligence)
     profile_overview?: {
       legal_name: string;
       website: string;
@@ -391,6 +442,11 @@ export interface Analysis {
   sentTo?: string;
   errorMessage?: string;
   completedAt?: string;
+
+  // Visibility control - Admin must explicitly make analysis visible to user
+  // Even after approval and PDF generation, analysis is NOT visible until toggled
+  isVisibleToUser?: boolean;
+  is_visible_to_user?: boolean; // Backend uses snake_case
 
   // ALL FRAMEWORKS NESTED IN "analysis" OBJECT (matches backend response structure)
   analysis: {
