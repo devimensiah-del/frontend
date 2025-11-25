@@ -104,21 +104,60 @@ export function EnrichmentDetails({
   const submittedData = parsedData.submitted_data as SubmittedData | undefined;
   const discoveredData = parsedData.discovered_data as DiscoveredData | undefined;
 
+  /**
+   * Normalize a value that might be a comma-separated string into an array
+   * Handles: "item1, item2, item3" -> ["item1", "item2", "item3"]
+   * Also handles already-array values
+   */
+  const normalizeToArray = (value: any): string[] => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean);
+    if (typeof value === 'string') {
+      // Split by common delimiters: comma, semicolon, or period followed by comma
+      return value
+        .split(/[,;]|(?<=\.)\s*,/)
+        .map(item => item.trim())
+        .filter(item => item.length > 0 && item !== '.');
+    }
+    return [String(value)];
+  };
+
   // Helper components for read‑only fields
   const Field = ({ label, value, multiline }: { label: string; value: any; multiline?: boolean }) => (
     <div className="space-y-1">
       <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">
         {label}
       </label>
-      <p className={`text-sm text-navy-900 ${multiline ? "whitespace-pre-line leading-relaxed" : "break-all"}`}>
+      <p className={`text-sm text-navy-900 leading-relaxed ${multiline ? "whitespace-pre-line" : ""}`} style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
         {value ?? "—"}
       </p>
     </div>
   );
 
-  const ListField = ({ label, items }: { label: string; items?: any[] }) => (
-    <Field label={label} value={items && items.length ? items.join(", ") : "—"} />
-  );
+  // List field that renders items as a proper bullet list
+  const ListField = ({ label, items }: { label: string; items?: any[] | string }) => {
+    const normalizedItems = normalizeToArray(items);
+
+    if (!normalizedItems.length) {
+      return <Field label={label} value="—" />;
+    }
+
+    return (
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+          {label}
+        </label>
+        <ul className="space-y-1.5">
+          {normalizedItems.map((item, index) => (
+            <li key={index} className="flex items-start gap-2 text-sm text-navy-900">
+              <span className="text-gray-400 mt-1 flex-shrink-0">•</span>
+              <span className="leading-relaxed" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
 
   const enrichmentActions = getEnrichmentActions(enrichment);
 

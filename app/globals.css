@@ -280,4 +280,35 @@
   .tracking-ultra {
     letter-spacing: var(--tracking-ultra);
   }
+
+  /* ============================================
+     TEXT FORMATTING - Global word wrapping
+     ============================================ */
+
+  /* Prevent word breaks in the middle of words */
+  .text-wrap-nice,
+  p,
+  span,
+  li,
+  td,
+  th,
+  label,
+  .prose,
+  [class*="text-"] {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+  }
+
+  /* For data display fields - ensure proper wrapping */
+  .data-field-value {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: auto;
+    white-space: pre-line;
+  }
 }

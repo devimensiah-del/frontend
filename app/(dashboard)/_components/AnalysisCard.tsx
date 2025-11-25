@@ -26,6 +26,7 @@ import {
 import type { Analysis } from '@/types';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectOption } from "@/components/ui/Select";
+import { normalizeToArray } from '@/lib/utils/format';
 
 interface AnalysisCardProps {
   analysis: Analysis;
@@ -546,17 +547,19 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
   );
 }
 
-// Helper Component for Lists
-function ListSection({ title, items }: { title: string; items: string[] }) {
-  if (!items || items.length === 0) return null;
+// Helper Component for Lists - handles both arrays and comma-separated strings
+function ListSection({ title, items }: { title: string; items?: string[] | string }) {
+  const normalizedItems = normalizeToArray(items);
+  if (normalizedItems.length === 0) return null;
+
   return (
     <div>
       <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{title}</h5>
-      <ul className="space-y-1">
-        {items.map((item, index) => (
+      <ul className="space-y-1.5">
+        {normalizedItems.map((item, index) => (
           <li key={index} className="text-sm text-navy-900 flex items-start gap-2">
-            <span className="text-gold-500 mt-1.5">•</span>
-            <span>{item}</span>
+            <span className="text-gold-500 mt-1.5 flex-shrink-0">•</span>
+            <span className="leading-relaxed" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>{item}</span>
           </li>
         ))}
       </ul>
