@@ -282,10 +282,10 @@
   }
 
   /* ============================================
-     TEXT FORMATTING - Global word wrapping
+     TEXT FORMATTING - Keep whole words together
      ============================================ */
 
-  /* Prevent word breaks in the middle of words */
+  /* Force whole words to wrap to next line instead of breaking mid-word */
   .text-wrap-nice,
   p,
   span,
@@ -295,20 +295,28 @@
   label,
   .prose,
   [class*="text-"] {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: normal;
-    hyphens: auto;
-    -webkit-hyphens: auto;
-    -ms-hyphens: auto;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    hyphens: none !important;
+    -webkit-hyphens: none !important;
+    -ms-hyphens: none !important;
   }
 
   /* For data display fields - ensure proper wrapping */
   .data-field-value {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: normal;
-    hyphens: auto;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    hyphens: none !important;
     white-space: pre-line;
+  }
+
+  /* Explicit class for whole-word wrapping */
+  .word-wrap-whole {
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    hyphens: none !important;
   }
 }
