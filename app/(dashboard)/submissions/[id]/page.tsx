@@ -80,10 +80,15 @@ export default function SubmissionPage() {
   const pdfReady = !!(reportStatus as any)?.pdf_url;
   const approveEnrichmentMutation = useMutation({
     mutationFn: () => adminApi.approveEnrichment(enrichment!.id),
-    onSuccess: () => {
-      toast({ title: "Sucesso", description: "Enriquecimento aprovado. Análise iniciada." });
-      queryClient.invalidateQueries({ queryKey: ["enrichment", id] });
-      queryClient.invalidateQueries({ queryKey: ["analysis", id] }); // Analysis should be created
+    onSuccess: async () => {
+      toast({ title: "Sucesso", description: "Enriquecimento aprovado. Análise será iniciada em breve." });
+      // Immediately refetch to update UI
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["enrichment", id] }),
+        queryClient.invalidateQueries({ queryKey: ["analysis", id] }),
+      ]);
+      // Auto-switch to Analysis tab
+      setActiveTab("analysis");
     },
     onError: (error) => {
       toast({
@@ -97,9 +102,12 @@ export default function SubmissionPage() {
 
   const approveAnalysisMutation = useMutation({
     mutationFn: () => adminApi.approveAnalysis(analysis!.id),
-    onSuccess: () => {
-      toast({ title: "Sucesso", description: "Análise aprovada. PDF gerado." });
-      queryClient.invalidateQueries({ queryKey: ["analysis", id] });
+    onSuccess: async () => {
+      toast({ title: "Sucesso", description: "Análise aprovada. Gerando PDF..." });
+      // Immediately refetch to update UI
+      await queryClient.invalidateQueries({ queryKey: ["analysis", id] });
+      // Start polling for report/PDF
+      await queryClient.invalidateQueries({ queryKey: ["report", id] });
     },
     onError: (error) => {
       toast({

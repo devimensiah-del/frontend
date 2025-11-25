@@ -4,7 +4,7 @@ import React from "react";
 import { Enrichment } from "@/lib/types";
 import { EnrichmentEditor } from "./EnrichmentEditor";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw, AlertCircle } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectOption } from "@/components/ui/Select";
 import { getEnrichmentActions } from "@/lib/utils/workflow";
@@ -112,31 +112,20 @@ export function EnrichmentDetails({
 
   return (
     <div className="space-y-6">
-      {/* Admin actions */}
-      {isAdmin && (
+      {/* Admin actions - Only show if enrichment can be edited (not approved) */}
+      {isAdmin && enrichmentActions.canEdit && (
         <div className="mb-4">
           <div className="flex justify-end gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsEditing(true)}
-              disabled={!enrichmentActions.canEdit}
-              title={!enrichmentActions.canEdit ? `Edição não permitida: ${enrichmentActions.message}` : 'Editar dados de enriquecimento'}
+              title="Editar dados de enriquecimento"
             >
               <RefreshCcw className="w-4 h-4 mr-2" />
               Editar Dados
             </Button>
           </div>
-          {!enrichmentActions.canEdit && (
-            <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-amber-900">
-                <p className="font-medium">Edição não permitida</p>
-                <p className="text-xs mt-1">{enrichmentActions.message}</p>
-                <p className="text-xs mt-1">Só é possível editar quando status é 'pending' ou 'completed'</p>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
