@@ -5,7 +5,7 @@ import { Enrichment, SubmittedData, DiscoveredData } from "@/lib/types";
 import { EnrichmentEditor } from "./EnrichmentEditor";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectOption } from "@/components/ui/Select";
 import { getEnrichmentActions } from "@/lib/utils/workflow";
 import { NoDataYet, ProcessingState, ErrorState } from "@/components/ui/state-components";
@@ -141,52 +141,26 @@ export function EnrichmentDetails({
         </div>
       )}
 
-      {/* Mobile Tab Selector */}
-      <div className="md:hidden mb-4">
+      {/* Section Selector Dropdown */}
+      <div className="mb-4">
         <Select
           value={activeTab}
           onChange={(e) => setActiveTab(e.target.value)}
-          className="w-full"
+          className="w-full md:w-[300px]"
         >
           <SelectOption value="submitted">Dados Enviados</SelectOption>
-          <SelectOption value="discovered">Descobertos</SelectOption>
-          <SelectOption value="overview">Perfil</SelectOption>
-          <SelectOption value="strategic">Estratégico</SelectOption>
-          <SelectOption value="financial">Financeiro</SelectOption>
-          <SelectOption value="market">Mercado</SelectOption>
-          <SelectOption value="macro">Macro</SelectOption>
+          <SelectOption value="discovered">Dados Descobertos (IA)</SelectOption>
+          <SelectOption value="overview">Perfil da Empresa</SelectOption>
+          <SelectOption value="strategic">Avaliação Estratégica</SelectOption>
+          <SelectOption value="financial">Contexto Financeiro</SelectOption>
+          <SelectOption value="market">Posição de Mercado</SelectOption>
+          <SelectOption value="macro">Contexto Macroeconômico</SelectOption>
           <SelectOption value="metadata">Metadados</SelectOption>
         </Select>
       </div>
 
       {/* Tabbed view */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="hidden md:grid w-full grid-cols-8 bg-white p-2 border border-gray-200 rounded-none text-[11px] md:text-xs font-semibold uppercase tracking-wide">
-          <TabsTrigger value="submitted" className="min-h-[48px] leading-tight data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
-            Enviados
-          </TabsTrigger>
-          <TabsTrigger value="discovered" className="min-h-[48px] leading-tight data-[state=active]:bg-green-50 data-[state=active]:text-green-700 data-[state=active]:border-b-2 data-[state=active]:border-green-500">
-            Descobertos
-          </TabsTrigger>
-          <TabsTrigger value="overview" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Perfil
-          </TabsTrigger>
-          <TabsTrigger value="strategic" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Estratégico
-          </TabsTrigger>
-          <TabsTrigger value="financial" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Financeiro
-          </TabsTrigger>
-          <TabsTrigger value="market" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Mercado
-          </TabsTrigger>
-          <TabsTrigger value="macro" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Macro
-          </TabsTrigger>
-          <TabsTrigger value="metadata" className="min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">
-            Meta
-          </TabsTrigger>
-        </TabsList>
 
         {/* NEW: Submitted Data Tab - User form input preserved exactly */}
         <TabsContent value="submitted" className="space-y-6">

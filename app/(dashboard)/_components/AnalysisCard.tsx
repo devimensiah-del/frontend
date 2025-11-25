@@ -24,7 +24,7 @@ import {
   SWOTQuadrant,
 } from '@/components/workflow';
 import type { Analysis } from '@/types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectOption } from "@/components/ui/Select";
 
 interface AnalysisCardProps {
@@ -44,11 +44,25 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
   // Normalize analysis data to support both snake_case (backend) and camelCase (frontend)
   // Cast to any to handle snake_case keys from backend API
   const rawAnalysis: any = analysis.analysis || {};
+
+  // Normalize synthesis data (backend sends snake_case, frontend expects camelCase)
+  const rawSynthesis = rawAnalysis.synthesis || {};
+  const normalizedSynthesis = {
+    executiveSummary: rawSynthesis.executiveSummary || rawSynthesis.executive_summary,
+    keyFindings: rawSynthesis.keyFindings || rawSynthesis.key_findings,
+    mainFindings: rawSynthesis.mainFindings || rawSynthesis.main_findings,
+    strategicPriorities: rawSynthesis.strategicPriorities || rawSynthesis.strategic_priorities,
+    centralChallenge: rawSynthesis.centralChallenge || rawSynthesis.central_challenge,
+    overallRecommendation: rawSynthesis.overallRecommendation || rawSynthesis.overall_recommendation,
+    importantNotes: rawSynthesis.importantNotes || rawSynthesis.important_notes,
+    roadmap: rawSynthesis.roadmap,
+  };
+
   const normalizedAnalysis: any = {
     pestel: rawAnalysis.pestel,
     porter: rawAnalysis.porter,
     swot: rawAnalysis.swot,
-    synthesis: rawAnalysis.synthesis,
+    synthesis: normalizedSynthesis,
     tamSamSom: rawAnalysis.tamSamSom || rawAnalysis.tam_sam_som,
     benchmarking: rawAnalysis.benchmarking,
     blueOcean: rawAnalysis.blueOcean || rawAnalysis.blue_ocean,
@@ -210,16 +224,16 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
           </div>
         )}
 
-        {/* Mobile Tab Selector */}
-        <div className="md:hidden mb-4">
+        {/* Framework Selector Dropdown */}
+        <div className="mb-4">
           <Select
             value={activeTab}
             onChange={(e) => setActiveTab(e.target.value)}
-            className="w-full"
+            className="w-full md:w-[300px]"
           >
-            <SelectOption value="synthesis">Síntese</SelectOption>
+            <SelectOption value="synthesis">Síntese Executiva</SelectOption>
             <SelectOption value="pestel">PESTEL</SelectOption>
-            <SelectOption value="porter">Porter</SelectOption>
+            <SelectOption value="porter">5 Forças de Porter</SelectOption>
             <SelectOption value="tam_sam_som">TAM/SAM/SOM</SelectOption>
             <SelectOption value="swot">SWOT</SelectOption>
             <SelectOption value="benchmarking">Benchmarking</SelectOption>
@@ -227,26 +241,12 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
             <SelectOption value="growth_hacking">Growth Hacking</SelectOption>
             <SelectOption value="scenarios">Cenários</SelectOption>
             <SelectOption value="okrs">OKRs</SelectOption>
-            <SelectOption value="bsc">BSC</SelectOption>
-            <SelectOption value="decision_matrix">Decision Matrix</SelectOption>
+            <SelectOption value="bsc">Balanced Scorecard</SelectOption>
+            <SelectOption value="decision_matrix">Matriz de Decisão</SelectOption>
           </Select>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="hidden md:flex w-full overflow-x-auto flex-nowrap justify-start bg-white p-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide scrollbar-hide">
-            <TabsTrigger value="synthesis" className="min-w-[100px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Síntese</TabsTrigger>
-            <TabsTrigger value="pestel" className="min-w-[80px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">PESTEL</TabsTrigger>
-            <TabsTrigger value="porter" className="min-w-[80px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Porter</TabsTrigger>
-            <TabsTrigger value="tam_sam_som" className="min-w-[110px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">TAM/SAM/SOM</TabsTrigger>
-            <TabsTrigger value="swot" className="min-w-[80px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">SWOT</TabsTrigger>
-            <TabsTrigger value="benchmarking" className="min-w-[120px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Benchmarking</TabsTrigger>
-            <TabsTrigger value="blue_ocean" className="min-w-[100px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Blue Ocean</TabsTrigger>
-            <TabsTrigger value="growth_hacking" className="min-w-[120px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Growth Hacking</TabsTrigger>
-            <TabsTrigger value="scenarios" className="min-w-[90px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Cenários</TabsTrigger>
-            <TabsTrigger value="okrs" className="min-w-[70px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">OKRs</TabsTrigger>
-            <TabsTrigger value="bsc" className="min-w-[60px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">BSC</TabsTrigger>
-            <TabsTrigger value="decision_matrix" className="min-w-[120px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Decision Matrix</TabsTrigger>
-          </TabsList>
 
           {/* Synthesis Tab */}
           <TabsContent value="synthesis" className="space-y-6">
