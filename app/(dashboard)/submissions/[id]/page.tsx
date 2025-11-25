@@ -239,17 +239,17 @@ export default function SubmissionPage() {
           </div>
 
           {/* Right: Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2 lg:flex-nowrap">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Download JSON - Always available for admin */}
             {isAdmin && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={downloadJson}
-                className="h-9 text-sm"
+                className="h-9 text-sm whitespace-nowrap"
               >
-                <Download className="w-4 h-4 mr-1.5" />
-                <span className="hidden sm:inline">Exportar</span> JSON
+                <Download className="w-4 h-4 mr-1.5 flex-shrink-0" />
+                Exportar JSON
               </Button>
             )}
 
@@ -260,9 +260,9 @@ export default function SubmissionPage() {
                 size="sm"
                 onClick={() => approveEnrichmentMutation.mutate()}
                 disabled={approveEnrichmentMutation.isPending}
-                className="h-9 text-sm bg-amber-600 hover:bg-amber-700"
+                className="h-9 text-sm bg-amber-600 hover:bg-amber-700 whitespace-nowrap"
               >
-                <CheckCircle className="w-4 h-4 mr-1.5" />
+                <CheckCircle className="w-4 h-4 mr-1.5 flex-shrink-0" />
                 Aprovar Enriquecimento
               </Button>
             )}
@@ -274,9 +274,9 @@ export default function SubmissionPage() {
                 size="sm"
                 onClick={() => approveAnalysisMutation.mutate()}
                 disabled={approveAnalysisMutation.isPending}
-                className="h-9 text-sm bg-amber-600 hover:bg-amber-700"
+                className="h-9 text-sm bg-amber-600 hover:bg-amber-700 whitespace-nowrap"
               >
-                <CheckCircle className="w-4 h-4 mr-1.5" />
+                <CheckCircle className="w-4 h-4 mr-1.5 flex-shrink-0" />
                 Aprovar Análise
               </Button>
             )}
@@ -287,9 +287,9 @@ export default function SubmissionPage() {
                 variant="default"
                 size="sm"
                 onClick={() => setShowSendDialog(true)}
-                className="h-9 text-sm bg-green-600 hover:bg-green-700"
+                className="h-9 text-sm bg-green-600 hover:bg-green-700 whitespace-nowrap"
               >
-                <Send className="w-4 h-4 mr-1.5" />
+                <Send className="w-4 h-4 mr-1.5 flex-shrink-0" />
                 Liberar para Cliente
               </Button>
             )}
@@ -300,9 +300,9 @@ export default function SubmissionPage() {
                 variant="default"
                 size="sm"
                 onClick={() => window.open(analysis.pdf_url || analysis.pdfUrl || '#', '_blank')}
-                className="h-9 text-sm bg-green-600 hover:bg-green-700"
+                className="h-9 text-sm bg-green-600 hover:bg-green-700 whitespace-nowrap"
               >
-                <FileText className="w-4 h-4 mr-1.5" />
+                <FileText className="w-4 h-4 mr-1.5 flex-shrink-0" />
                 Baixar Relatório PDF
               </Button>
             )}
