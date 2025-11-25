@@ -18,6 +18,7 @@ import {
   MapPin,
   Zap,
   GitBranch,
+  Lock,
 } from 'lucide-react';
 import {
   Section,
@@ -27,17 +28,33 @@ import type { Analysis } from '@/types';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectOption } from "@/components/ui/Select";
 import { normalizeToArray } from '@/lib/utils/format';
+import { BlurredContent } from '@/components/ui/BlurredContent';
+import { getFrameworkAccess, getTeaserMessage } from '@/lib/config/analysis-access';
 
 interface AnalysisCardProps {
   analysis: Analysis;
   isAdmin?: boolean;
+  hasPaid?: boolean;
   onToggleVisibility?: (visible: boolean) => void;
+  onUnlockRequest?: () => void;
 }
 
-export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: AnalysisCardProps) {
+export function AnalysisCard({ analysis, isAdmin, hasPaid = false, onToggleVisibility, onUnlockRequest }: AnalysisCardProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("synthesis");
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
+
+  // Helper to get access level for a framework
+  const getAccess = (frameworkId: string) => getFrameworkAccess(frameworkId, !!isAdmin, hasPaid);
+  const getTeaser = (frameworkId: string) => getTeaserMessage(frameworkId);
+
+  // Default unlock handler shows toast if not provided
+  const handleUnlock = onUnlockRequest || (() => {
+    toast({
+      title: 'Análise Premium',
+      description: 'Entre em contato para desbloquear a análise completa.',
+    });
+  });
 
   // Get visibility status (handle both camelCase and snake_case)
   const isVisibleToUser = analysis.isVisibleToUser ?? analysis.is_visible_to_user ?? false;
@@ -308,49 +325,62 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
             )}
           </TabsContent>
 
-          {/* PESTEL Tab */}
+          {/* PESTEL Tab - Partial Access */}
           <TabsContent value="pestel" className="space-y-6">
             {normalizedAnalysis.pestel && (
               <Section title="Análise PESTEL" icon={<Globe />}>
                 <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.pestel.summary}</p>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <ListSection title="Político" items={normalizedAnalysis.pestel.political} />
-                  <ListSection title="Econômico" items={normalizedAnalysis.pestel.economic} />
-                  <ListSection title="Social" items={normalizedAnalysis.pestel.social} />
-                  <ListSection title="Tecnológico" items={normalizedAnalysis.pestel.technological} />
-                  <ListSection title="Ambiental" items={normalizedAnalysis.pestel.environmental} />
-                  <ListSection title="Legal" items={normalizedAnalysis.pestel.legal} />
-                </div>
+                <BlurredContent
+                  accessLevel={getAccess('pestel')}
+                  teaserMessage={getTeaser('pestel')}
+                  onUnlock={handleUnlock}
+                >
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <ListSection title="Político" items={normalizedAnalysis.pestel.political} />
+                    <ListSection title="Econômico" items={normalizedAnalysis.pestel.economic} />
+                    <ListSection title="Social" items={normalizedAnalysis.pestel.social} />
+                    <ListSection title="Tecnológico" items={normalizedAnalysis.pestel.technological} />
+                    <ListSection title="Ambiental" items={normalizedAnalysis.pestel.environmental} />
+                    <ListSection title="Legal" items={normalizedAnalysis.pestel.legal} />
+                  </div>
+                </BlurredContent>
               </Section>
             )}
           </TabsContent>
 
-          {/* Porter Tab */}
+          {/* Porter Tab - Partial Access */}
           <TabsContent value="porter" className="space-y-6">
             {normalizedAnalysis.porter && (
               <Section title="5 Forças de Porter" icon={<Shield />}>
                 <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.porter.summary}</p>
-                <div className="space-y-4">
-                  {(normalizedAnalysis.porter.forces || []).map((force: any, index: number) => (
-                    <div key={index} className="p-4 border rounded-lg bg-gray-50 space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-sm">{force.force}</span>
-                        <Badge variant="outline">{force.intensity}</Badge>
+                <BlurredContent
+                  accessLevel={getAccess('porter')}
+                  teaserMessage={getTeaser('porter')}
+                  onUnlock={handleUnlock}
+                >
+                  <div className="space-y-4">
+                    {(normalizedAnalysis.porter.forces || []).map((force: any, index: number) => (
+                      <div key={index} className="p-4 border rounded-lg bg-gray-50 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-semibold text-sm">{force.force}</span>
+                          <Badge variant="outline">{force.intensity}</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600">{force.description}</p>
                       </div>
-                      <p className="text-sm text-gray-600">{force.description}</p>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </BlurredContent>
               </Section>
             )}
           </TabsContent>
 
-          {/* TAM/SAM/SOM Tab */}
+          {/* TAM/SAM/SOM Tab - Partial Access */}
           <TabsContent value="tam_sam_som" className="space-y-6">
             {normalizedAnalysis.tamSamSom && (
               <Section title="TAM / SAM / SOM" icon={<TrendingUp />}>
                 <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.tamSamSom.summary}</p>
-                <div className="grid md:grid-cols-3 gap-6">
+                {/* Show market values (free preview) */}
+                <div className="grid md:grid-cols-3 gap-6 mb-4">
                   <div>
                     <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">TAM (Mercado Total)</h5>
                     <p className="text-sm">{normalizedAnalysis.tamSamSom.tam}</p>
@@ -364,181 +394,234 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
                     <p className="text-sm">{normalizedAnalysis.tamSamSom.som}</p>
                   </div>
                 </div>
-                {normalizedAnalysis.tamSamSom.assumptions && normalizedAnalysis.tamSamSom.assumptions.length > 0 && (
-                  <div className="mt-4">
-                    <ListSection title="Premissas" items={normalizedAnalysis.tamSamSom.assumptions} />
-                  </div>
-                )}
+                {/* Blur assumptions and methodology */}
+                <BlurredContent
+                  accessLevel={getAccess('tam_sam_som')}
+                  teaserMessage={getTeaser('tam_sam_som')}
+                  onUnlock={handleUnlock}
+                >
+                  {normalizedAnalysis.tamSamSom.assumptions && normalizedAnalysis.tamSamSom.assumptions.length > 0 && (
+                    <div className="mt-4">
+                      <ListSection title="Premissas" items={normalizedAnalysis.tamSamSom.assumptions} />
+                    </div>
+                  )}
+                </BlurredContent>
               </Section>
             )}
           </TabsContent>
 
-          {/* Benchmarking Tab */}
+          {/* Benchmarking Tab - Partial Access */}
           <TabsContent value="benchmarking" className="space-y-6">
             {normalizedAnalysis.benchmarking && (
               <Section title="Benchmarking" icon={<BarChart />}>
                 <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.benchmarking.summary}</p>
-                <div className="grid md:grid-cols-2 gap-6">
+                {/* Show competitors (free preview) */}
+                <div className="mb-4">
                   <ListSection title="Competidores Analisados" items={normalizedAnalysis.benchmarking.competitorsAnalyzed || normalizedAnalysis.benchmarking.competitors_analyzed} />
-                  <ListSection title="Gaps de Performance" items={normalizedAnalysis.benchmarking.performanceGaps || normalizedAnalysis.benchmarking.performance_gaps} />
-                  <ListSection title="Melhores Práticas" items={normalizedAnalysis.benchmarking.bestPractices || normalizedAnalysis.benchmarking.best_practices} />
                 </div>
+                {/* Blur gaps and best practices */}
+                <BlurredContent
+                  accessLevel={getAccess('benchmarking')}
+                  teaserMessage={getTeaser('benchmarking')}
+                  onUnlock={handleUnlock}
+                >
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <ListSection title="Gaps de Performance" items={normalizedAnalysis.benchmarking.performanceGaps || normalizedAnalysis.benchmarking.performance_gaps} />
+                    <ListSection title="Melhores Práticas" items={normalizedAnalysis.benchmarking.bestPractices || normalizedAnalysis.benchmarking.best_practices} />
+                  </div>
+                </BlurredContent>
               </Section>
             )}
           </TabsContent>
 
-          {/* Blue Ocean Tab */}
+          {/* Blue Ocean Tab - LOCKED */}
           <TabsContent value="blue_ocean" className="space-y-6">
             {normalizedAnalysis.blueOcean && (
-              <Section title="Estratégia do Oceano Azul" icon={<MapPin />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.blueOcean.summary}</p>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <ListSection title="Eliminar" items={normalizedAnalysis.blueOcean.eliminate} />
-                  <ListSection title="Reduzir" items={normalizedAnalysis.blueOcean.reduce} />
-                  <ListSection title="Elevar" items={normalizedAnalysis.blueOcean.raise} />
-                  <ListSection title="Criar" items={normalizedAnalysis.blueOcean.create} />
-                </div>
-              </Section>
+              <BlurredContent
+                accessLevel={getAccess('blue_ocean')}
+                teaserMessage={getTeaser('blue_ocean')}
+                onUnlock={handleUnlock}
+              >
+                <Section title="Estratégia do Oceano Azul" icon={<MapPin />}>
+                  <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.blueOcean.summary}</p>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <ListSection title="Eliminar" items={normalizedAnalysis.blueOcean.eliminate} />
+                    <ListSection title="Reduzir" items={normalizedAnalysis.blueOcean.reduce} />
+                    <ListSection title="Elevar" items={normalizedAnalysis.blueOcean.raise} />
+                    <ListSection title="Criar" items={normalizedAnalysis.blueOcean.create} />
+                  </div>
+                </Section>
+              </BlurredContent>
             )}
           </TabsContent>
 
-          {/* Growth Hacking Tab */}
+          {/* Growth Hacking Tab - LOCKED */}
           <TabsContent value="growth_hacking" className="space-y-6">
             {normalizedAnalysis.growthHacking && (
-              <Section title="Growth Hacking" icon={<Zap />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.growthHacking.summary}</p>
-                <div className="grid md:grid-cols-2 gap-6">
-                  {(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop) && (
-                    <div className="p-4 border rounded-lg">
-                      <h5 className="font-semibold mb-2">{(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).name}</h5>
-                      <p className="text-sm text-gray-600 mb-2">{(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).type}</p>
-                      <ListSection title="Passos" items={(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).steps} />
-                      <ListSection title="Métricas" items={(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).metrics} />
-                    </div>
-                  )}
-                  {(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop) && (
-                    <div className="p-4 border rounded-lg">
-                      <h5 className="font-semibold mb-2">{(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).name}</h5>
-                      <p className="text-sm text-gray-600 mb-2">{(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).type}</p>
-                      <ListSection title="Passos" items={(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).steps} />
-                      <ListSection title="Métricas" items={(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).metrics} />
-                    </div>
-                  )}
-                </div>
-              </Section>
+              <BlurredContent
+                accessLevel={getAccess('growth_hacking')}
+                teaserMessage={getTeaser('growth_hacking')}
+                onUnlock={handleUnlock}
+              >
+                <Section title="Growth Hacking" icon={<Zap />}>
+                  <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.growthHacking.summary}</p>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop) && (
+                      <div className="p-4 border rounded-lg">
+                        <h5 className="font-semibold mb-2">{(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).name}</h5>
+                        <p className="text-sm text-gray-600 mb-2">{(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).type}</p>
+                        <ListSection title="Passos" items={(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).steps} />
+                        <ListSection title="Métricas" items={(normalizedAnalysis.growthHacking.leap_loop || normalizedAnalysis.growthHacking.leapLoop).metrics} />
+                      </div>
+                    )}
+                    {(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop) && (
+                      <div className="p-4 border rounded-lg">
+                        <h5 className="font-semibold mb-2">{(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).name}</h5>
+                        <p className="text-sm text-gray-600 mb-2">{(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).type}</p>
+                        <ListSection title="Passos" items={(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).steps} />
+                        <ListSection title="Métricas" items={(normalizedAnalysis.growthHacking.scale_loop || normalizedAnalysis.growthHacking.scaleLoop).metrics} />
+                      </div>
+                    )}
+                  </div>
+                </Section>
+              </BlurredContent>
             )}
           </TabsContent>
 
-          {/* Scenarios Tab */}
+          {/* Scenarios Tab - LOCKED */}
           <TabsContent value="scenarios" className="space-y-6">
             {normalizedAnalysis.scenarios && (
-              <Section title="Análise de Cenários" icon={<GitBranch />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.scenarios.summary}</p>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {normalizedAnalysis.scenarios.optimistic && (
-                    <div className="p-4 border border-green-200 bg-green-50 rounded-lg">
-                      <h5 className="font-semibold text-green-900 mb-2">Otimista ({normalizedAnalysis.scenarios.optimistic.probability}%)</h5>
-                      <p className="text-sm mb-2">{normalizedAnalysis.scenarios.optimistic.description}</p>
-                      <ListSection title="Ações Necessárias" items={normalizedAnalysis.scenarios.optimistic.required_actions || normalizedAnalysis.scenarios.optimistic.requiredActions} />
-                    </div>
-                  )}
-                  {normalizedAnalysis.scenarios.realist && (
-                    <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
-                      <h5 className="font-semibold text-blue-900 mb-2">Realista ({normalizedAnalysis.scenarios.realist.probability}%)</h5>
-                      <p className="text-sm mb-2">{normalizedAnalysis.scenarios.realist.description}</p>
-                      <ListSection title="Ações Necessárias" items={normalizedAnalysis.scenarios.realist.required_actions || normalizedAnalysis.scenarios.realist.requiredActions} />
-                    </div>
-                  )}
-                  {normalizedAnalysis.scenarios.pessimistic && (
-                    <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
-                      <h5 className="font-semibold text-red-900 mb-2">Pessimista ({normalizedAnalysis.scenarios.pessimistic.probability}%)</h5>
-                      <p className="text-sm mb-2">{normalizedAnalysis.scenarios.pessimistic.description}</p>
-                      <ListSection title="Ações Necessárias" items={normalizedAnalysis.scenarios.pessimistic.required_actions || normalizedAnalysis.scenarios.pessimistic.requiredActions} />
-                    </div>
-                  )}
-                </div>
-              </Section>
+              <BlurredContent
+                accessLevel={getAccess('scenarios')}
+                teaserMessage={getTeaser('scenarios')}
+                onUnlock={handleUnlock}
+              >
+                <Section title="Análise de Cenários" icon={<GitBranch />}>
+                  <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.scenarios.summary}</p>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {normalizedAnalysis.scenarios.optimistic && (
+                      <div className="p-4 border border-green-200 bg-green-50 rounded-lg">
+                        <h5 className="font-semibold text-green-900 mb-2">Otimista ({normalizedAnalysis.scenarios.optimistic.probability}%)</h5>
+                        <p className="text-sm mb-2">{normalizedAnalysis.scenarios.optimistic.description}</p>
+                        <ListSection title="Ações Necessárias" items={normalizedAnalysis.scenarios.optimistic.required_actions || normalizedAnalysis.scenarios.optimistic.requiredActions} />
+                      </div>
+                    )}
+                    {normalizedAnalysis.scenarios.realist && (
+                      <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
+                        <h5 className="font-semibold text-blue-900 mb-2">Realista ({normalizedAnalysis.scenarios.realist.probability}%)</h5>
+                        <p className="text-sm mb-2">{normalizedAnalysis.scenarios.realist.description}</p>
+                        <ListSection title="Ações Necessárias" items={normalizedAnalysis.scenarios.realist.required_actions || normalizedAnalysis.scenarios.realist.requiredActions} />
+                      </div>
+                    )}
+                    {normalizedAnalysis.scenarios.pessimistic && (
+                      <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
+                        <h5 className="font-semibold text-red-900 mb-2">Pessimista ({normalizedAnalysis.scenarios.pessimistic.probability}%)</h5>
+                        <p className="text-sm mb-2">{normalizedAnalysis.scenarios.pessimistic.description}</p>
+                        <ListSection title="Ações Necessárias" items={normalizedAnalysis.scenarios.pessimistic.required_actions || normalizedAnalysis.scenarios.pessimistic.requiredActions} />
+                      </div>
+                    )}
+                  </div>
+                </Section>
+              </BlurredContent>
             )}
           </TabsContent>
 
-          {/* OKRs Tab */}
+          {/* OKRs Tab - LOCKED */}
           <TabsContent value="okrs" className="space-y-6">
             {normalizedAnalysis.okrs && (
-              <Section title="OKRs (Objectives & Key Results)" icon={<Target />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.okrs.summary}</p>
-                <div className="space-y-4">
-                  {normalizedAnalysis.okrs.quarters && normalizedAnalysis.okrs.quarters.map((quarter: any, index: number) => (
-                    <div key={index} className="p-4 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <h5 className="font-semibold">{quarter.quarter}</h5>
-                        <span className="text-sm text-gray-500">{quarter.timeline}</span>
-                      </div>
-                      <p className="text-sm font-medium text-navy-900 mb-2">{quarter.objective}</p>
-                      <ListSection title="Key Results" items={quarter.keyResults || quarter.key_results} />
-                      <p className="text-sm text-gray-600 mt-2">Investimento: {quarter.investment}</p>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            )}
-          </TabsContent>
-
-          {/* BSC Tab */}
-          <TabsContent value="bsc" className="space-y-6">
-            {normalizedAnalysis.bsc && (
-              <Section title="Balanced Scorecard" icon={<BarChart />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.bsc.summary}</p>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <ListSection title="Perspectiva Financeira" items={normalizedAnalysis.bsc.financial} />
-                  <ListSection title="Perspectiva do Cliente" items={normalizedAnalysis.bsc.customer} />
-                  <ListSection title="Processos Internos" items={normalizedAnalysis.bsc.internal_processes || normalizedAnalysis.bsc.internalProcesses} />
-                  <ListSection title="Aprendizado e Crescimento" items={normalizedAnalysis.bsc.learning_growth || normalizedAnalysis.bsc.learningGrowth} />
-                </div>
-              </Section>
-            )}
-          </TabsContent>
-
-          {/* Decision Matrix Tab */}
-          <TabsContent value="decision_matrix" className="space-y-6">
-            {normalizedAnalysis.decisionMatrix && (
-              <Section title="Matriz de Decisão" icon={<CheckCircle />}>
-                <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.decisionMatrix.summary}</p>
-
-                {(normalizedAnalysis.decisionMatrix.final_recommendation || normalizedAnalysis.decisionMatrix.finalRecommendation) && (
-                  <div className="p-4 bg-gold-50 border border-gold-200 rounded-lg mb-4">
-                    <h5 className="font-semibold text-gold-900 mb-2">Recomendação Final</h5>
-                    <p className="text-sm">{normalizedAnalysis.decisionMatrix.final_recommendation || normalizedAnalysis.decisionMatrix.finalRecommendation}</p>
-                  </div>
-                )}
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <ListSection title="Alternativas" items={normalizedAnalysis.decisionMatrix.alternatives} />
-                  <ListSection title="Critérios" items={normalizedAnalysis.decisionMatrix.criteria} />
-                </div>
-
-                {(normalizedAnalysis.decisionMatrix.priority_recommendations || normalizedAnalysis.decisionMatrix.priorityRecommendations) && (normalizedAnalysis.decisionMatrix.priority_recommendations || normalizedAnalysis.decisionMatrix.priorityRecommendations).length > 0 && (
-                  <div className="mt-4 space-y-3">
-                    <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recomendações Prioritárias</h5>
-                    {(normalizedAnalysis.decisionMatrix.priority_recommendations || normalizedAnalysis.decisionMatrix.priorityRecommendations).map((rec: any, index: number) => (
+              <BlurredContent
+                accessLevel={getAccess('okrs')}
+                teaserMessage={getTeaser('okrs')}
+                onUnlock={handleUnlock}
+              >
+                <Section title="OKRs (Objectives & Key Results)" icon={<Target />}>
+                  <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.okrs.summary}</p>
+                  <div className="space-y-4">
+                    {normalizedAnalysis.okrs.quarters && normalizedAnalysis.okrs.quarters.map((quarter: any, index: number) => (
                       <div key={index} className="p-4 border rounded-lg">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy-600 text-white flex items-center justify-center text-sm font-bold">
-                            {rec.priority}
-                          </div>
-                          <div className="flex-1">
-                            <h6 className="font-semibold mb-1">{rec.title}</h6>
-                            <p className="text-sm text-gray-600 mb-2">{rec.description}</p>
-                            <div className="flex gap-4 text-xs text-gray-500">
-                              <span>Prazo: {rec.timeline}</span>
-                              <span>Orçamento: {rec.budget}</span>
-                            </div>
-                          </div>
+                        <div className="flex justify-between items-start mb-2">
+                          <h5 className="font-semibold">{quarter.quarter}</h5>
+                          <span className="text-sm text-gray-500">{quarter.timeline}</span>
                         </div>
+                        <p className="text-sm font-medium text-navy-900 mb-2">{quarter.objective}</p>
+                        <ListSection title="Key Results" items={quarter.keyResults || quarter.key_results} />
+                        <p className="text-sm text-gray-600 mt-2">Investimento: {quarter.investment}</p>
                       </div>
                     ))}
                   </div>
-                )}
-              </Section>
+                </Section>
+              </BlurredContent>
+            )}
+          </TabsContent>
+
+          {/* BSC Tab - LOCKED */}
+          <TabsContent value="bsc" className="space-y-6">
+            {normalizedAnalysis.bsc && (
+              <BlurredContent
+                accessLevel={getAccess('bsc')}
+                teaserMessage={getTeaser('bsc')}
+                onUnlock={handleUnlock}
+              >
+                <Section title="Balanced Scorecard" icon={<BarChart />}>
+                  <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.bsc.summary}</p>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <ListSection title="Perspectiva Financeira" items={normalizedAnalysis.bsc.financial} />
+                    <ListSection title="Perspectiva do Cliente" items={normalizedAnalysis.bsc.customer} />
+                    <ListSection title="Processos Internos" items={normalizedAnalysis.bsc.internal_processes || normalizedAnalysis.bsc.internalProcesses} />
+                    <ListSection title="Aprendizado e Crescimento" items={normalizedAnalysis.bsc.learning_growth || normalizedAnalysis.bsc.learningGrowth} />
+                  </div>
+                </Section>
+              </BlurredContent>
+            )}
+          </TabsContent>
+
+          {/* Decision Matrix Tab - LOCKED */}
+          <TabsContent value="decision_matrix" className="space-y-6">
+            {normalizedAnalysis.decisionMatrix && (
+              <BlurredContent
+                accessLevel={getAccess('decision_matrix')}
+                teaserMessage={getTeaser('decision_matrix')}
+                onUnlock={handleUnlock}
+              >
+                <Section title="Matriz de Decisão" icon={<CheckCircle />}>
+                  <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.decisionMatrix.summary}</p>
+
+                  {(normalizedAnalysis.decisionMatrix.final_recommendation || normalizedAnalysis.decisionMatrix.finalRecommendation) && (
+                    <div className="p-4 bg-gold-50 border border-gold-200 rounded-lg mb-4">
+                      <h5 className="font-semibold text-gold-900 mb-2">Recomendação Final</h5>
+                      <p className="text-sm">{normalizedAnalysis.decisionMatrix.final_recommendation || normalizedAnalysis.decisionMatrix.finalRecommendation}</p>
+                    </div>
+                  )}
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <ListSection title="Alternativas" items={normalizedAnalysis.decisionMatrix.alternatives} />
+                    <ListSection title="Critérios" items={normalizedAnalysis.decisionMatrix.criteria} />
+                  </div>
+
+                  {(normalizedAnalysis.decisionMatrix.priority_recommendations || normalizedAnalysis.decisionMatrix.priorityRecommendations) && (normalizedAnalysis.decisionMatrix.priority_recommendations || normalizedAnalysis.decisionMatrix.priorityRecommendations).length > 0 && (
+                    <div className="mt-4 space-y-3">
+                      <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recomendações Prioritárias</h5>
+                      {(normalizedAnalysis.decisionMatrix.priority_recommendations || normalizedAnalysis.decisionMatrix.priorityRecommendations).map((rec: any, index: number) => (
+                        <div key={index} className="p-4 border rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy-600 text-white flex items-center justify-center text-sm font-bold">
+                              {rec.priority}
+                            </div>
+                            <div className="flex-1">
+                              <h6 className="font-semibold mb-1">{rec.title}</h6>
+                              <p className="text-sm text-gray-600 mb-2">{rec.description}</p>
+                              <div className="flex gap-4 text-xs text-gray-500">
+                                <span>Prazo: {rec.timeline}</span>
+                                <span>Orçamento: {rec.budget}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Section>
+              </BlurredContent>
             )}
           </TabsContent>
         </Tabs>
