@@ -97,9 +97,10 @@ export default function ReportPage() {
         </Button>
       </div>
 
+      {/* PDF DISABLED - TEMPORARY
       <div className="fixed bottom-8 right-8 z-50 print:hidden">
-        <Button 
-          onClick={handleDownloadPDF} 
+        <Button
+          onClick={handleDownloadPDF}
           disabled={downloading}
           className="shadow-2xl btn-architect rounded-full px-8 py-6 h-auto text-sm"
         >
@@ -107,6 +108,7 @@ export default function ReportPage() {
           Baixar PDF Oficial
         </Button>
       </div>
+      */}
 
       {/* REPORT HEADER */}
       <Section className="bg-navy-900 text-white text-center py-24">

@@ -73,7 +73,7 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({
         </Button>
       )}
 
-      {/* Generate PDF Button - Admin only, when approved but not sent (Analysis only) */}
+      {/* PDF DISABLED - TEMPORARY
       {isAdmin && onSend && type === 'analysis' && status === 'approved' && (
         <Button
           variant="architect"
@@ -86,6 +86,7 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({
           <span className="truncate">Gerar PDF</span>
         </Button>
       )}
+      */}
     </div>
   );
 };

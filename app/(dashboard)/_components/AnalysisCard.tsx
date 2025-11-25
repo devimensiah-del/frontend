@@ -200,7 +200,7 @@ export function AnalysisCard({ analysis, isAdmin, hasPaid = false, onToggleVisib
                 </span>
               </div>
 
-              {/* Admin PDF Download - Only show when PDF is available */}
+              {/* PDF DISABLED - TEMPORARY
               {canDownloadPdf && (
                 <Button
                   variant="outline"
@@ -212,11 +212,12 @@ export function AnalysisCard({ analysis, isAdmin, hasPaid = false, onToggleVisib
                   Baixar PDF
                 </Button>
               )}
+              */}
             </div>
           </div>
         )}
 
-        {/* User PDF Download - Only when approved AND visible */}
+        {/* PDF DISABLED - TEMPORARY
         {!isAdmin && userCanDownload && (
           <div className="pb-6 border-b border-surface-border">
             <Button
@@ -229,6 +230,7 @@ export function AnalysisCard({ analysis, isAdmin, hasPaid = false, onToggleVisib
             </Button>
           </div>
         )}
+        */}
 
         {/* User sees "not available" message if not visible */}
         {!isAdmin && showAdminControls && !isVisibleToUser && (

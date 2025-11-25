@@ -58,24 +58,26 @@ export default function SubmissionPage() {
       return status === 'pending' ? 5000 : false;
     },
   });
-  const { data: reportStatus } = useQuery({
-    queryKey: ["report", id],
-    queryFn: async () => {
-      try {
-        return await reportApi.downloadReport(id);
-      } catch {
-        // PDF not ready yet (404/202) - keep polling
-        return null;
-      }
-    },
-    enabled: !!submission && isAdmin && analysis?.status === 'approved',
-    refetchInterval: (query) => {
-      const ready = (query.state.data as any)?.pdf_url;
-      return ready ? false : 5000;
-    },
-    retry: true,
-  });
-  const pdfReady = !!(reportStatus as any)?.pdf_url;
+  // PDF DISABLED - TEMPORARY
+  // const { data: reportStatus } = useQuery({
+  //   queryKey: ["report", id],
+  //   queryFn: async () => {
+  //     try {
+  //       return await reportApi.downloadReport(id);
+  //     } catch {
+  //       // PDF not ready yet (404/202) - keep polling
+  //       return null;
+  //     }
+  //   },
+  //   enabled: !!submission && isAdmin && analysis?.status === 'approved',
+  //   refetchInterval: (query) => {
+  //     const ready = (query.state.data as any)?.pdf_url;
+  //     return ready ? false : 5000;
+  //   },
+  //   retry: true,
+  // });
+  // const pdfReady = !!(reportStatus as any)?.pdf_url;
+  const pdfReady = false; // PDF DISABLED - TEMPORARY
   const approveEnrichmentMutation = useMutation({
     mutationFn: () => adminApi.approveEnrichment(enrichment!.id),
     onSuccess: async () => {
@@ -294,7 +296,7 @@ export default function SubmissionPage() {
               </Button>
             )}
 
-            {/* User: Download PDF */}
+            {/* PDF DISABLED - TEMPORARY
             {!isAdmin && analysis?.status === 'sent' && (
               <Button
                 variant="default"
@@ -306,6 +308,7 @@ export default function SubmissionPage() {
                 Baixar Relatório PDF
               </Button>
             )}
+            */}
           </div>
         </div>
 
