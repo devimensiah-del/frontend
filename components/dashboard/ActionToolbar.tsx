@@ -73,7 +73,7 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({
         </Button>
       )}
 
-      {/* Send Button - Admin only, when approved but not sent (Analysis only) */}
+      {/* Generate PDF Button - Admin only, when approved but not sent (Analysis only) */}
       {isAdmin && onSend && type === 'analysis' && status === 'approved' && (
         <Button
           variant="architect"
@@ -83,7 +83,7 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({
           className="gap-2 w-full sm:w-auto min-h-[44px] text-sm font-medium bg-gold-500 hover:bg-gold-600 text-white"
         >
           <Send className="w-4 h-4" />
-          <span className="truncate">Enviar para Cliente</span>
+          <span className="truncate">Gerar PDF</span>
         </Button>
       )}
     </div>

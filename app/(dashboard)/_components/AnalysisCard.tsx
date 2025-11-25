@@ -41,10 +41,11 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
   // Get visibility status (handle both camelCase and snake_case)
   const isVisibleToUser = analysis.isVisibleToUser ?? analysis.is_visible_to_user ?? false;
 
-  const downloadPdf = async () => {
-    // Get PDF URL from the analysis
-    const pdfUrl = (analysis as any).pdfUrl || (analysis as any).pdf_url;
+  // Check if PDF is actually available (has URL in database)
+  const pdfUrl = (analysis as any).pdfUrl || (analysis as any).pdf_url;
+  const hasPdfAvailable = !!pdfUrl;
 
+  const downloadPdf = async () => {
     if (!pdfUrl) {
       toast({
         title: 'PDF não disponível',
@@ -103,17 +104,18 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
     }
   };
 
-  // Check if PDF download should be available
-  // Admin: can download when approved (for review)
-  // User: can download when approved AND visible
-  const canDownloadPdf = analysis.status === 'approved' || analysis.status === 'sent';
+  // Show admin controls section when status is approved/sent (for visibility toggle)
+  const showAdminControls = analysis.status === 'approved' || analysis.status === 'sent';
+
+  // PDF download only available when PDF actually exists in database
+  const canDownloadPdf = hasPdfAvailable;
   const userCanDownload = canDownloadPdf && isVisibleToUser;
 
   return (
     <Card>
       <CardContent className="pt-6 space-y-6">
         {/* Admin Controls - Visibility Toggle and PDF Download */}
-        {isAdmin && canDownloadPdf && (
+        {isAdmin && showAdminControls && (
           <div className="pb-6 border-b border-surface-border">
             <div className="flex flex-wrap gap-3 items-center justify-between">
               {/* Visibility Toggle */}
@@ -148,16 +150,18 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
                 </span>
               </div>
 
-              {/* Admin PDF Download */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={downloadPdf}
-                className="border-navy-300 hover:bg-navy-100"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Baixar PDF
-              </Button>
+              {/* Admin PDF Download - Only show when PDF is available */}
+              {canDownloadPdf && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={downloadPdf}
+                  className="border-navy-300 hover:bg-navy-100"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Baixar PDF
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -177,7 +181,7 @@ export function AnalysisCard({ analysis, isAdmin, onToggleVisibility }: Analysis
         )}
 
         {/* User sees "not available" message if not visible */}
-        {!isAdmin && canDownloadPdf && !isVisibleToUser && (
+        {!isAdmin && showAdminControls && !isVisibleToUser && (
           <div className="pb-6 border-b border-surface-border">
             <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
               <EyeOff className="w-6 h-6 text-gray-400 mx-auto mb-2" />
