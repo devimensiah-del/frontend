@@ -412,14 +412,14 @@ function PremiumBlurOverlay({ children, isBlurred, isDark = false }: { children:
 // SECTION COMPONENTS
 // ============================================
 
-function SynthesisSection({ synthesis }: { synthesis: any }) {
+function SynthesisSection({ synthesis, sectionNumber }: { synthesis: any; sectionNumber: string }) {
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24">
       <div className="max-w-6xl mx-auto w-full">
         {/* Section Header */}
         <div className="mb-16">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            01 — Sumário Executivo
+            {sectionNumber} — Sumário Executivo
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-6">
             Visão Estratégica
@@ -505,7 +505,7 @@ function SynthesisSection({ synthesis }: { synthesis: any }) {
   );
 }
 
-function SWOTSection({ swot }: { swot: any }) {
+function SWOTSection({ swot, sectionNumber }: { swot: any; sectionNumber: string }) {
   const quadrants = [
     { key: 'strengths', title: 'Forças', items: swot.strengths, color: 'green', icon: CheckCircle },
     { key: 'weaknesses', title: 'Fraquezas', items: swot.weaknesses, color: 'red', icon: AlertCircle },
@@ -544,7 +544,7 @@ function SWOTSection({ swot }: { swot: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            02 — Análise SWOT
+            {sectionNumber} — Análise SWOT
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Posicionamento Estratégico
@@ -596,7 +596,7 @@ function SWOTSection({ swot }: { swot: any }) {
   );
 }
 
-function PESTELSection({ pestel }: { pestel: any }) {
+function PESTELSection({ pestel, sectionNumber }: { pestel: any; sectionNumber: string }) {
   const factors = [
     { key: 'political', title: 'Político', icon: Globe, items: pestel.political },
     { key: 'economic', title: 'Econômico', icon: DollarSign, items: pestel.economic },
@@ -612,7 +612,7 @@ function PESTELSection({ pestel }: { pestel: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            03 — Análise PESTEL
+            {sectionNumber} — Análise PESTEL
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Ambiente Macro
@@ -655,7 +655,7 @@ function PESTELSection({ pestel }: { pestel: any }) {
   );
 }
 
-function PorterSection({ porter }: { porter: any }) {
+function PorterSection({ porter, sectionNumber }: { porter: any; sectionNumber: string }) {
   const forces = [
     { key: 'competitive_rivalry', title: 'Rivalidade Competitiva', content: porter.competitive_rivalry || porter.competitiveRivalry, intensity: porter.competitive_rivalry_intensity || porter.competitiveRivalryIntensity },
     { key: 'threat_new_entrants', title: 'Novos Entrantes', content: porter.threat_new_entrants || porter.threatNewEntrants, intensity: porter.threat_new_entrants_intensity || porter.threatNewEntrantsIntensity },
@@ -672,7 +672,7 @@ function PorterSection({ porter }: { porter: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            04 — 5 Forças de Porter+
+            {sectionNumber} — 5 Forças de Porter+
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-white tracking-tight mb-4">
             Dinâmica Competitiva
@@ -727,7 +727,7 @@ function PorterSection({ porter }: { porter: any }) {
   );
 }
 
-function OKRsSection({ okrs }: { okrs: any }) {
+function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string }) {
   const quarters = okrs.quarters || [];
 
   return (
@@ -736,7 +736,7 @@ function OKRsSection({ okrs }: { okrs: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            05 — OKRs
+            {sectionNumber} — OKRs
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Objectives & Key Results
@@ -806,7 +806,7 @@ function OKRsSection({ okrs }: { okrs: any }) {
   );
 }
 
-function ScenariosSection({ scenarios }: { scenarios: any }) {
+function ScenariosSection({ scenarios, sectionNumber }: { scenarios: any; sectionNumber: string }) {
   const scenarioList = [
     { key: 'optimistic', data: scenarios.optimistic, color: 'green', label: 'Otimista' },
     { key: 'realist', data: scenarios.realist, color: 'blue', label: 'Realista' },
@@ -825,7 +825,7 @@ function ScenariosSection({ scenarios }: { scenarios: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            06 — Cenários
+            {sectionNumber} — Cenários
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Análise de Cenários
@@ -879,7 +879,7 @@ function ScenariosSection({ scenarios }: { scenarios: any }) {
   );
 }
 
-function DecisionMatrixSection({ matrix }: { matrix: any }) {
+function DecisionMatrixSection({ matrix, sectionNumber }: { matrix: any; sectionNumber: string }) {
   const recommendations = matrix.priority_recommendations || matrix.priorityRecommendations || [];
 
   return (
@@ -888,7 +888,7 @@ function DecisionMatrixSection({ matrix }: { matrix: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            07 — Matriz de Decisão
+            {sectionNumber} — Matriz de Decisão
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Recomendações Prioritárias
@@ -955,7 +955,7 @@ function DecisionMatrixSection({ matrix }: { matrix: any }) {
   );
 }
 
-function TamSamSomSection({ tamSamSom }: { tamSamSom: any }) {
+function TamSamSomSection({ tamSamSom, sectionNumber }: { tamSamSom: any; sectionNumber: string }) {
   const marketSizes = [
     { key: 'tam', label: 'TAM', sublabel: 'Total Addressable Market', value: tamSamSom.tam, color: 'navy' },
     { key: 'sam', label: 'SAM', sublabel: 'Serviceable Addressable Market', value: tamSamSom.sam, color: 'gold' },
@@ -972,7 +972,7 @@ function TamSamSomSection({ tamSamSom }: { tamSamSom: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            03 — TAM SAM SOM
+            {sectionNumber} — TAM SAM SOM
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Dimensionamento de Mercado
@@ -1098,7 +1098,7 @@ function TamSamSomSection({ tamSamSom }: { tamSamSom: any }) {
   );
 }
 
-function BenchmarkingSection({ benchmarking }: { benchmarking: any }) {
+function BenchmarkingSection({ benchmarking, sectionNumber }: { benchmarking: any; sectionNumber: string }) {
   const competitors = normalizeToArray(benchmarking.competitors_analyzed || benchmarking.competitors);
   const gaps = normalizeToArray(benchmarking.performance_gaps || benchmarking.performanceGaps);
   const bestPractices = normalizeToArray(benchmarking.best_practices || benchmarking.bestPractices);
@@ -1109,7 +1109,7 @@ function BenchmarkingSection({ benchmarking }: { benchmarking: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            04 — Benchmarking
+            {sectionNumber} — Benchmarking
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Análise Competitiva
@@ -1189,7 +1189,7 @@ function BenchmarkingSection({ benchmarking }: { benchmarking: any }) {
   );
 }
 
-function BlueOceanSection({ blueOcean }: { blueOcean: any }) {
+function BlueOceanSection({ blueOcean, sectionNumber }: { blueOcean: any; sectionNumber: string }) {
   const quadrants = [
     { key: 'eliminate', title: 'Eliminar', items: blueOcean.eliminate, icon: Minus, color: 'red', description: 'Fatores que a indústria compete mas que devem ser eliminados' },
     { key: 'reduce', title: 'Reduzir', items: blueOcean.reduce, icon: TrendingDown, color: 'amber', description: 'Fatores que devem ser reduzidos abaixo do padrão' },
@@ -1210,7 +1210,7 @@ function BlueOceanSection({ blueOcean }: { blueOcean: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            05 — Blue Ocean
+            {sectionNumber} — Blue Ocean
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Estratégia do Oceano Azul
@@ -1270,7 +1270,7 @@ function BlueOceanSection({ blueOcean }: { blueOcean: any }) {
   );
 }
 
-function GrowthHackingSection({ growthHacking }: { growthHacking: any }) {
+function GrowthHackingSection({ growthHacking, sectionNumber }: { growthHacking: any; sectionNumber: string }) {
   const leapLoop = growthHacking.leap_loop || growthHacking.leapLoop || {};
   const scaleLoop = growthHacking.scale_loop || growthHacking.scaleLoop || {};
 
@@ -1285,7 +1285,7 @@ function GrowthHackingSection({ growthHacking }: { growthHacking: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            06 — Growth Hacking
+            {sectionNumber} — Growth Hacking
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-white tracking-tight mb-4">
             Loops de Crescimento
@@ -1369,7 +1369,7 @@ function GrowthHackingSection({ growthHacking }: { growthHacking: any }) {
   );
 }
 
-function BSCSection({ bsc }: { bsc: any }) {
+function BSCSection({ bsc, sectionNumber }: { bsc: any; sectionNumber: string }) {
   const perspectives = [
     { key: 'financial', title: 'Financeira', items: bsc.financial, icon: DollarSign, color: 'green' },
     { key: 'customer', title: 'Cliente', items: bsc.customer, icon: Users, color: 'blue' },
@@ -1390,7 +1390,7 @@ function BSCSection({ bsc }: { bsc: any }) {
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            07 — BSC
+            {sectionNumber} — BSC
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Balanced Scorecard
@@ -1523,108 +1523,120 @@ function buildSections(synthesis: any, analysis: any, isBlurred: boolean = true)
     { id: 'hero', title: 'Início', component: null },
   ];
 
+  // Track section number (starts at 1 after hero)
+  let sectionNum = 1;
+
   // 01 - Synthesis (Executive Summary) - FREE
   if (synthesis.executiveSummary || synthesis.keyFindings?.length > 0) {
+    const num = String(sectionNum++).padStart(2, '0');
     sections.push({
       id: 'synthesis',
       title: 'Sumário Executivo',
-      component: <SynthesisSection synthesis={synthesis} />,
+      component: <SynthesisSection synthesis={synthesis} sectionNumber={num} />,
     });
   }
 
   // 02 - SWOT - FREE
   if (analysis.swot) {
+    const num = String(sectionNum++).padStart(2, '0');
     sections.push({
       id: 'swot',
       title: 'SWOT',
-      component: <SWOTSection swot={analysis.swot} />,
+      component: <SWOTSection swot={analysis.swot} sectionNumber={num} />,
     });
   }
 
-  // 03 - TAM SAM SOM - FREE
-  if (analysis.tamSamSom?.tam || analysis.tamSamSom?.sam || analysis.tamSamSom?.som) {
-    sections.push({
-      id: 'tam-sam-som',
-      title: 'TAM SAM SOM',
-      component: <TamSamSomSection tamSamSom={analysis.tamSamSom} />,
-    });
-  }
-
-  // 04 - Benchmarking - PREMIUM
-  if (analysis.benchmarking?.competitors?.length > 0 || analysis.benchmarking?.performance_gaps?.length > 0) {
-    sections.push({
-      id: 'benchmarking',
-      title: 'Benchmarking',
-      component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <BenchmarkingSection benchmarking={analysis.benchmarking} />
-        </PremiumBlurOverlay>
-      ),
-    });
-  }
-
-  // 05 - Blue Ocean - PREMIUM
-  if (analysis.blueOcean?.eliminate?.length > 0 || analysis.blueOcean?.create?.length > 0) {
-    sections.push({
-      id: 'blue-ocean',
-      title: 'Blue Ocean',
-      component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <BlueOceanSection blueOcean={analysis.blueOcean} />
-        </PremiumBlurOverlay>
-      ),
-    });
-  }
-
-  // 06 - Growth Hacking - PREMIUM (dark)
-  if (analysis.growthHacking?.leap_loop || analysis.growthHacking?.scale_loop) {
-    sections.push({
-      id: 'growth-hacking',
-      title: 'Growth Hacking',
-      variant: 'dark',
-      component: (
-        <PremiumBlurOverlay isBlurred={isBlurred} isDark>
-          <GrowthHackingSection growthHacking={analysis.growthHacking} />
-        </PremiumBlurOverlay>
-      ),
-    });
-  }
-
-  // 07 - BSC (Balanced Scorecard) - PREMIUM
-  if (analysis.bsc?.financial?.length > 0 || analysis.bsc?.customer?.length > 0) {
-    sections.push({
-      id: 'bsc',
-      title: 'BSC',
-      component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <BSCSection bsc={analysis.bsc} />
-        </PremiumBlurOverlay>
-      ),
-    });
-  }
-
-  // 08 - PESTEL - PREMIUM
+  // 03 - PESTEL - PREMIUM
   if (analysis.pestel) {
+    const num = String(sectionNum++).padStart(2, '0');
     sections.push({
       id: 'pestel',
       title: 'PESTEL',
       component: (
         <PremiumBlurOverlay isBlurred={isBlurred}>
-          <PESTELSection pestel={analysis.pestel} />
+          <PESTELSection pestel={analysis.pestel} sectionNumber={num} />
         </PremiumBlurOverlay>
       ),
     });
   }
 
-  // 09 - Porter's 5 Forces+ - PREMIUM (dark)
+  // 04 - Porter's 5 Forces+ - PREMIUM (dark)
   if (analysis.porter) {
+    const num = String(sectionNum++).padStart(2, '0');
     sections.push({
       id: 'porter',
       title: 'Porter',
       variant: 'dark',
       component: (
         <PremiumBlurOverlay isBlurred={isBlurred} isDark>
-          <PorterSection porter={analysis.porter} />
+          <PorterSection porter={analysis.porter} sectionNumber={num} />
+        </PremiumBlurOverlay>
+      ),
+    });
+  }
+
+  // 05 - TAM SAM SOM - FREE
+  if (analysis.tamSamSom?.tam || analysis.tamSamSom?.sam || analysis.tamSamSom?.som) {
+    const num = String(sectionNum++).padStart(2, '0');
+    sections.push({
+      id: 'tam-sam-som',
+      title: 'TAM SAM SOM',
+      component: <TamSamSomSection tamSamSom={analysis.tamSamSom} sectionNumber={num} />,
+    });
+  }
+
+  // 06 - Benchmarking - PREMIUM
+  if (analysis.benchmarking?.competitors?.length > 0 || analysis.benchmarking?.performance_gaps?.length > 0) {
+    const num = String(sectionNum++).padStart(2, '0');
+    sections.push({
+      id: 'benchmarking',
+      title: 'Benchmarking',
+      component: (
+        <PremiumBlurOverlay isBlurred={isBlurred}>
+          <BenchmarkingSection benchmarking={analysis.benchmarking} sectionNumber={num} />
+        </PremiumBlurOverlay>
+      ),
+    });
+  }
+
+  // 07 - Blue Ocean - PREMIUM
+  if (analysis.blueOcean?.eliminate?.length > 0 || analysis.blueOcean?.create?.length > 0) {
+    const num = String(sectionNum++).padStart(2, '0');
+    sections.push({
+      id: 'blue-ocean',
+      title: 'Blue Ocean',
+      component: (
+        <PremiumBlurOverlay isBlurred={isBlurred}>
+          <BlueOceanSection blueOcean={analysis.blueOcean} sectionNumber={num} />
+        </PremiumBlurOverlay>
+      ),
+    });
+  }
+
+  // 08 - Growth Hacking - PREMIUM (dark)
+  if (analysis.growthHacking?.leap_loop || analysis.growthHacking?.scale_loop) {
+    const num = String(sectionNum++).padStart(2, '0');
+    sections.push({
+      id: 'growth-hacking',
+      title: 'Growth Hacking',
+      variant: 'dark',
+      component: (
+        <PremiumBlurOverlay isBlurred={isBlurred} isDark>
+          <GrowthHackingSection growthHacking={analysis.growthHacking} sectionNumber={num} />
+        </PremiumBlurOverlay>
+      ),
+    });
+  }
+
+  // 09 - Scenarios - PREMIUM
+  if (analysis.scenarios) {
+    const num = String(sectionNum++).padStart(2, '0');
+    sections.push({
+      id: 'scenarios',
+      title: 'Cenários',
+      component: (
+        <PremiumBlurOverlay isBlurred={isBlurred}>
+          <ScenariosSection scenarios={analysis.scenarios} sectionNumber={num} />
         </PremiumBlurOverlay>
       ),
     });
@@ -1632,25 +1644,27 @@ function buildSections(synthesis: any, analysis: any, isBlurred: boolean = true)
 
   // 10 - OKRs - PREMIUM
   if (analysis.okrs?.quarters?.length > 0) {
+    const num = String(sectionNum++).padStart(2, '0');
     sections.push({
       id: 'okrs',
       title: 'OKRs',
       component: (
         <PremiumBlurOverlay isBlurred={isBlurred}>
-          <OKRsSection okrs={analysis.okrs} />
+          <OKRsSection okrs={analysis.okrs} sectionNumber={num} />
         </PremiumBlurOverlay>
       ),
     });
   }
 
-  // 11 - Scenarios - PREMIUM
-  if (analysis.scenarios) {
+  // 11 - BSC (Balanced Scorecard) - PREMIUM
+  if (analysis.bsc?.financial?.length > 0 || analysis.bsc?.customer?.length > 0) {
+    const num = String(sectionNum++).padStart(2, '0');
     sections.push({
-      id: 'scenarios',
-      title: 'Cenários',
+      id: 'bsc',
+      title: 'BSC',
       component: (
         <PremiumBlurOverlay isBlurred={isBlurred}>
-          <ScenariosSection scenarios={analysis.scenarios} />
+          <BSCSection bsc={analysis.bsc} sectionNumber={num} />
         </PremiumBlurOverlay>
       ),
     });
@@ -1658,12 +1672,13 @@ function buildSections(synthesis: any, analysis: any, isBlurred: boolean = true)
 
   // 12 - Decision Matrix (Final) - PREMIUM
   if (analysis.decisionMatrix) {
+    const num = String(sectionNum++).padStart(2, '0');
     sections.push({
       id: 'decision',
       title: 'Decisão',
       component: (
         <PremiumBlurOverlay isBlurred={isBlurred}>
-          <DecisionMatrixSection matrix={analysis.decisionMatrix} />
+          <DecisionMatrixSection matrix={analysis.decisionMatrix} sectionNumber={num} />
         </PremiumBlurOverlay>
       ),
     });
