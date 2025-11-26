@@ -8,7 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Save, RotateCcw, Plus, X } from 'lucide-react';
 import { ListEditor } from '@/components/admin/editors/ListEditor';
 import { JsonEditor } from '@/components/admin/editors/JsonEditor';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectOption } from '@/components/ui/Select';
 
 interface AnalysisEditorProps {
@@ -18,7 +18,6 @@ interface AnalysisEditorProps {
 
 export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
   const { toast } = useToast();
-  // Use any type to handle snake_case keys from backend API
   const [data, setData] = useState<any>(analysis.analysis);
   const [activeTab, setActiveTab] = useState<string>('synthesis');
 
@@ -41,13 +40,14 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
     onSave(data);
     toast({
       title: "Salvo",
-      description: "AnA­lise atualizada.",
+      description: "Análise atualizada.",
       variant: "success",
     });
   };
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-medium">Editor de Análise Estratégica</h2>
         <div className="flex gap-2">
@@ -62,56 +62,43 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         </div>
       </div>
 
-      {/* Mobile Tab Selector */}
-      <div className="md:hidden mb-4">
+      {/* Tab Selector Dropdown */}
+      <div className="mb-4">
         <Select
           value={activeTab}
           onChange={(e) => setActiveTab(e.target.value)}
-          className="w-full"
+          className="w-full md:w-[300px]"
         >
-          <SelectOption value="synthesis">Síntese</SelectOption>
-          <SelectOption value="pestel">PESTEL</SelectOption>
-          <SelectOption value="porter">Porter</SelectOption>
-          <SelectOption value="tam_sam_som">TAM/SAM/SOM</SelectOption>
+          <SelectOption value="synthesis">Síntese Executiva</SelectOption>
           <SelectOption value="swot">SWOT</SelectOption>
+          <SelectOption value="pestel">PESTEL</SelectOption>
+          <SelectOption value="porter">5 Forças de Porter</SelectOption>
+          <SelectOption value="tam_sam_som">TAM / SAM / SOM</SelectOption>
           <SelectOption value="benchmarking">Benchmarking</SelectOption>
-          <SelectOption value="blue_ocean">Blue Ocean</SelectOption>
+          <SelectOption value="blue_ocean">Oceano Azul</SelectOption>
           <SelectOption value="growth_hacking">Growth Hacking</SelectOption>
           <SelectOption value="scenarios">Cenários</SelectOption>
           <SelectOption value="okrs">OKRs</SelectOption>
-          <SelectOption value="bsc">BSC</SelectOption>
-          <SelectOption value="decision_matrix">Decision Matrix</SelectOption>
-          <SelectOption value="json">JSON</SelectOption>
+          <SelectOption value="bsc">Balanced Scorecard</SelectOption>
+          <SelectOption value="decision_matrix">Matriz de Decisão</SelectOption>
+          <SelectOption value="json">Dados Brutos (JSON)</SelectOption>
         </Select>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="hidden md:flex w-full overflow-x-auto flex-nowrap justify-start bg-white p-2 border border-gray-200 rounded-none text-[13px] md:text-sm font-semibold uppercase tracking-wide scrollbar-hide">
-          <TabsTrigger value="synthesis" className="min-w-[100px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Síntese</TabsTrigger>
-          <TabsTrigger value="pestel" className="min-w-[80px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">PESTEL</TabsTrigger>
-          <TabsTrigger value="porter" className="min-w-[80px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Porter</TabsTrigger>
-          <TabsTrigger value="tam_sam_som" className="min-w-[110px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">TAM/SAM/SOM</TabsTrigger>
-          <TabsTrigger value="swot" className="min-w-[80px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">SWOT</TabsTrigger>
-          <TabsTrigger value="benchmarking" className="min-w-[120px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Benchmarking</TabsTrigger>
-          <TabsTrigger value="blue_ocean" className="min-w-[100px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Blue Ocean</TabsTrigger>
-          <TabsTrigger value="growth_hacking" className="min-w-[120px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Growth Hacking</TabsTrigger>
-          <TabsTrigger value="scenarios" className="min-w-[90px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Cenários</TabsTrigger>
-          <TabsTrigger value="okrs" className="min-w-[70px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">OKRs</TabsTrigger>
-          <TabsTrigger value="bsc" className="min-w-[60px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">BSC</TabsTrigger>
-          <TabsTrigger value="decision_matrix" className="min-w-[120px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">Decision Matrix</TabsTrigger>
-          <TabsTrigger value="json" className="min-w-[60px] flex-shrink-0 min-h-[48px] leading-tight data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900">JSON</TabsTrigger>
-        </TabsList>
-
         {/* Synthesis Tab */}
         <TabsContent value="synthesis">
           <Card>
-            <CardHeader><CardTitle>Síntese Executiva</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Síntese Executiva</CardTitle>
+              <p className="text-sm text-gray-500">Resumo consolidado de todas as análises estratégicas.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo Executivo</label>
                 <Textarea
                   className="min-h-[150px]"
-                  value={data.synthesis?.executiveSummary || ''}
+                  value={data.synthesis?.executiveSummary || data.synthesis?.executive_summary || ''}
                   onChange={(e) => updateFramework('synthesis', { executiveSummary: e.target.value })}
                 />
               </div>
@@ -119,12 +106,12 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
               <div className="grid md:grid-cols-2 gap-6">
                 <ListEditor
                   label="Principais Descobertas"
-                  items={data.synthesis?.keyFindings || []}
+                  items={data.synthesis?.keyFindings || data.synthesis?.key_findings || []}
                   onChange={(items) => updateFramework('synthesis', { keyFindings: items })}
                 />
                 <ListEditor
                   label="Prioridades Estratégicas"
-                  items={data.synthesis?.strategicPriorities || []}
+                  items={data.synthesis?.strategicPriorities || data.synthesis?.strategic_priorities || []}
                   onChange={(items) => updateFramework('synthesis', { strategicPriorities: items })}
                 />
               </div>
@@ -138,7 +125,7 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Recomendação Geral</label>
                 <Input
-                  value={data.synthesis?.overallRecommendation || ''}
+                  value={data.synthesis?.overallRecommendation || data.synthesis?.overall_recommendation || ''}
                   onChange={(e) => updateFramework('synthesis', { overallRecommendation: e.target.value })}
                 />
               </div>
@@ -149,9 +136,12 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* SWOT Tab */}
         <TabsContent value="swot">
           <Card>
-            <CardHeader><CardTitle>Análise SWOT</CardTitle></CardHeader>
-            <CardContent>
-              <div className="space-y-2 mb-6">
+            <CardHeader>
+              <CardTitle>Análise SWOT</CardTitle>
+              <p className="text-sm text-gray-500">Forças, Fraquezas, Oportunidades e Ameaças.</p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo da Análise SWOT</label>
                 <Textarea
                   value={data.swot?.summary || ''}
@@ -171,7 +161,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* PESTEL Tab */}
         <TabsContent value="pestel">
           <Card>
-            <CardHeader><CardTitle>Análise PESTEL</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Análise PESTEL</CardTitle>
+              <p className="text-sm text-gray-500">Fatores Políticos, Econômicos, Sociais, Tecnológicos, Ambientais e Legais.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo PESTEL</label>
@@ -195,7 +188,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* Porter Tab */}
         <TabsContent value="porter">
           <Card>
-            <CardHeader><CardTitle>5 Forças de Porter</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>5 Forças de Porter</CardTitle>
+              <p className="text-sm text-gray-500">Análise competitiva do ambiente de mercado.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo Porter</label>
@@ -210,7 +206,7 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
                   <div key={index} className="p-4 border rounded-lg bg-gray-50 space-y-3">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-xs font-medium">Força</label>
+                        <label className="text-xs font-medium text-gray-600">Força</label>
                         <Input
                           value={force.force}
                           onChange={(e) => {
@@ -221,7 +217,7 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-medium">Intensidade</label>
+                        <label className="text-xs font-medium text-gray-600">Intensidade</label>
                         <Input
                           value={force.intensity}
                           onChange={(e) => {
@@ -233,7 +229,7 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-medium">Descrição</label>
+                      <label className="text-xs font-medium text-gray-600">Descrição</label>
                       <Textarea
                         value={force.description}
                         onChange={(e) => {
@@ -254,7 +250,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* TAM/SAM/SOM Tab */}
         <TabsContent value="tam_sam_som">
           <Card>
-            <CardHeader><CardTitle>TAM / SAM / SOM</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>TAM / SAM / SOM</CardTitle>
+              <p className="text-sm text-gray-500">Dimensionamento de mercado total, endereçável e obtenível.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo</label>
@@ -298,7 +297,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* Benchmarking Tab */}
         <TabsContent value="benchmarking">
           <Card>
-            <CardHeader><CardTitle>Benchmarking</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Benchmarking</CardTitle>
+              <p className="text-sm text-gray-500">Comparação com concorrentes e melhores práticas do mercado.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo</label>
@@ -331,7 +333,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* Blue Ocean Tab */}
         <TabsContent value="blue_ocean">
           <Card>
-            <CardHeader><CardTitle>Estratégia do Oceano Azul</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Estratégia do Oceano Azul</CardTitle>
+              <p className="text-sm text-gray-500">Identificação de novos espaços de mercado inexplorados.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo</label>
@@ -369,7 +374,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* Growth Hacking Tab */}
         <TabsContent value="growth_hacking">
           <Card>
-            <CardHeader><CardTitle>Growth Hacking</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Growth Hacking</CardTitle>
+              <p className="text-sm text-gray-500">Estratégias de crescimento acelerado e loops virais.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo</label>
@@ -378,7 +386,68 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
                   onChange={(e) => updateFramework('growthHacking', { summary: e.target.value })}
                 />
               </div>
-              <p className="text-sm text-gray-500">Para edição detalhada dos loops (Leap Loop e Scale Loop), use o editor JSON.</p>
+
+              {/* Leap Loop */}
+              <div className="space-y-4 pt-4 border-t">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Leap Loop (Aquisição)</h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Nome</label>
+                    <Input
+                      value={getNormalizedData('growthHacking', 'growth_hacking')?.leap_loop?.name || getNormalizedData('growthHacking', 'growth_hacking')?.leapLoop?.name || ''}
+                      onChange={(e) => updateFramework('growthHacking', { leap_loop: { ...getNormalizedData('growthHacking', 'growth_hacking')?.leap_loop, name: e.target.value } })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tipo</label>
+                    <Input
+                      value={getNormalizedData('growthHacking', 'growth_hacking')?.leap_loop?.type || getNormalizedData('growthHacking', 'growth_hacking')?.leapLoop?.type || ''}
+                      onChange={(e) => updateFramework('growthHacking', { leap_loop: { ...getNormalizedData('growthHacking', 'growth_hacking')?.leap_loop, type: e.target.value } })}
+                    />
+                  </div>
+                </div>
+                <ListEditor
+                  label="Passos"
+                  items={getNormalizedData('growthHacking', 'growth_hacking')?.leap_loop?.steps || getNormalizedData('growthHacking', 'growth_hacking')?.leapLoop?.steps || []}
+                  onChange={(items) => updateFramework('growthHacking', { leap_loop: { ...getNormalizedData('growthHacking', 'growth_hacking')?.leap_loop, steps: items } })}
+                />
+                <ListEditor
+                  label="Métricas"
+                  items={getNormalizedData('growthHacking', 'growth_hacking')?.leap_loop?.metrics || getNormalizedData('growthHacking', 'growth_hacking')?.leapLoop?.metrics || []}
+                  onChange={(items) => updateFramework('growthHacking', { leap_loop: { ...getNormalizedData('growthHacking', 'growth_hacking')?.leap_loop, metrics: items } })}
+                />
+              </div>
+
+              {/* Scale Loop */}
+              <div className="space-y-4 pt-4 border-t">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Scale Loop (Retenção)</h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Nome</label>
+                    <Input
+                      value={getNormalizedData('growthHacking', 'growth_hacking')?.scale_loop?.name || getNormalizedData('growthHacking', 'growth_hacking')?.scaleLoop?.name || ''}
+                      onChange={(e) => updateFramework('growthHacking', { scale_loop: { ...getNormalizedData('growthHacking', 'growth_hacking')?.scale_loop, name: e.target.value } })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tipo</label>
+                    <Input
+                      value={getNormalizedData('growthHacking', 'growth_hacking')?.scale_loop?.type || getNormalizedData('growthHacking', 'growth_hacking')?.scaleLoop?.type || ''}
+                      onChange={(e) => updateFramework('growthHacking', { scale_loop: { ...getNormalizedData('growthHacking', 'growth_hacking')?.scale_loop, type: e.target.value } })}
+                    />
+                  </div>
+                </div>
+                <ListEditor
+                  label="Passos"
+                  items={getNormalizedData('growthHacking', 'growth_hacking')?.scale_loop?.steps || getNormalizedData('growthHacking', 'growth_hacking')?.scaleLoop?.steps || []}
+                  onChange={(items) => updateFramework('growthHacking', { scale_loop: { ...getNormalizedData('growthHacking', 'growth_hacking')?.scale_loop, steps: items } })}
+                />
+                <ListEditor
+                  label="Métricas"
+                  items={getNormalizedData('growthHacking', 'growth_hacking')?.scale_loop?.metrics || getNormalizedData('growthHacking', 'growth_hacking')?.scaleLoop?.metrics || []}
+                  onChange={(items) => updateFramework('growthHacking', { scale_loop: { ...getNormalizedData('growthHacking', 'growth_hacking')?.scale_loop, metrics: items } })}
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -386,7 +455,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* Scenarios Tab */}
         <TabsContent value="scenarios">
           <Card>
-            <CardHeader><CardTitle>Análise de Cenários</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Análise de Cenários</CardTitle>
+              <p className="text-sm text-gray-500">Projeções otimista, realista e pessimista.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo</label>
@@ -395,7 +467,93 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
                   onChange={(e) => updateFramework('scenarios', { summary: e.target.value })}
                 />
               </div>
-              <p className="text-sm text-gray-500">Para edição detalhada dos cenários (Otimista, Realista, Pessimista), use o editor JSON.</p>
+
+              {/* Optimistic */}
+              <div className="space-y-4 pt-4 border-t border-green-200 bg-green-50/50 p-4 rounded-lg">
+                <h4 className="text-sm font-semibold text-green-700 uppercase tracking-wider">Cenário Otimista</h4>
+                <div className="grid md:grid-cols-4 gap-4">
+                  <div className="md:col-span-3 space-y-2">
+                    <label className="text-sm font-medium">Descrição</label>
+                    <Textarea
+                      value={data.scenarios?.optimistic?.description || ''}
+                      onChange={(e) => updateFramework('scenarios', { optimistic: { ...data.scenarios?.optimistic, description: e.target.value } })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Probabilidade (%)</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={data.scenarios?.optimistic?.probability || ''}
+                      onChange={(e) => updateFramework('scenarios', { optimistic: { ...data.scenarios?.optimistic, probability: parseInt(e.target.value) || 0 } })}
+                    />
+                  </div>
+                </div>
+                <ListEditor
+                  label="Ações Necessárias"
+                  items={data.scenarios?.optimistic?.required_actions || data.scenarios?.optimistic?.requiredActions || []}
+                  onChange={(items) => updateFramework('scenarios', { optimistic: { ...data.scenarios?.optimistic, required_actions: items } })}
+                />
+              </div>
+
+              {/* Realist (note: backend uses 'realist' not 'realistic') */}
+              <div className="space-y-4 pt-4 border-t border-blue-200 bg-blue-50/50 p-4 rounded-lg">
+                <h4 className="text-sm font-semibold text-blue-700 uppercase tracking-wider">Cenário Realista</h4>
+                <div className="grid md:grid-cols-4 gap-4">
+                  <div className="md:col-span-3 space-y-2">
+                    <label className="text-sm font-medium">Descrição</label>
+                    <Textarea
+                      value={data.scenarios?.realist?.description || ''}
+                      onChange={(e) => updateFramework('scenarios', { realist: { ...data.scenarios?.realist, description: e.target.value } })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Probabilidade (%)</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={data.scenarios?.realist?.probability || ''}
+                      onChange={(e) => updateFramework('scenarios', { realist: { ...data.scenarios?.realist, probability: parseInt(e.target.value) || 0 } })}
+                    />
+                  </div>
+                </div>
+                <ListEditor
+                  label="Ações Necessárias"
+                  items={data.scenarios?.realist?.required_actions || data.scenarios?.realist?.requiredActions || []}
+                  onChange={(items) => updateFramework('scenarios', { realist: { ...data.scenarios?.realist, required_actions: items } })}
+                />
+              </div>
+
+              {/* Pessimistic */}
+              <div className="space-y-4 pt-4 border-t border-red-200 bg-red-50/50 p-4 rounded-lg">
+                <h4 className="text-sm font-semibold text-red-700 uppercase tracking-wider">Cenário Pessimista</h4>
+                <div className="grid md:grid-cols-4 gap-4">
+                  <div className="md:col-span-3 space-y-2">
+                    <label className="text-sm font-medium">Descrição</label>
+                    <Textarea
+                      value={data.scenarios?.pessimistic?.description || ''}
+                      onChange={(e) => updateFramework('scenarios', { pessimistic: { ...data.scenarios?.pessimistic, description: e.target.value } })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Probabilidade (%)</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={data.scenarios?.pessimistic?.probability || ''}
+                      onChange={(e) => updateFramework('scenarios', { pessimistic: { ...data.scenarios?.pessimistic, probability: parseInt(e.target.value) || 0 } })}
+                    />
+                  </div>
+                </div>
+                <ListEditor
+                  label="Ações Necessárias"
+                  items={data.scenarios?.pessimistic?.required_actions || data.scenarios?.pessimistic?.requiredActions || []}
+                  onChange={(items) => updateFramework('scenarios', { pessimistic: { ...data.scenarios?.pessimistic, required_actions: items } })}
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -403,7 +561,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* OKRs Tab */}
         <TabsContent value="okrs">
           <Card>
-            <CardHeader><CardTitle>OKRs (Objectives & Key Results)</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>OKRs (Objectives & Key Results)</CardTitle>
+              <p className="text-sm text-gray-500">Objetivos e resultados-chave por trimestre.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo</label>
@@ -412,7 +573,93 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
                   onChange={(e) => updateFramework('okrs', { summary: e.target.value })}
                 />
               </div>
-              <p className="text-sm text-gray-500">Para edição detalhada dos OKRs por trimestre, use o editor JSON.</p>
+
+              {/* Quarters - Dynamic array */}
+              {(data.okrs?.quarters || []).map((quarter: any, index: number) => (
+                <div key={index} className="space-y-4 pt-4 border-t p-4 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">{quarter.quarter || `Trimestre ${index + 1}`}</h4>
+                    <span className="text-sm text-gray-500">{quarter.timeline}</span>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Trimestre</label>
+                      <Input
+                        value={quarter.quarter || ''}
+                        onChange={(e) => {
+                          const newQuarters = [...(data.okrs?.quarters || [])];
+                          newQuarters[index] = { ...quarter, quarter: e.target.value };
+                          updateFramework('okrs', { quarters: newQuarters });
+                        }}
+                        placeholder="Ex: Q1 2025"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Duração</label>
+                      <Input
+                        value={quarter.timeline || ''}
+                        onChange={(e) => {
+                          const newQuarters = [...(data.okrs?.quarters || [])];
+                          newQuarters[index] = { ...quarter, timeline: e.target.value };
+                          updateFramework('okrs', { quarters: newQuarters });
+                        }}
+                        placeholder="Ex: 3 meses"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Objetivo</label>
+                    <Textarea
+                      value={quarter.objective || ''}
+                      onChange={(e) => {
+                        const newQuarters = [...(data.okrs?.quarters || [])];
+                        newQuarters[index] = { ...quarter, objective: e.target.value };
+                        updateFramework('okrs', { quarters: newQuarters });
+                      }}
+                    />
+                  </div>
+                  <ListEditor
+                    label="Key Results"
+                    items={quarter.keyResults || quarter.key_results || []}
+                    onChange={(items) => {
+                      const newQuarters = [...(data.okrs?.quarters || [])];
+                      newQuarters[index] = { ...quarter, keyResults: items };
+                      updateFramework('okrs', { quarters: newQuarters });
+                    }}
+                  />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Investimento Estimado</label>
+                    <Input
+                      value={quarter.investment || ''}
+                      onChange={(e) => {
+                        const newQuarters = [...(data.okrs?.quarters || [])];
+                        newQuarters[index] = { ...quarter, investment: e.target.value };
+                        updateFramework('okrs', { quarters: newQuarters });
+                      }}
+                      placeholder="Ex: R$ 30-50 mil"
+                    />
+                  </div>
+                </div>
+              ))}
+
+              {/* Add Quarter Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newQuarters = [...(data.okrs?.quarters || []), {
+                    quarter: `Q${(data.okrs?.quarters?.length || 0) + 1} ${new Date().getFullYear()}`,
+                    timeline: '3 meses',
+                    objective: '',
+                    keyResults: [],
+                    investment: ''
+                  }];
+                  updateFramework('okrs', { quarters: newQuarters });
+                }}
+                className="w-full border-dashed"
+              >
+                <Plus className="w-4 h-4 mr-2" /> Adicionar Trimestre
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -420,7 +667,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* BSC Tab */}
         <TabsContent value="bsc">
           <Card>
-            <CardHeader><CardTitle>Balanced Scorecard</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Balanced Scorecard</CardTitle>
+              <p className="text-sm text-gray-500">Perspectivas financeira, cliente, processos e aprendizado.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo</label>
@@ -458,7 +708,10 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
         {/* Decision Matrix Tab */}
         <TabsContent value="decision_matrix">
           <Card>
-            <CardHeader><CardTitle>Matriz de Decisão</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Matriz de Decisão</CardTitle>
+              <p className="text-sm text-gray-500">Avaliação ponderada de alternativas estratégicas.</p>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Resumo</label>
@@ -481,22 +734,58 @@ export function AnalysisEditor({ analysis, onSave }: AnalysisEditorProps) {
                   onChange={(items) => updateFramework('decisionMatrix', { alternatives: items })}
                 />
                 <ListEditor
-                  label="Critérios"
+                  label="Critérios de Avaliação"
                   items={getNormalizedData('decisionMatrix', 'decision_matrix')?.criteria || []}
                   onChange={(items) => updateFramework('decisionMatrix', { criteria: items })}
                 />
               </div>
-              <p className="text-sm text-gray-500">Para edição detalhada das recomendações prioritárias, use o editor JSON.</p>
+
+              {/* Priority Recommendations */}
+              <div className="space-y-4 pt-4 border-t">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Recomendações Prioritárias</h4>
+                <ListEditor
+                  label="Alta Prioridade"
+                  items={getNormalizedData('decisionMatrix', 'decision_matrix')?.priorityRecommendations?.high || []}
+                  onChange={(items) => updateFramework('decisionMatrix', {
+                    priorityRecommendations: {
+                      ...getNormalizedData('decisionMatrix', 'decision_matrix')?.priorityRecommendations,
+                      high: items
+                    }
+                  })}
+                />
+                <ListEditor
+                  label="Média Prioridade"
+                  items={getNormalizedData('decisionMatrix', 'decision_matrix')?.priorityRecommendations?.medium || []}
+                  onChange={(items) => updateFramework('decisionMatrix', {
+                    priorityRecommendations: {
+                      ...getNormalizedData('decisionMatrix', 'decision_matrix')?.priorityRecommendations,
+                      medium: items
+                    }
+                  })}
+                />
+                <ListEditor
+                  label="Baixa Prioridade"
+                  items={getNormalizedData('decisionMatrix', 'decision_matrix')?.priorityRecommendations?.low || []}
+                  onChange={(items) => updateFramework('decisionMatrix', {
+                    priorityRecommendations: {
+                      ...getNormalizedData('decisionMatrix', 'decision_matrix')?.priorityRecommendations,
+                      low: items
+                    }
+                  })}
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* JSON Tab (Fallback for all frameworks) */}
+        {/* JSON Tab */}
         <TabsContent value="json">
           <Card>
-            <CardHeader><CardTitle>Editor Avançado (JSON)</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Dados Brutos (JSON)</CardTitle>
+              <p className="text-sm text-gray-500">Editor avançado para visualizar e modificar todos os dados da análise.</p>
+            </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-500 mb-4">Use este editor para visualizar ou editar todos os frameworks em formato JSON.</p>
               <JsonEditor data={data} onChange={setData} />
             </CardContent>
           </Card>

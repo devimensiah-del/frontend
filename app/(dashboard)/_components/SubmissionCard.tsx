@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, Globe, Target, Briefcase, Mail, Calendar } from 'lucide-react';
-import { DataField, Section, StatusBadge } from '@/components/workflow';
+import { DataField, Section } from '@/components/workflow';
 import type { Submission } from '@/types';
 
 interface SubmissionCardProps {
@@ -23,18 +23,15 @@ export function SubmissionCard({ submission }: SubmissionCardProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2 flex-1">
-            <Building2 className="w-5 h-5 text-gold-600 flex-shrink-0" />
-            <div>
-              <CardTitle className="text-navy-900">{submission.companyName}</CardTitle>
-              <div className="flex items-center gap-2 mt-1 text-xs text-text-secondary">
-                <Calendar className="w-3 h-3" />
-                <span>Enviado em {formatDate(submission.createdAt)}</span>
-              </div>
+        <div className="flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-gold-600 flex-shrink-0" />
+          <div>
+            <CardTitle className="text-navy-900">{submission.companyName}</CardTitle>
+            <div className="flex items-center gap-2 mt-1 text-xs text-text-secondary">
+              <Calendar className="w-3 h-3" />
+              <span>Enviado em {formatDate(submission.createdAt)}</span>
             </div>
           </div>
-          <StatusBadge status={submission.status} />
         </div>
       </CardHeader>
 

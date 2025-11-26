@@ -48,11 +48,12 @@ const formSchema = z.object({
   annualRevenueMax: z.string().transform((val) => (val === "" ? undefined : Number(val))).optional(),
   fundingStage: z.string().optional(),
 
-  // Submission Details (4 fields)
+  // Submission Details (5 fields)
   businessChallenge: z.string().min(10, { message: "Descreva seu desafio com mais detalhes (mín. 10 caracteres)." }),
   additionalNotes: z.string().optional(),
   linkedinUrl: z.string().url({ message: "URL inválida." }).optional().or(z.literal("")),
   twitterHandle: z.string().optional(),
+  instagramUrl: z.string().url({ message: "URL inválida." }).optional().or(z.literal("")),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -82,6 +83,7 @@ export function SubmissionForm() {
       additionalNotes: "",
       linkedinUrl: "",
       twitterHandle: "",
+      instagramUrl: "",
     },
   })
 
@@ -103,6 +105,7 @@ export function SubmissionForm() {
         additionalNotes: data.additionalNotes || "",
         linkedinUrl: data.linkedinUrl || "",
         twitterHandle: data.twitterHandle || "",
+        instagramUrl: data.instagramUrl || "",
       }
 
       // Prepare submission data for backend (camelCase format)
@@ -438,6 +441,21 @@ export function SubmissionForm() {
                       <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Twitter/X</FormLabel>
                       <FormControl>
                         <Input placeholder="@acmecorp" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Instagram URL */}
+                <FormField
+                  control={form.control}
+                  name="instagramUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Instagram</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://instagram.com/acmecorp" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

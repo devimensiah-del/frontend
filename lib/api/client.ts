@@ -13,6 +13,8 @@ import type {
   ResetPasswordFormData,
   SubmissionFormData,
   PaginatedResponse,
+  PublicReportData,
+  AccessCodeResponse,
 } from '@/types';
 
 import { handleApiError, handleNetworkError } from './error-handler';
@@ -416,6 +418,16 @@ export const adminApi = {
   },
 
   /**
+   * Get analysis by submission ID (admin only)
+   */
+  async getAnalysisBySubmissionId(submissionId: string): Promise<Analysis> {
+    const response = await apiRequest<{ analysis: Analysis }>(
+      `/admin/submissions/${submissionId}/analysis`
+    );
+    return response.analysis;
+  },
+
+  /**
    * Update enrichment fields (admin only) - status remains unchanged
    */
   async updateEnrichment(enrichmentId: string, data: Record<string, any>): Promise<Enrichment> {
@@ -491,6 +503,54 @@ export const adminApi = {
       method: 'POST',
     });
   },
+
+  /**
+   * Toggle analysis visibility to end user (admin only)
+   */
+  async toggleVisibility(analysisId: string, visible: boolean): Promise<{ analysis: Analysis; message: string }> {
+    return apiRequest(`/admin/analysis/${analysisId}/visibility`, {
+      method: 'POST',
+      body: JSON.stringify({ visible }),
+    });
+  },
+
+  /**
+   * Generate access code for public sharing (admin only)
+   */
+  async generateAccessCode(analysisId: string): Promise<AccessCodeResponse> {
+    return apiRequest(`/admin/analysis/${analysisId}/access-code`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Reopen analysis for editing (admin only) - reverts approved → completed
+   */
+  async reopenAnalysis(analysisId: string): Promise<{ analysis: Analysis; message: string }> {
+    return apiRequest(`/admin/analysis/${analysisId}/reopen`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Toggle blur status for premium frameworks (admin only)
+   * When blurred=true, premium frameworks are hidden behind a paywall blur
+   */
+  async toggleBlur(analysisId: string, blurred: boolean): Promise<{ analysis: Analysis; message: string }> {
+    return apiRequest(`/admin/analysis/${analysisId}/blur`, {
+      method: 'POST',
+      body: JSON.stringify({ blurred }),
+    });
+  },
+
+  /**
+   * Reopen enrichment for editing (admin only) - reverts approved → completed
+   */
+  async reopenEnrichment(enrichmentId: string): Promise<{ enrichment: Enrichment; message: string }> {
+    return apiRequest(`/admin/enrichment/${enrichmentId}/reopen`, {
+      method: 'POST',
+    });
+  },
 };
 
 // Export all APIs as a single client
@@ -508,5 +568,52 @@ export default apiClient;
 export const reportApi = {
   publishReport: analysisApi.publishReport,
   downloadReport: analysisApi.downloadReport,
+};
+
+/**
+ * Public API - No authentication required (unless admin preview)
+ */
+export const publicApi = {
+  /**
+   * Get report by access code (public, no auth required)
+   * Returns 404 if code is invalid or report is not visible
+   *
+   * @param code - The access code for the report
+   * @param adminPreview - If true, sends auth token and bypasses visibility check (admin only)
+   */
+  async getReportByAccessCode(code: string, adminPreview: boolean = false): Promise<PublicReportData> {
+    const baseUrl = `${API_BASE_URL}/public/report/${code}`;
+    const url = adminPreview ? `${baseUrl}?preview=admin` : baseUrl;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // For admin preview, include the auth token
+    if (adminPreview) {
+      const token = getAuthToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Report not found');
+        }
+        await handleApiError(response);
+      }
+
+      return await response.json();
+    } catch (error) {
+      handleNetworkError(error);
+    }
+  },
 };
 

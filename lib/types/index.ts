@@ -448,6 +448,17 @@ export interface Analysis {
   isVisibleToUser?: boolean;
   is_visible_to_user?: boolean; // Backend uses snake_case
 
+  // Blur control for premium frameworks (paywall)
+  // When true, premium frameworks are blurred until admin unblurs
+  isBlurred?: boolean;
+  is_blurred?: boolean; // Backend uses snake_case
+
+  // Public sharing via access code
+  accessCode?: string;
+  access_code?: string; // Backend uses snake_case
+  accessCodeCreatedAt?: string;
+  access_code_created_at?: string; // Backend uses snake_case
+
   // ALL FRAMEWORKS NESTED IN "analysis" OBJECT (matches backend response structure)
   analysis: {
     pestel: PESTELAnalysis;
@@ -466,6 +477,39 @@ export interface Analysis {
 
   createdAt: string;
   updatedAt: string;
+}
+
+// Public Report Data returned by the public endpoint
+export interface PublicReportData {
+  id: string;
+  submission_id: string;
+  status: AnalysisStatus;
+  analysis: {
+    pestel: PESTELAnalysis;
+    porter: PorterAnalysis;
+    tam_sam_som: TamSamSomAnalysis;
+    swot: SWOTAnalysis;
+    benchmarking: BenchmarkingAnalysis;
+    blue_ocean: BlueOceanAnalysis;
+    growth_hacking: GrowthHackingAnalysis;
+    scenarios: ScenariosAnalysis;
+    okrs: OKRsAnalysis;
+    bsc: BSCAnalysis;
+    decision_matrix: DecisionMatrixAnalysis;
+    synthesis: Synthesis;
+  };
+  created_at: string;
+  // Optional field added by admin preview mode
+  is_admin_preview?: boolean;
+  // When true, premium frameworks are blurred (paywall)
+  is_blurred?: boolean;
+}
+
+// Access Code Generation Response
+export interface AccessCodeResponse {
+  access_code: string;
+  shareable_url: string;
+  message: string;
 }
 
 // ============================================================================

@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import {
   FileText,
   Lightbulb,
   CheckCircle,
-  Download,
-  Eye,
   EyeOff,
   Globe,
   Shield,
@@ -18,7 +15,6 @@ import {
   MapPin,
   Zap,
   GitBranch,
-  Lock,
 } from 'lucide-react';
 import {
   Section,
@@ -35,14 +31,12 @@ interface AnalysisCardProps {
   analysis: Analysis;
   isAdmin?: boolean;
   hasPaid?: boolean;
-  onToggleVisibility?: (visible: boolean) => void;
   onUnlockRequest?: () => void;
 }
 
-export function AnalysisCard({ analysis, isAdmin, hasPaid = false, onToggleVisibility, onUnlockRequest }: AnalysisCardProps) {
+export function AnalysisCard({ analysis, isAdmin, hasPaid = false, onUnlockRequest }: AnalysisCardProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("synthesis");
-  const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
 
   // Helper to get access level for a framework
   const getAccess = (frameworkId: string) => getFrameworkAccess(frameworkId, !!isAdmin, hasPaid);
@@ -91,147 +85,12 @@ export function AnalysisCard({ analysis, isAdmin, hasPaid = false, onToggleVisib
     decisionMatrix: rawAnalysis.decisionMatrix || rawAnalysis.decision_matrix,
   };
 
-  // Check if PDF is actually available (has URL in database)
-  const pdfUrl = (analysis as any).pdfUrl || (analysis as any).pdf_url;
-  const hasPdfAvailable = !!pdfUrl;
-
-  const downloadPdf = async () => {
-    if (!pdfUrl) {
-      toast({
-        title: 'PDF não disponível',
-        description: 'O relatório ainda está sendo gerado. Por favor, aguarde alguns instantes.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      // Open PDF in new tab (works for most browsers)
-      window.open(pdfUrl, '_blank');
-
-      // Also trigger download
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = `relatorio-estrategico-${analysis.id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast({
-        title: 'Download iniciado',
-        description: 'Seu relatório está sendo baixado.',
-      });
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-      toast({
-        title: 'Erro no download',
-        description: 'Não foi possível baixar o PDF. Tente novamente.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleToggleVisibility = async () => {
-    if (!onToggleVisibility) return;
-
-    setIsTogglingVisibility(true);
-    try {
-      await onToggleVisibility(!isVisibleToUser);
-      toast({
-        title: isVisibleToUser ? 'Análise ocultada' : 'Análise liberada',
-        description: isVisibleToUser
-          ? 'O usuário não poderá mais ver esta análise.'
-          : 'O usuário agora pode ver esta análise e baixar o PDF.',
-      });
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível alterar a visibilidade.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsTogglingVisibility(false);
-    }
-  };
-
   // Show admin controls section when status is approved/sent (for visibility toggle)
   const showAdminControls = analysis.status === 'approved' || analysis.status === 'sent';
-
-  // PDF download only available when PDF actually exists in database
-  const canDownloadPdf = hasPdfAvailable;
-  const userCanDownload = canDownloadPdf && isVisibleToUser;
 
   return (
     <Card>
       <CardContent className="pt-6 space-y-6">
-        {/* Admin Controls - Visibility Toggle and PDF Download */}
-        {isAdmin && showAdminControls && (
-          <div className="pb-6 border-b border-surface-border">
-            <div className="flex flex-wrap gap-3 items-center justify-between">
-              {/* Visibility Toggle */}
-              <div className="flex items-center gap-3">
-                <Button
-                  variant={isVisibleToUser ? "default" : "outline"}
-                  size="sm"
-                  onClick={handleToggleVisibility}
-                  disabled={isTogglingVisibility}
-                  className={isVisibleToUser
-                    ? "bg-green-600 hover:bg-green-700 text-white"
-                    : "border-gray-300 hover:bg-gray-100"
-                  }
-                >
-                  {isVisibleToUser ? (
-                    <>
-                      <Eye className="w-4 h-4 mr-2" />
-                      Visível para Usuário
-                    </>
-                  ) : (
-                    <>
-                      <EyeOff className="w-4 h-4 mr-2" />
-                      Oculto do Usuário
-                    </>
-                  )}
-                </Button>
-                <span className="text-xs text-gray-500">
-                  {isVisibleToUser
-                    ? "Usuário pode ver a análise e baixar o PDF"
-                    : "Usuário não pode acessar esta análise"
-                  }
-                </span>
-              </div>
-
-              {/* PDF DISABLED - TEMPORARY
-              {canDownloadPdf && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={downloadPdf}
-                  className="border-navy-300 hover:bg-navy-100"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Baixar PDF
-                </Button>
-              )}
-              */}
-            </div>
-          </div>
-        )}
-
-        {/* PDF DISABLED - TEMPORARY
-        {!isAdmin && userCanDownload && (
-          <div className="pb-6 border-b border-surface-border">
-            <Button
-              variant="architect"
-              className="w-full"
-              onClick={downloadPdf}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Baixar Relatório Completo (PDF)
-            </Button>
-          </div>
-        )}
-        */}
-
         {/* User sees "not available" message if not visible */}
         {!isAdmin && showAdminControls && !isVisibleToUser && (
           <div className="pb-6 border-b border-surface-border">

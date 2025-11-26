@@ -89,7 +89,6 @@ export const StatusIcon: React.FC<StatusIconProps> = ({ status, size = "md", cla
       className={cn(
         sizeClass,
         color,
-        animated && "animate-spin",
         "transition-colors duration-300",
         className
       )}

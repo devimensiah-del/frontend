@@ -61,12 +61,14 @@ export function LoadingState({
     )}>
       {variant === "processing" ? (
         <div className="relative">
-          <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center animate-pulse">
-            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-blue-500" />
           </div>
         </div>
       ) : (
-        <Spinner size={spinnerSizes[size]} className="text-gold-500" />
+        <div className="w-10 h-10 rounded-full bg-gold-100 flex items-center justify-center">
+          <Loader2 className="w-5 h-5 text-gold-500" />
+        </div>
       )}
       <p className="mt-4 text-sm text-gray-500 font-medium">{message}</p>
     </div>
@@ -100,13 +102,8 @@ export function ProcessingState({
       className
     )}>
       <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-full bg-white shadow-lg flex items-center justify-center">
-          <Zap className="w-10 h-10 text-blue-500 animate-pulse" />
-        </div>
-        <div className="absolute -top-1 -right-1">
-          <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
-            <Loader2 className="w-4 h-4 text-white animate-spin" />
-          </div>
+        <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+          <Zap className="w-8 h-8 text-blue-500" />
         </div>
       </div>
 

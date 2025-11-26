@@ -203,11 +203,6 @@ export function EnrichmentDetails({
 
         {/* NEW: Submitted Data Tab - User form input preserved exactly */}
         <TabsContent value="submitted" className="space-y-6">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-1">Dados Enviados pelo Usuário</h3>
-            <p className="text-xs text-blue-600">Informações fornecidas pelo usuário no formulário de submissão.</p>
-          </div>
-
           {submittedData ? (
             <>
               {/* Company Information */}
@@ -266,11 +261,6 @@ export function EnrichmentDetails({
 
         {/* NEW: Discovered Data Tab - AI-enriched public information */}
         <TabsContent value="discovered" className="space-y-6">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-            <h3 className="text-sm font-semibold text-green-800 mb-1">Dados Descobertos pela IA</h3>
-            <p className="text-xs text-green-600">Informações públicas encontradas automaticamente que não foram fornecidas pelo usuário.</p>
-          </div>
-
           {discoveredData ? (
             <>
               {/* Discovered Company Info */}
@@ -289,13 +279,6 @@ export function EnrichmentDetails({
                   <Field label="Faturamento Estimado" value={discoveredData.annual_revenue_estimate} />
                   <Field label="Mercado Alvo" value={discoveredData.target_market} />
                 </div>
-              </div>
-
-              {/* Comparison hint */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
-                <p className="text-xs text-yellow-700">
-                  <strong>Dica:</strong> Compare estes dados com os "Dados Enviados" para identificar informações que o usuário não forneceu mas que são importantes para a análise.
-                </p>
               </div>
             </>
           ) : (

@@ -223,10 +223,7 @@ export default function ConfiguracoesPage() {
                   className="w-full sm:w-auto"
                 >
                   {isUpdatingProfile ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Salvando...
-                    </>
+                    <>Salvando...</>
                   ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />
@@ -364,10 +361,7 @@ export default function ConfiguracoesPage() {
                   className="w-full sm:w-auto"
                 >
                   {passwordLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Salvando...
-                    </>
+                    <>Salvando...</>
                   ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />

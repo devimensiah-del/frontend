@@ -46,11 +46,8 @@ function getWorkflowStage(
   // Analysis sent = final state
   if (analysisStatus === 'sent') return 'sent';
 
-  // Analysis approved + PDF ready = ready to send
-  if (analysisStatus === 'approved' && pdfReady) return 'pdf_ready';
-
-  // Analysis approved but no PDF = generating
-  if (analysisStatus === 'approved') return 'pdf_generating';
+  // Analysis approved = ready to send (skip pdf_generating state)
+  if (analysisStatus === 'approved') return 'pdf_ready';
 
   // Analysis completed = needs admin approval
   if (analysisStatus === 'completed') return 'analysis_completed';
@@ -106,7 +103,7 @@ function getAdminConfig(stage: WorkflowStage): StageConfig {
     pdf_ready: {
       icon: Send,
       title: 'Pronto para enviar',
-      description: 'O relatório PDF foi gerado. Libere para o cliente visualizar.',
+      description: 'Libere para o cliente visualizar.',
       color: 'green'
     },
     sent: {
@@ -216,22 +213,11 @@ export function WorkflowStatusBanner({
   const Icon = config.icon;
 
   return (
-    <div className={`${colors.bg} ${colors.border} border rounded-lg p-4`}>
-      <div className="flex items-start gap-3">
-        <div className={`flex-shrink-0 mt-0.5`}>
-          <Icon
-            className={`w-5 h-5 ${colors.icon} ${config.animate ? 'animate-pulse' : ''}`}
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className={`text-sm font-semibold ${colors.title}`}>
-            {config.title}
-          </h3>
-          <p className={`text-sm ${colors.description} mt-0.5`}>
-            {config.description}
-          </p>
-        </div>
-      </div>
+    <div className={`${colors.bg} ${colors.border} border rounded-lg px-4 py-2 inline-flex items-center gap-2`}>
+      <Icon className={`w-4 h-4 ${colors.icon}`} />
+      <span className={`text-sm font-medium ${colors.title}`}>
+        {config.title}
+      </span>
     </div>
   );
 }

@@ -22,7 +22,7 @@ export const Logo: React.FC<LogoProps> = ({
   variant: _variant, // Ignored - PNG is always default variant
 }) => {
   return (
-    <div className={cn("relative inline-block", className)}>
+    <div className={cn("relative inline-block w-full h-full", className)}>
       <Image
         src="/imensiah_logo.png"
         alt={alt}

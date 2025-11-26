@@ -80,7 +80,7 @@ interface SpinnerProps {
 export function Spinner({ className, size = 16 }: SpinnerProps) {
   return (
     <svg
-      className={cn("animate-spin", className)}
+      className={cn(className)}
       width={size}
       height={size}
       viewBox="0 0 24 24"

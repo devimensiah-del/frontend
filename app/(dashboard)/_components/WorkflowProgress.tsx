@@ -44,7 +44,9 @@ export function WorkflowProgress({
             id: 'delivery',
             label: 'Entrega',
             icon: CheckCircle,
-            status: analysisStatus === 'sent' ? 'completed' : analysisStatus === 'approved' ? 'processing' : 'pending',
+            // Only show as active/complete when analysis is actually approved/sent
+            // Otherwise show as waiting (undefined status = gray)
+            status: analysisStatus === 'sent' ? 'completed' : analysisStatus === 'approved' ? 'processing' : undefined,
             errorMessage: undefined,
             description: 'Relatório final pronto para visualização'
         }
@@ -97,7 +99,7 @@ export function WorkflowProgress({
                             <div
                                 className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
                                     isComplete ? 'bg-green-50 border-green-500' :
-                                    isActive ? 'bg-blue-50 border-blue-500 animate-pulse' :
+                                    isActive ? 'bg-blue-50 border-blue-500' :
                                     isFailed ? 'bg-red-50 border-red-500' :
                                     'bg-gray-50 border-gray-300'
                                 }`}
@@ -108,7 +110,7 @@ export function WorkflowProgress({
                                         isActive ? 'text-blue-600' :
                                         isFailed ? 'text-red-600' :
                                         'text-gray-400'
-                                    } ${state.animate ? 'animate-spin' : ''}`}
+                                    }`}
                                 />
                             </div>
 

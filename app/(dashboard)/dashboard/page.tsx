@@ -4,10 +4,8 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { submissionsApi, adminApi, authApi } from "@/lib/api/client";
 import { SubmissionCard } from "@/components/dashboard/SubmissionCard";
-import { StatCard } from "@/components/dashboard/StatCard";
 import { Section, Container } from "@/components/editorial/Section";
 import { Heading, Eyebrow, Text } from "@/components/ui/Typography";
-import { Loader, CheckCircle, BarChart3 } from "lucide-react";
 import type { Submission } from "@/lib/types";
 import { LoadingState, EmptyState } from "@/components/ui/state-components";
 
@@ -33,14 +31,7 @@ export default function DashboardPage() {
     enabled: !!user,
   });
 
-  // Fetch analytics (admin only)
-  const { data: analytics, isLoading: isAnalyticsLoading } = useQuery({
-    queryKey: ["analytics"],
-    queryFn: adminApi.getAnalytics,
-    enabled: isAdmin,
-  });
-
-  const isLoading = isUserLoading || isSubmissionsLoading || (isAdmin && isAnalyticsLoading);
+  const isLoading = isUserLoading || isSubmissionsLoading;
 
   if (isLoading) {
     return (
@@ -75,32 +66,6 @@ export default function DashboardPage() {
               : "Veja o status dos seus envios enquanto avançam pelas etapas de enriquecimento e análise estratégica."}
           </Text>
         </div>
-
-        {/* Admin Analytics Cards */}
-        {isAdmin && analytics && (
-          <div className="mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-            <Eyebrow className="mb-6">Métricas do Sistema</Eyebrow>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <StatCard
-                label="Total de Envios"
-                value={analytics.totalSubmissions}
-                icon={BarChart3}
-              />
-              <StatCard
-                label="Em Andamento"
-                value={analytics.activeSubmissions}
-                variant="warning"
-                icon={Loader}
-              />
-              <StatCard
-                label="Concluídos"
-                value={analytics.completedSubmissions}
-                variant="success"
-                icon={CheckCircle}
-              />
-            </div>
-          </div>
-        )}
 
         {/* Submissions Section */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">

@@ -16,7 +16,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = "architect", size = "default", className, children, isLoading, disabled, ...props }, ref) => {
+  ({ variant = "architect", size = "default", className, children, isLoading, disabled, asChild, ...props }, ref) => {
     const variants = {
       architect: "btn-architect",
       outline: "btn-outline",

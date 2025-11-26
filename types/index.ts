@@ -56,6 +56,10 @@ export type {
   SignupFormData,
   ResetPasswordFormData,
   UpdatePasswordFormData,
+
+  // Public API types
+  PublicReportData,
+  AccessCodeResponse,
 } from '@/lib/types';
 
 // Legacy type aliases for backward compatibility
