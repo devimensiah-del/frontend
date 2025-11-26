@@ -40,6 +40,7 @@ export async function middleware(request: NextRequest) {
     '/',
     '/privacy',
     '/terms',
+    '/report', // Public report viewing (access code based, blurring controlled by admin)
   ];
 
   // Check if the current path is public
