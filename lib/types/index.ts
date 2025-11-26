@@ -271,6 +271,13 @@ export interface PorterAnalysis {
 }
 
 // 3. TAM SAM SOM
+export interface DataSourcesUsed {
+  government_data?: string[];
+  industry_reports?: string[];
+  company_data?: string[];
+  web_search?: string[];
+}
+
 export interface TamSamSomAnalysis {
   tam: string;
   sam: string;
@@ -278,6 +285,16 @@ export interface TamSamSomAnalysis {
   assumptions: string[];
   cagr: string;
   summary: string;
+
+  // V2: Estimation transparency fields (optional for backwards compatibility)
+  confidence_level?: number;          // 0-100 scale
+  estimation_method?: string;         // e.g., "Top-down with sector benchmarks"
+  calculation_notes?: string;         // Detailed calculation explanation
+  data_sources_used?: DataSourcesUsed;
+  caveat_message?: string;            // Warning for low-confidence estimates
+
+  // Legacy fields (kept for backwards compatibility)
+  data_quality?: string;
 }
 
 // 4. SWOT with Confidence & Source Attribution
@@ -346,25 +363,49 @@ export interface ScenariosAnalysis {
   summary: string;
 }
 
-// 9. OKRs (Quarterly Model)
+// 9. OKRs (Quarterly Model + 90-Day Plan)
 export interface KeyResult {
   description: string;
   target: string;
   measurement: string;
 }
 
+// V1 Legacy: Quarterly format (Q1 2025, Q2 2025, etc.)
 export interface QuarterlyOKR {
-  quarter: string;              // "Q1", "Q2", "Q3"
+  quarter: string;              // "Q1 2025", "Q2 2025", "Q3 2025"
   objective: string;
-  key_results: KeyResult[];
-  investment_estimate: string;
+  key_results: string[];        // Simple strings
+  keyResults?: string[];        // Alternative casing
+  investment: string;
+  investment_estimate?: string; // Alternative field name
   timeline: string;
 }
 
-export interface OKRsAnalysis {
-  quarters: QuarterlyOKR[];
+// V2: Monthly format (Mês 1, Mês 2, Mês 3) for 90-Day Plans
+export interface MonthlyOKR {
+  month: string;                // "Mês 1", "Mês 2", "Mês 3"
+  focus: string;                // "Fundação", "Crescimento", "Consolidação"
+  objective: string;
+  key_results: string[];
+  keyResults?: string[];        // Alternative casing
+  investment: string;
+  aligned_recommendation: string;  // Links to Decision Matrix
+  alignedRecommendation?: string;  // Alternative casing
+}
 
-  // Backward compatibility: old format (optional)
+export interface OKRsAnalysis {
+  // V2: 90-Day Plan format with monthly milestones (preferred)
+  plan_90_days?: MonthlyOKR[];
+  plan90Days?: MonthlyOKR[];    // Alternative casing
+  total_investment?: string;
+  totalInvestment?: string;     // Alternative casing
+  success_metrics?: string[];
+  successMetrics?: string[];    // Alternative casing
+
+  // V1 Legacy: Quarterly format (for backwards compatibility)
+  quarters?: QuarterlyOKR[];
+
+  // Very old format (optional)
   objectives?: Array<{
     title: string;
     keyResults: string[];

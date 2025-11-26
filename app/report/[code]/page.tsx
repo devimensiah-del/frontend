@@ -728,7 +728,12 @@ function PorterSection({ porter, sectionNumber }: { porter: any; sectionNumber: 
 }
 
 function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string }) {
+  // Support both V2 (plan_90_days) and V1 legacy (quarters) formats
+  const plan90Days = okrs.plan_90_days || okrs.plan90Days || [];
   const quarters = okrs.quarters || [];
+  const totalInvestment = okrs.total_investment || okrs.totalInvestment;
+  const successMetrics = normalizeToArray(okrs.success_metrics || okrs.successMetrics);
+  const useNewFormat = plan90Days.length > 0;
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24">
@@ -736,71 +741,177 @@ function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string
         {/* Section Header */}
         <div className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
-            {sectionNumber} — OKRs
+            {sectionNumber} — {useNewFormat ? 'Plano 90 Dias' : 'OKRs'}
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
-            Objectives & Key Results
+            {useNewFormat ? 'Plano Estratégico 90 Dias' : 'Objectives & Key Results'}
           </h2>
           {okrs.summary && (
             <p className="text-lg text-gray-600 max-w-3xl">{okrs.summary}</p>
           )}
         </div>
 
-        {/* Quarters Timeline */}
-        <div className="space-y-8">
-          {quarters.map((quarter: any, index: number) => (
-            <div key={index} className="relative">
-              {/* Timeline connector */}
-              {index < quarters.length - 1 && (
-                <div className="absolute left-6 top-16 bottom-0 w-0.5 bg-gray-200" />
-              )}
-
-              <div className="flex gap-6">
-                {/* Quarter Badge */}
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gold-500 text-white flex items-center justify-center font-bold text-sm z-10">
-                  Q{quarter.quarter?.match(/Q?(\d+)/)?.[1] || index + 1}
+        {/* V2: 90-Day Plan Format */}
+        {useNewFormat && (
+          <>
+            {/* Total Investment Banner */}
+            {totalInvestment && (
+              <div className="mb-8 p-6 bg-gold-50 border border-gold-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-gold-800 mb-1">
+                      Investimento Total (90 dias)
+                    </div>
+                    <div className="text-2xl font-light text-navy-900">{totalInvestment}</div>
+                  </div>
+                  <DollarSign className="w-10 h-10 text-gold-500" />
                 </div>
+              </div>
+            )}
 
-                {/* Content */}
-                <div className="flex-1 bg-white border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-navy-900">{quarter.quarter}</h3>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {quarter.timeline}
-                      </span>
-                      {quarter.investment && (
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4" />
-                          {quarter.investment}
-                        </span>
+            {/* Monthly Timeline */}
+            <div className="space-y-8">
+              {plan90Days.map((month: any, index: number) => (
+                <div key={index} className="relative">
+                  {/* Timeline connector */}
+                  {index < plan90Days.length - 1 && (
+                    <div className="absolute left-6 top-16 bottom-0 w-0.5 bg-gray-200" />
+                  )}
+
+                  <div className="flex gap-6">
+                    {/* Month Badge */}
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gold-500 text-white flex items-center justify-center font-bold text-sm z-10">
+                      M{index + 1}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 bg-white border border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-bold text-navy-900">{month.month}</h3>
+                          <span className="px-2 py-1 bg-navy-100 text-navy-800 text-xs font-bold uppercase tracking-wider rounded">
+                            {month.focus}
+                          </span>
+                        </div>
+                        {month.investment && (
+                          <span className="flex items-center gap-1 text-sm text-gray-500">
+                            <DollarSign className="w-4 h-4" />
+                            {month.investment}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-navy-900 font-medium mb-4">{month.objective}</p>
+
+                      {(month.key_results || month.keyResults)?.length > 0 && (
+                        <div className="bg-gray-50 p-4">
+                          <h4 className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-3">
+                            Key Results
+                          </h4>
+                          <ul className="space-y-2">
+                            {(month.key_results || month.keyResults).map((kr: string, krIndex: number) => (
+                              <li key={krIndex} className="flex items-start gap-2 text-sm text-gray-700">
+                                <CheckCircle className="w-4 h-4 text-gold-500 mt-0.5 flex-shrink-0" />
+                                <span>{kr}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Aligned Recommendation */}
+                      {(month.aligned_recommendation || month.alignedRecommendation) && (
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <span className="text-xs text-gray-500 italic">
+                            Alinhado com: {month.aligned_recommendation || month.alignedRecommendation}
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>
+                </div>
+              ))}
+            </div>
 
-                  <p className="text-navy-900 font-medium mb-4">{quarter.objective}</p>
+            {/* Success Metrics */}
+            {successMetrics.length > 0 && (
+              <div className="mt-8 bg-navy-900 text-white p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <Target className="w-5 h-5 text-gold-500" />
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-gold-500">
+                    Métricas de Sucesso (90 dias)
+                  </h3>
+                </div>
+                <ul className="grid md:grid-cols-3 gap-4">
+                  {successMetrics.map((metric: string, index: number) => (
+                    <li key={index} className="flex items-center gap-2 text-gray-200 text-sm">
+                      <CheckCircle className="w-4 h-4 text-gold-500 flex-shrink-0" />
+                      <span>{metric}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
 
-                  {(quarter.key_results || quarter.keyResults)?.length > 0 && (
-                    <div className="bg-gray-50 p-4">
-                      <h4 className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-3">
-                        Key Results
-                      </h4>
-                      <ul className="space-y-2">
-                        {(quarter.key_results || quarter.keyResults).map((kr: string, krIndex: number) => (
-                          <li key={krIndex} className="flex items-start gap-2 text-sm text-gray-700">
-                            <CheckCircle className="w-4 h-4 text-gold-500 mt-0.5 flex-shrink-0" />
-                            <span>{kr}</span>
-                          </li>
-                        ))}
-                      </ul>
+        {/* V1 Legacy: Quarters Timeline */}
+        {!useNewFormat && quarters.length > 0 && (
+          <div className="space-y-8">
+            {quarters.map((quarter: any, index: number) => (
+              <div key={index} className="relative">
+                {/* Timeline connector */}
+                {index < quarters.length - 1 && (
+                  <div className="absolute left-6 top-16 bottom-0 w-0.5 bg-gray-200" />
+                )}
+
+                <div className="flex gap-6">
+                  {/* Quarter Badge */}
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gold-500 text-white flex items-center justify-center font-bold text-sm z-10">
+                    Q{quarter.quarter?.match(/Q?(\d+)/)?.[1] || index + 1}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 bg-white border border-gray-200 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-navy-900">{quarter.quarter}</h3>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {quarter.timeline}
+                        </span>
+                        {quarter.investment && (
+                          <span className="flex items-center gap-1">
+                            <DollarSign className="w-4 h-4" />
+                            {quarter.investment}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  )}
+
+                    <p className="text-navy-900 font-medium mb-4">{quarter.objective}</p>
+
+                    {(quarter.key_results || quarter.keyResults)?.length > 0 && (
+                      <div className="bg-gray-50 p-4">
+                        <h4 className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-3">
+                          Key Results
+                        </h4>
+                        <ul className="space-y-2">
+                          {(quarter.key_results || quarter.keyResults).map((kr: string, krIndex: number) => (
+                            <li key={krIndex} className="flex items-start gap-2 text-sm text-gray-700">
+                              <CheckCircle className="w-4 h-4 text-gold-500 mt-0.5 flex-shrink-0" />
+                              <span>{kr}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1642,12 +1753,15 @@ function buildSections(synthesis: any, analysis: any, isBlurred: boolean = true)
     });
   }
 
-  // 10 - OKRs - PREMIUM
-  if (analysis.okrs?.quarters?.length > 0) {
+  // 10 - OKRs / Plano 90 Dias - PREMIUM
+  // Support both V2 (plan_90_days) and V1 legacy (quarters) formats
+  const hasPlan90Days = (analysis.okrs?.plan_90_days?.length > 0 || analysis.okrs?.plan90Days?.length > 0);
+  const hasQuarters = analysis.okrs?.quarters?.length > 0;
+  if (hasPlan90Days || hasQuarters) {
     const num = String(sectionNum++).padStart(2, '0');
     sections.push({
       id: 'okrs',
-      title: 'OKRs',
+      title: hasPlan90Days ? 'Plano 90 Dias' : 'OKRs',
       component: (
         <PremiumBlurOverlay isBlurred={isBlurred}>
           <OKRsSection okrs={analysis.okrs} sectionNumber={num} />

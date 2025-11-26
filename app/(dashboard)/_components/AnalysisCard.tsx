@@ -119,7 +119,7 @@ export function AnalysisCard({ analysis, isAdmin, hasPaid = false, onUnlockReque
             <SelectOption value="blue_ocean">Blue Ocean</SelectOption>
             <SelectOption value="growth_hacking">Growth Hacking</SelectOption>
             <SelectOption value="scenarios">Cenários</SelectOption>
-            <SelectOption value="okrs">OKRs</SelectOption>
+            <SelectOption value="okrs">Plano 90 Dias</SelectOption>
             <SelectOption value="bsc">Balanced Scorecard</SelectOption>
             <SelectOption value="decision_matrix">Matriz de Decisão</SelectOption>
           </Select>
@@ -395,21 +395,66 @@ export function AnalysisCard({ analysis, isAdmin, hasPaid = false, onUnlockReque
                 teaserMessage={getTeaser('okrs')}
                 onUnlock={handleUnlock}
               >
-                <Section title="OKRs (Objectives & Key Results)" icon={<Target />}>
+                <Section title="Plano 90 Dias (OKRs)" icon={<Target />}>
                   <p className="text-sm text-navy-900 mb-4 whitespace-pre-line">{normalizedAnalysis.okrs.summary}</p>
-                  <div className="space-y-4">
-                    {normalizedAnalysis.okrs.quarters && normalizedAnalysis.okrs.quarters.map((quarter: any, index: number) => (
-                      <div key={index} className="p-4 border rounded-lg">
-                        <div className="flex justify-between items-start mb-2">
-                          <h5 className="font-semibold">{quarter.quarter}</h5>
-                          <span className="text-sm text-gray-500">{quarter.timeline}</span>
+
+                  {/* V2 Format: 90-Day Plan with Monthly Milestones */}
+                  {(normalizedAnalysis.okrs.plan_90_days || normalizedAnalysis.okrs.plan90Days) && (normalizedAnalysis.okrs.plan_90_days || normalizedAnalysis.okrs.plan90Days).length > 0 && (
+                    <>
+                      {/* Total Investment & Success Metrics */}
+                      {(normalizedAnalysis.okrs.total_investment || normalizedAnalysis.okrs.totalInvestment) && (
+                        <div className="p-3 bg-gold-50 border border-gold-200 rounded-lg mb-4">
+                          <span className="text-sm font-medium text-gold-900">Investimento Total (90 dias): </span>
+                          <span className="text-sm text-gold-800">{normalizedAnalysis.okrs.total_investment || normalizedAnalysis.okrs.totalInvestment}</span>
                         </div>
-                        <p className="text-sm font-medium text-navy-900 mb-2">{quarter.objective}</p>
-                        <ListSection title="Key Results" items={quarter.keyResults || quarter.key_results} />
-                        <p className="text-sm text-gray-600 mt-2">Investimento: {quarter.investment}</p>
+                      )}
+
+                      <div className="space-y-4">
+                        {(normalizedAnalysis.okrs.plan_90_days || normalizedAnalysis.okrs.plan90Days).map((month: any, index: number) => (
+                          <div key={index} className="p-4 border rounded-lg">
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex items-center gap-2">
+                                <h5 className="font-semibold">{month.month}</h5>
+                                <Badge variant="outline" className="text-xs">{month.focus}</Badge>
+                              </div>
+                              <span className="text-sm text-gray-500">{month.investment}</span>
+                            </div>
+                            <p className="text-sm font-medium text-navy-900 mb-2">{month.objective}</p>
+                            <ListSection title="Key Results" items={month.keyResults || month.key_results} />
+                            {(month.aligned_recommendation || month.alignedRecommendation) && (
+                              <p className="text-xs text-gray-500 mt-2 italic">
+                                Alinhado com: {month.aligned_recommendation || month.alignedRecommendation}
+                              </p>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+
+                      {/* Success Metrics */}
+                      {(normalizedAnalysis.okrs.success_metrics || normalizedAnalysis.okrs.successMetrics) && (normalizedAnalysis.okrs.success_metrics || normalizedAnalysis.okrs.successMetrics).length > 0 && (
+                        <div className="mt-4">
+                          <ListSection title="Métricas de Sucesso (90 dias)" items={normalizedAnalysis.okrs.success_metrics || normalizedAnalysis.okrs.successMetrics} />
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* V1 Legacy Format: Quarterly OKRs (backwards compatibility) */}
+                  {!(normalizedAnalysis.okrs.plan_90_days || normalizedAnalysis.okrs.plan90Days) && normalizedAnalysis.okrs.quarters && normalizedAnalysis.okrs.quarters.length > 0 && (
+                    <div className="space-y-4">
+                      {normalizedAnalysis.okrs.quarters.map((quarter: any, index: number) => (
+                        <div key={index} className="p-4 border rounded-lg">
+                          <div className="flex justify-between items-start mb-2">
+                            <h5 className="font-semibold">{quarter.quarter}</h5>
+                            <span className="text-sm text-gray-500">{quarter.timeline}</span>
+                          </div>
+                          <p className="text-sm font-medium text-navy-900 mb-2">{quarter.objective}</p>
+                          <ListSection title="Key Results" items={quarter.keyResults || quarter.key_results} />
+                          <p className="text-sm text-gray-600 mt-2">Investimento: {quarter.investment}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </Section>
               </BlurredContent>
             )}
