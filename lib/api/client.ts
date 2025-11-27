@@ -553,6 +553,81 @@ export const adminApi = {
   },
 };
 
+/**
+ * Macroeconomics API (Admin only)
+ * Manages economic indicators: SELIC, IPCA, USD/BRL
+ */
+export interface MacroValue {
+  value: number;
+  effective_date: string;
+  reference_period?: string;
+  source_code: string;
+  fetched_at: string;
+}
+
+export interface MacroSnapshot {
+  selic?: MacroValue;
+  ipca?: MacroValue;
+  usd_brl?: MacroValue;
+  as_of: string;
+}
+
+export interface MacroHistoryValue {
+  id: string;
+  value: number;
+  effective_date: string;
+  reference_period?: string;
+  source_code: string;
+  fetched_at: string;
+}
+
+export const macroApi = {
+  /**
+   * Get latest snapshot of all macro indicators
+   */
+  async getLatestSnapshot(): Promise<{ snapshot: MacroSnapshot | null; message?: string }> {
+    return apiRequest('/admin/macro/latest');
+  },
+
+  /**
+   * Refresh all macro indicators (SELIC, IPCA, USD/BRL)
+   */
+  async refreshAll(): Promise<{ message: string; snapshot: MacroSnapshot }> {
+    return apiRequest('/admin/macro/refresh', {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Refresh a specific indicator
+   * @param code - One of: 'selic', 'ipca', 'usd_brl'
+   */
+  async refreshIndicator(code: 'selic' | 'ipca' | 'usd_brl'): Promise<{ message: string; indicator: string; snapshot: MacroSnapshot }> {
+    return apiRequest(`/admin/macro/refresh/${code}`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Get historical values for an indicator
+   * @param code - One of: 'selic', 'ipca', 'usd_brl'
+   * @param from - Start date (YYYY-MM-DD)
+   * @param to - End date (YYYY-MM-DD)
+   */
+  async getHistory(
+    code: 'selic' | 'ipca' | 'usd_brl',
+    from?: string,
+    to?: string
+  ): Promise<{ indicator: string; count: number; from: string; to: string; history: MacroHistoryValue[] }> {
+    const params = new URLSearchParams();
+    if (from) params.append('from', from);
+    if (to) params.append('to', to);
+    const query = params.toString();
+    const endpoint = query ? `/admin/macro/history/${code}?${query}` : `/admin/macro/history/${code}`;
+    return apiRequest(endpoint);
+  },
+};
+
 // Export all APIs as a single client
 export const apiClient = {
   auth: authApi,
@@ -561,6 +636,7 @@ export const apiClient = {
   analysis: analysisApi,
   user: userApi,
   admin: adminApi,
+  macro: macroApi,
 };
 
 export default apiClient;

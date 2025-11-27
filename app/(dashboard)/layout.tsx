@@ -5,6 +5,7 @@ import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/button';
 import { SkipToContent } from '@/components/a11y/SkipToContent';
 import Link from 'next/link';
+import { useProfile } from '@/lib/hooks/use-profile';
 
 export default function DashboardLayout({
   children,
@@ -12,6 +13,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { profile } = useProfile(undefined, { enabled: true });
+
+  // Check if user is admin
+  const isAdmin = profile?.role === 'admin';
 
   const handleLogout = () => {
     // Mock logout - clear auth and redirect
@@ -44,6 +49,14 @@ export default function DashboardLayout({
               >
                 Painel
               </Link>
+              {isAdmin && (
+                <Link
+                  href="/dashboard/macroeconomia"
+                  className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
+                >
+                  Macroeconomia
+                </Link>
+              )}
               <Link
                 href="/dashboard/configuracoes"
                 className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
@@ -106,6 +119,15 @@ export default function DashboardLayout({
               >
                 Painel
               </Link>
+              {isAdmin && (
+                <Link
+                  href="/dashboard/macroeconomia"
+                  onClick={closeMobileMenu}
+                  className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  Macroeconomia
+                </Link>
+              )}
               <Link
                 href="/dashboard/configuracoes"
                 onClick={closeMobileMenu}
