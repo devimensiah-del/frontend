@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -61,6 +61,11 @@ type FormValues = z.infer<typeof formSchema>
 export function SubmissionForm() {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [accordionValue, setAccordionValue] = useState<string>("")
+
+  const handleAccordionChange = useCallback((value: string) => {
+    setAccordionValue(value)
+  }, [])
 
   // 1. Define form with react-hook-form and zod resolver
   const form = useForm<FormValues>({
@@ -249,7 +254,13 @@ export function SubmissionForm() {
         </div>
 
         {/* --- OPTIONAL FIELDS (Single Accordion) --- */}
-        <Accordion type="single" collapsible className="w-full border-t border-line">
+        <Accordion
+          type="single"
+          collapsible
+          value={accordionValue}
+          onValueChange={handleAccordionChange}
+          className="w-full border-t border-line"
+        >
           <AccordionItem value="optional" className="border-b-0">
             <AccordionTrigger className="font-heading text-lg font-medium text-navy-900 hover:text-gold-500 py-4">
               Informações Adicionais (Opcional)

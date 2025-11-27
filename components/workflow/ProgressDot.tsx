@@ -31,17 +31,17 @@ export function ProgressDot({
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-2',
+        'flex flex-col items-center gap-1 md:gap-2',
         className
       )}
     >
-      {/* Dot */}
+      {/* Dot - responsive sizing */}
       <button
         type="button"
         onClick={isClickable ? onClick : undefined}
         disabled={!isClickable}
         className={cn(
-          'relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300',
+          'relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full transition-all duration-300',
           'border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
           // State-based colors
           state === 'completed' && 'bg-green-500 border-green-500 text-white',
@@ -55,11 +55,11 @@ export function ProgressDot({
         )}
         title={description}
       >
-        <Icon className="w-5 h-5" />
-        {/* Stage number badge */}
+        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+        {/* Stage number badge - responsive */}
         <span
           className={cn(
-            'absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center',
+            'absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-xs font-bold flex items-center justify-center',
             state === 'completed' && 'bg-green-700 text-white',
             state === 'current' && 'bg-blue-700 text-white',
             state === 'future' && 'bg-gray-400 text-white'
@@ -69,11 +69,11 @@ export function ProgressDot({
         </span>
       </button>
 
-      {/* Label */}
-      <div className="text-center max-w-[100px]">
+      {/* Label - hidden on mobile, visible on sm+ */}
+      <div className="text-center max-w-[60px] sm:max-w-[80px] md:max-w-[100px] hidden sm:block">
         <p
           className={cn(
-            'text-xs font-medium leading-tight',
+            'text-[10px] sm:text-xs font-medium leading-tight truncate',
             state === 'completed' && 'text-green-600',
             state === 'current' && 'text-blue-600',
             state === 'future' && 'text-gray-400'

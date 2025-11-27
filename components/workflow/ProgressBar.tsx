@@ -121,10 +121,10 @@ export function ProgressBar({
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Progress dots and connectors */}
-      <div className="flex items-center justify-center gap-1 md:gap-2">
+      {/* Progress dots and connectors - responsive with overflow handling */}
+      <div className="flex items-center justify-center gap-0.5 sm:gap-1 md:gap-2 px-2 sm:px-0 overflow-x-auto">
         {stages.map((stage, index) => (
-          <div key={stage.stage} className="flex items-center">
+          <div key={stage.stage} className="flex items-center flex-shrink-0">
             <ProgressDot
               stage={stage.stage}
               label={stage.label}
@@ -138,7 +138,7 @@ export function ProgressBar({
             {index < stages.length - 1 && (
               <ProgressConnector
                 isCompleted={stage.stage < currentStage}
-                className="mx-1 md:mx-2"
+                className="mx-0.5 sm:mx-1 md:mx-2"
               />
             )}
           </div>
