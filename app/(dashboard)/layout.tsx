@@ -32,8 +32,8 @@ export default function DashboardLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link href="/dashboard" className="flex items-center">
-              <Logo className="w-32 h-8" />
+            <Link href="/dashboard" className="flex items-center -ml-2">
+              <Logo className="w-52 h-14" />
             </Link>
 
             {/* Desktop Navigation */}

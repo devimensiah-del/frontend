@@ -17,7 +17,7 @@ export default function EditorialPage() {
             <Eyebrow>Inteligência Estratégica</Eyebrow>
           </div>
 
-          <Display variant="hero" className="mb-10">
+          <Display variant="hero" className="mt-4 md:mt-0 mb-10">
             Torne sua empresa <br />
             <span className="text-gold-500 italic serif-touch">imensa</span> com IA + IH.
           </Display>

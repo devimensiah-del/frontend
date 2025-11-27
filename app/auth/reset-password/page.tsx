@@ -89,7 +89,7 @@ function ResetPasswordForm() {
           <div className="absolute top-0 left-0 w-full h-1 bg-gold-500" />
 
           <div className="flex flex-col items-center mb-10">
-            <Logo className="w-12 h-12 mb-4" />
+            <Logo className="w-20 h-20 mb-4" />
             <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
               {siteConfig.brand.name}
             </Heading>
@@ -120,7 +120,7 @@ function ResetPasswordForm() {
 
         {/* Logo and Branding */}
         <div className="flex flex-col items-center mb-10">
-          <Logo className="w-12 h-12 mb-4" />
+          <Logo className="w-20 h-20 mb-4" />
           <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
             {siteConfig.brand.name}
           </Heading>
@@ -213,7 +213,7 @@ export default function ResetPasswordPage() {
           <div className="max-w-md w-full bg-white p-12 border border-line shadow-sm relative">
             <div className="absolute top-0 left-0 w-full h-1 bg-gold-500" />
             <div className="flex flex-col items-center mb-10">
-              <Logo className="w-12 h-12 mb-4" />
+              <Logo className="w-20 h-20 mb-4" />
               <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
                 {siteConfig.brand.name}
               </Heading>

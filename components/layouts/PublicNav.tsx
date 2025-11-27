@@ -6,7 +6,7 @@ export function PublicNav() {
   return (
     <nav className="w-full border-b border-grid bg-white/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="relative w-32 h-10">
+        <Link href="/" className="relative w-32 h-10 md:w-30 md:h-12">
           <Logo />
         </Link>
         <div className="flex items-center gap-4">

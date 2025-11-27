@@ -91,7 +91,7 @@ export default function PublicReportPage() {
     return (
       <div className="min-h-screen bg-navy-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-6">
+          <div className="w-28 h-28 mx-auto mb-6">
             <Logo />
           </div>
           <div className="animate-spin w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full mx-auto mb-4" />
@@ -271,8 +271,8 @@ function ReportHeader({ isAdminPreview = false }: { isAdminPreview?: boolean }) 
         </div>
       )}
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10">
+        <a href="/" className="flex items-center gap-3 -ml-2">
+          <div className="w-16 h-16">
             <Logo />
           </div>
           <span className="font-medium text-navy-900 tracking-tight">IMENSIAH</span>
@@ -291,8 +291,8 @@ function ReportFooter() {
     <footer className="bg-white border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8">
+          <div className="flex items-center gap-3 -ml-2">
+            <div className="w-14 h-14">
               <Logo />
             </div>
             <span className="text-sm text-gray-600">
