@@ -28,7 +28,7 @@ export default function AdminAnalysisEditPage() {
     queryFn: authApi.getCurrentUser,
   });
 
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
 
   // Redirect non-admins
   React.useEffect(() => {

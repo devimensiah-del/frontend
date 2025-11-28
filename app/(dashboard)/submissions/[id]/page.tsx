@@ -41,7 +41,7 @@ export default function SubmissionPage() {
     queryKey: ["user"],
     queryFn: authApi.getCurrentUser,
   });
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
 
   // 2. Fetch Data
   const { data: submission, isLoading: isLoadingSubmission } = useQuery({

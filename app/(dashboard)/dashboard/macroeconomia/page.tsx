@@ -144,7 +144,7 @@ export default function MacroeconomiaPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Check if user is admin
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
 
   // Group indicators by category
   const indicatorsByCategory = useMemo(() => {

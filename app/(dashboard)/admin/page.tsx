@@ -25,7 +25,7 @@ export default function AdminDashboardPage() {
   });
 
   // Redirect non-admins to user dashboard
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   React.useEffect(() => {
     if (user && !isAdmin) {
       router.replace("/dashboard");
