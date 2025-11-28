@@ -5,8 +5,29 @@ import { Section, Container } from "@/components/editorial/Section";
 import { Display, Heading, Eyebrow, Text } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/button";
 import { ProcessStep, MetricCard, TestimonialCard, FounderCard } from "@/components/editorial/Cards";
+import { useTranslations } from "@/lib/i18n/context";
 
 export default function EditorialPage() {
+  const t = useTranslations();
+
+  const processSteps = [
+    {
+      num: t("process.step1.num"),
+      title: t("process.step1.title"),
+      desc: t("process.step1.desc"),
+    },
+    {
+      num: t("process.step2.num"),
+      title: t("process.step2.title"),
+      desc: t("process.step2.desc"),
+    },
+    {
+      num: t("process.step3.num"),
+      title: t("process.step3.title"),
+      desc: t("process.step3.desc"),
+    },
+  ];
+
   return (
     <>
       {/* --- HERO: The Manifesto Grid --- */}
@@ -14,24 +35,24 @@ export default function EditorialPage() {
         {/* Left: The Promise */}
         <div className="lg:col-span-7 p-12 lg:p-24 flex flex-col justify-center border-r border-grid relative bg-white/50">
           <div className="absolute top-12 left-12">
-            <Eyebrow>Inteligência Estratégica</Eyebrow>
+            <Eyebrow>{t("hero.eyebrow")}</Eyebrow>
           </div>
 
           <Display variant="hero" className="mt-4 md:mt-0 mb-10">
-            Torne sua empresa <br />
-            <span className="text-gold-500 italic serif-touch">imensa</span> com IA + IH.
+            {t("hero.title")} <br />
+            <span className="text-gold-500 italic serif-touch">{t("hero.titleHighlight")}</span> {t("hero.titleSuffix")}
           </Display>
 
           <Text variant="lead" className="max-w-lg mb-12">
-            Unimos a velocidade da Inteligência Artificial com a sabedoria da Inteligência Humana. Transformamos dados em decisões estratégicas em 48 horas.
+            {t("hero.description")}
           </Text>
 
           <div className="flex flex-wrap gap-6">
             <Button asChild variant="architect">
-              <a href="#diagnostico">Iniciar Análise</a>
+              <a href="#diagnostico">{t("hero.cta")}</a>
             </Button>
             <Button asChild variant="outline">
-              <a href="/login">Login</a>
+              <a href="/login">{t("hero.login")}</a>
             </Button>
           </div>
         </div>
@@ -45,32 +66,16 @@ export default function EditorialPage() {
           }}></div>
 
           {/* Top Statistic */}
-          <MetricCard value="11" label="Frameworks de Análise" />
+          <MetricCard value="11" label={t("hero.frameworks")} />
 
           {/* Bottom Statistic */}
-          <MetricCard value="48h" label="Tempo de Entrega" highlight />
+          <MetricCard value="48h" label={t("hero.deliveryTime")} highlight />
         </div>
       </Section>
 
       {/* --- HOW IT WORKS: The Blueprint --- */}
       <Section variant="grid">
-        {[
-          {
-            num: "01",
-            title: "Ingestão",
-            desc: "Compartilhe links e documentos. Nossa IA enriquece e estrutura os dados automaticamente."
-          },
-          {
-            num: "02",
-            title: "Processamento Híbrido",
-            desc: "Algoritmos aplicam Porter e PESTEL. Consultores seniores validam a intuição estratégica."
-          },
-          {
-            num: "03",
-            title: "Decisão",
-            desc: "Receba um relatório executivo pragmático. Insights claros, prontos para o conselho."
-          }
-        ].map((step, i) => (
+        {processSteps.map((step, i) => (
           <ProcessStep
             key={i}
             stepNumber={step.num}
@@ -94,25 +99,25 @@ export default function EditorialPage() {
       <Section>
         <Container>
           <div className="text-center mb-16">
-            <Eyebrow className="mb-4">Quem confia na IMENSIAH</Eyebrow>
+            <Eyebrow className="mb-4">{t("testimonials.eyebrow")}</Eyebrow>
             <Heading variant="section">
-              Empresas que já transformaram suas decisões estratégicas
+              {t("testimonials.title")}
             </Heading>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             <TestimonialCard
-              quote="Renato alia expertise em conselhos com IA estratégica — impulsionando o futuro da governança das empresas com clareza e impacto. Recomendo."
-              author="Felipe Figueira"
-              role="Coordenador Geral das Comissões Temáticas"
-              company="Board Academy"
+              quote={t("testimonials.testimonial1.quote")}
+              author={t("testimonials.testimonial1.author")}
+              role={t("testimonials.testimonial1.role")}
+              company={t("testimonials.testimonial1.company")}
             />
 
             <TestimonialCard
-              quote="Renato combina profunda experiência com IA aplicada à estratégia — transformando decisões da Associação Despertar. Clareza, ritmo e resultados. Recomendo com convicção."
-              author="Rodolfo Villela Marino"
-              role="Presidente"
-              company="Associação Despertar"
+              quote={t("testimonials.testimonial2.quote")}
+              author={t("testimonials.testimonial2.author")}
+              role={t("testimonials.testimonial2.role")}
+              company={t("testimonials.testimonial2.company")}
             />
           </div>
         </Container>
@@ -122,29 +127,29 @@ export default function EditorialPage() {
       <Section variant="dark">
         <Container>
           <div className="text-center mb-16">
-            <Eyebrow className="mb-4">Sobre nós</Eyebrow>
+            <Eyebrow className="mb-4">{t("about.eyebrow")}</Eyebrow>
             <Heading as="h2" className="text-3xl lg:text-5xl font-medium text-white">
-              Conheça os fundadores que unem décadas de experiência com visão de futuro
+              {t("about.title")}
             </Heading>
           </div>
 
           <div className="max-w-6xl mx-auto space-y-16">
             <FounderCard
-              name="Renato de Faria e Almeida Prado"
-              role="Cofundador da IMENSIAH"
-              bio="Com quase 30 anos de trajetória em conselhos, inovação e liderança com propósito, Renato combina uma visão estratégica rara com a capacidade de traduzir complexidade em ação. Cofundador da 10xMentorAI e da IMENSIAH, atua na interseção entre governança e inteligência artificial, ajudando líderes a aplicarem tecnologia com sabedoria — e não apenas com velocidade. Sua missão é clara: tornar empresas e lideranças mais humanas, sustentáveis e exponenciais, unindo experiência, intuição e IA em um mesmo fluxo de decisão inteligente."
+              name={t("about.founder1.name")}
+              role={t("about.founder1.role")}
+              bio={t("about.founder1.bio")}
             />
 
             <FounderCard
-              name="Daniela de Luca Brandão"
-              role="Cofundadora da IMENSIAH"
-              bio="Especialista em estratégia, gestão, arquitetura de processos e finanças, Daniela é a força analítica e criativa por trás da IMENSIAH. Sua trajetória une raciocínio estruturado e pensamento crítico com uma abordagem humana e inovadora para resolver problemas complexos. Na IMENSIAH, lidera a integração entre eficiência operacional e inteligência estratégica, garantindo que cada solução seja precisa, prática e orientada a resultados reais."
+              name={t("about.founder2.name")}
+              role={t("about.founder2.role")}
+              bio={t("about.founder2.bio")}
             />
 
             <FounderCard
-              name="Renato DAP"
-              role="Cofundador da IMENSIAH"
-              bio="Engenheiro e desenvolvedor especializado em inteligência artificial e sistemas full-stack. Atualmente cursando Ciência da Computação com foco em Deep Learning e AI Research na Rose-Hulman Institute of Technology, combina expertise técnica em IA (GPT-4, RAG, PyTorch) com habilidades práticas de desenvolvimento (Next.js, React Native, Golang). Criador de soluções inovadoras que unem tecnologia e impacto real, desde assistentes culinários com comando de voz até plataformas de fitness adaptativas com IA. Na IMENSIAH, lidera a implementação técnica das soluções de inteligência artificial, garantindo que a tecnologia sirva à estratégia com excelência e inovação."
+              name={t("about.founder3.name")}
+              role={t("about.founder3.role")}
+              bio={t("about.founder3.bio")}
             />
           </div>
         </Container>
