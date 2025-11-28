@@ -15,8 +15,8 @@ export default function DashboardLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { profile } = useProfile(undefined, { enabled: true });
 
-  // Check if user is admin
-  const isAdmin = profile?.role === 'admin';
+  // Check if user is admin (includes super_admin)
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
 
   const handleLogout = () => {
     // Mock logout - clear auth and redirect

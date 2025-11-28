@@ -20,7 +20,7 @@ export default function DashboardPage() {
   });
 
   // Redirect admins to admin dashboard
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   React.useEffect(() => {
     if (isAdmin) {
       router.replace("/admin");
