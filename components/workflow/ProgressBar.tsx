@@ -132,7 +132,7 @@ export function ProgressBar({
               icon={stage.icon}
               state={getDotState(stage.stage)}
               isSelected={selectedStage === stage.stage}
-              isClickable={isAdmin && stage.stage !== currentStage && !isLoading}
+              isClickable={isAdmin && stage.stage !== currentStage && !isLoading && !!onStageChange}
               onClick={() => handleStageClick(stage.stage)}
             />
             {index < stages.length - 1 && (

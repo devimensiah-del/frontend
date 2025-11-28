@@ -43,26 +43,43 @@ export default function DashboardLayout({
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8" role="navigation" aria-label="Navegação do painel">
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
-              >
-                Painel
-              </Link>
-              {isAdmin && (
-                <Link
-                  href="/dashboard/macroeconomia"
-                  className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
-                >
-                  Macroeconomia
-                </Link>
+              {isAdmin ? (
+                <>
+                  <Link
+                    href="/admin"
+                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
+                  >
+                    Empresas
+                  </Link>
+                  <Link
+                    href="/dashboard/macroeconomia"
+                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
+                  >
+                    Macroeconomia
+                  </Link>
+                  <Link
+                    href="/dashboard/configuracoes"
+                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
+                  >
+                    Configurações
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
+                  >
+                    Minhas Empresas
+                  </Link>
+                  <Link
+                    href="/dashboard/configuracoes"
+                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
+                  >
+                    Configurações
+                  </Link>
+                </>
               )}
-              <Link
-                href="/dashboard/configuracoes"
-                className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
-              >
-                Configurações
-              </Link>
             </nav>
 
             {/* User Menu */}
@@ -112,29 +129,48 @@ export default function DashboardLayout({
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
             <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
-              <Link
-                href="/dashboard"
-                onClick={closeMobileMenu}
-                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-              >
-                Painel
-              </Link>
-              {isAdmin && (
-                <Link
-                  href="/dashboard/macroeconomia"
-                  onClick={closeMobileMenu}
-                  className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-                >
-                  Macroeconomia
-                </Link>
+              {isAdmin ? (
+                <>
+                  <Link
+                    href="/admin"
+                    onClick={closeMobileMenu}
+                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                  >
+                    Empresas
+                  </Link>
+                  <Link
+                    href="/dashboard/macroeconomia"
+                    onClick={closeMobileMenu}
+                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                  >
+                    Macroeconomia
+                  </Link>
+                  <Link
+                    href="/dashboard/configuracoes"
+                    onClick={closeMobileMenu}
+                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                  >
+                    Configurações
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={closeMobileMenu}
+                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                  >
+                    Minhas Empresas
+                  </Link>
+                  <Link
+                    href="/dashboard/configuracoes"
+                    onClick={closeMobileMenu}
+                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                  >
+                    Configurações
+                  </Link>
+                </>
               )}
-              <Link
-                href="/dashboard/configuracoes"
-                onClick={closeMobileMenu}
-                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-              >
-                Configurações
-              </Link>
               <div className="border-t border-gray-200 pt-2">
                 <Button
                   onClick={handleLogout}

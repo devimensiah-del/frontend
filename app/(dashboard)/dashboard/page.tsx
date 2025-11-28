@@ -2,43 +2,47 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { submissionsApi, adminApi, authApi } from "@/lib/api/client";
-import { SubmissionCard } from "@/components/dashboard/SubmissionCard";
+import { companiesApi, authApi } from "@/lib/api/client";
+import { CompanyCard } from "@/components/dashboard/CompanyCard";
 import { Section, Container } from "@/components/editorial/Section";
 import { Heading, Eyebrow, Text } from "@/components/ui/Typography";
-import type { Submission } from "@/lib/types";
+import type { Company } from "@/lib/types";
 import { LoadingState, EmptyState } from "@/components/ui/state-components";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
-  // Fetch current user to check role
+  const router = useRouter();
+
+  // Fetch current user
   const { data: user, isLoading: isUserLoading } = useQuery({
     queryKey: ["user"],
     queryFn: authApi.getCurrentUser,
   });
 
+  // Redirect admins to admin dashboard
   const isAdmin = user?.role === "admin";
+  React.useEffect(() => {
+    if (isAdmin) {
+      router.replace("/admin");
+    }
+  }, [isAdmin, router]);
 
-  // Fetch submissions (user or admin)
-  const { data: submissionsData, isLoading: isSubmissionsLoading } = useQuery<{ submissions: Submission[]; total: number }>({
-    queryKey: [isAdmin ? "adminSubmissions" : "submissions"],
-    queryFn: async () => {
-      if (isAdmin) {
-        const response = await adminApi.getAllSubmissions();
-        return { submissions: response.data, total: response.total };
-      }
-      return submissionsApi.getAll();
-    },
-    enabled: !!user,
+  // Fetch user's companies (where user is owner or in allowed_users)
+  const { data: companiesData, isLoading: isCompaniesLoading } = useQuery({
+    queryKey: ["myCompanies"],
+    queryFn: companiesApi.getMyCompanies,
+    enabled: !!user && !isAdmin,
   });
 
-  const isLoading = isUserLoading || isSubmissionsLoading;
+  const isLoading = isUserLoading || isCompaniesLoading;
 
-  if (isLoading) {
+  // Don't render while redirecting admin
+  if (isAdmin) {
     return (
       <Section className="bg-surface-paper border-0 min-h-screen">
         <Container>
           <LoadingState
-            message="Carregando seus projetos..."
+            message="Redirecionando..."
             size="lg"
           />
         </Container>
@@ -46,60 +50,60 @@ export default function DashboardPage() {
     );
   }
 
-  // Handle different response structures or default to empty
-  const submissions = submissionsData?.submissions || [];
+  if (isLoading) {
+    return (
+      <Section className="bg-surface-paper border-0 min-h-screen">
+        <Container>
+          <LoadingState
+            message="Carregando suas empresas..."
+            size="lg"
+          />
+        </Container>
+      </Section>
+    );
+  }
+
+  const companies = companiesData?.companies || [];
 
   return (
     <Section className="bg-surface-paper border-0 min-h-screen">
       <Container>
         {/* Header Section */}
         <div className="mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <Eyebrow className="mb-4">
-            {isAdmin ? "Visão Geral Administrativa" : "Seus Projetos"}
-          </Eyebrow>
+          <Eyebrow className="mb-4">Suas Empresas</Eyebrow>
           <Heading variant="section" className="mb-6">
-            {isAdmin ? "Painel de Controle" : "Envios Recentes"}
+            Meus Projetos
           </Heading>
           <Text variant="lead" className="max-w-2xl">
-            {isAdmin
-              ? "Acompanhe o fluxo completo: recebidos, enriquecimento, análise e aprovação do relatório final."
-              : "Veja o status dos seus envios enquanto avançam pelas etapas de enriquecimento e análise estratégica."}
+            Veja as empresas que você possui acesso. Clique em uma empresa para
+            visualizar os relatórios e análises estratégicas.
           </Text>
         </div>
 
-        {/* Submissions Section */}
+        {/* Companies Section */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-          {isAdmin && (
-            <div className="mb-8">
-              <Heading variant="subtitle">
-                Todos os Envios
-              </Heading>
-              <Text variant="small" className="mt-2">
-                {submissions.length} {submissions.length === 1 ? "projeto" : "projetos"} no sistema
-              </Text>
-            </div>
-          )}
-
-          {submissions.length === 0 ? (
+          {companies.length === 0 ? (
             <EmptyState
               variant="inbox"
-              title="Nenhum projeto ainda"
-              description={
-                isAdmin
-                  ? "Aguardando novos envios de clientes. Quando houver projetos, eles aparecerão aqui."
-                  : "Você ainda não enviou nenhum projeto. Comece criando seu primeiro envio para receber análises estratégicas detalhadas."
-              }
+              title="Nenhuma empresa ainda"
+              description="Você ainda não possui acesso a nenhuma empresa. Quando você enviar uma análise ou for adicionado a uma empresa, ela aparecerá aqui."
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {submissions.map((submission: any) => (
-                <SubmissionCard
-                  key={submission.id}
-                  submission={submission}
-                  isAdmin={isAdmin}
-                />
-              ))}
-            </div>
+            <>
+              <div className="mb-8">
+                <Text variant="small" className="text-text-secondary">
+                  {companies.length} {companies.length === 1 ? "empresa" : "empresas"} disponíveis
+                </Text>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {companies.map((company: Company) => (
+                  <CompanyCard
+                    key={company.id}
+                    company={company}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </Container>

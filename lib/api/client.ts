@@ -15,6 +15,13 @@ import type {
   PaginatedResponse,
   PublicReportData,
   AccessCodeResponse,
+  Company,
+  CompanyListResponse,
+  AdminCompanyListResponse,
+  CompanyDetailResponse,
+  AdminCompanyDetailResponse,
+  CompanySubmission,
+  DataHistoryEntry,
 } from '@/types';
 
 import { handleApiError, handleNetworkError } from './error-handler';
@@ -260,27 +267,6 @@ export const submissionsApi = {
 
     return response.submission;
   },
-
-  /**
-   * Update submission
-   */
-  async update(id: string, data: Partial<Submission>): Promise<Submission> {
-    const response = await apiRequest<{ submission: Submission }>(`/submissions/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-
-    return response.submission;
-  },
-
-  /**
-   * Delete submission
-   */
-  async delete(id: string): Promise<{ message: string }> {
-    return apiRequest(`/submissions/${id}`, {
-      method: 'DELETE',
-    });
-  },
 };
 
 /**
@@ -418,11 +404,31 @@ export const adminApi = {
   },
 
   /**
+   * Get enrichment by ID (admin only)
+   */
+  async getEnrichmentById(enrichmentId: string): Promise<Enrichment> {
+    const response = await apiRequest<{ enrichment: Enrichment }>(
+      `/admin/enrichment/${enrichmentId}`
+    );
+    return response.enrichment;
+  },
+
+  /**
    * Get analysis by submission ID (admin only)
    */
   async getAnalysisBySubmissionId(submissionId: string): Promise<Analysis> {
     const response = await apiRequest<{ analysis: Analysis }>(
       `/admin/submissions/${submissionId}/analysis`
+    );
+    return response.analysis;
+  },
+
+  /**
+   * Get analysis by ID (admin only)
+   */
+  async getAnalysisById(analysisId: string): Promise<Analysis> {
+    const response = await apiRequest<{ analysis: Analysis }>(
+      `/admin/analysis/${analysisId}`
     );
     return response.analysis;
   },
@@ -442,15 +448,6 @@ export const adminApi = {
   },
 
   /**
-   * Approve enrichment (admin only) - changes status to 'approved' and triggers analysis
-   */
-  async approveEnrichment(enrichmentId: string): Promise<{ enrichment: Enrichment; message: string }> {
-    return apiRequest(`/admin/enrichment/${enrichmentId}/approve`, {
-      method: 'POST',
-    });
-  },
-
-  /**
    * Update analysis fields (admin only) - status remains unchanged
    */
   async updateAnalysis(analysisId: string, data: Record<string, any>): Promise<Analysis> {
@@ -462,28 +459,6 @@ export const adminApi = {
       }
     );
     return response.analysis;
-  },
-
-  // NOTE: createAnalysisVersion removed - no versioning in new architecture
-  // Each submission has exactly one analysis record
-
-  /**
-   * Approve analysis (admin only) - changes status to 'approved' and triggers PDF generation
-   */
-  async approveAnalysis(analysisId: string): Promise<{ analysis: Analysis; message: string }> {
-    return apiRequest(`/admin/analysis/${analysisId}/approve`, {
-      method: 'POST',
-    });
-  },
-
-  /**
-   * Send analysis to user (admin only) - changes status to 'sent'
-   */
-  async sendAnalysis(analysisId: string, userEmail: string): Promise<{ analysis: Analysis; message: string }> {
-    return apiRequest(`/admin/analysis/${analysisId}/send`, {
-      method: 'POST',
-      body: JSON.stringify({ userEmail }),
-    });
   },
 
   /**
@@ -501,6 +476,17 @@ export const adminApi = {
   async retryAnalysis(submissionId: string): Promise<{ message: string }> {
     return apiRequest(`/admin/submissions/${submissionId}/retry-analysis`, {
       method: 'POST',
+    });
+  },
+
+  /**
+   * Send analysis to client (deprecated - use toggleVisibility)
+   */
+  async sendAnalysis(analysisId: string, _email: string): Promise<{ analysis: Analysis; message: string }> {
+    // In the new architecture, "sending" is the same as making visible
+    return apiRequest(`/admin/analysis/${analysisId}/visibility`, {
+      method: 'POST',
+      body: JSON.stringify({ visible: true }),
     });
   },
 
@@ -524,15 +510,6 @@ export const adminApi = {
   },
 
   /**
-   * Reopen analysis for editing (admin only) - reverts approved → completed
-   */
-  async reopenAnalysis(analysisId: string): Promise<{ analysis: Analysis; message: string }> {
-    return apiRequest(`/admin/analysis/${analysisId}/reopen`, {
-      method: 'POST',
-    });
-  },
-
-  /**
    * Toggle blur status for premium frameworks (admin only)
    * When blurred=true, premium frameworks are hidden behind a paywall blur
    */
@@ -542,23 +519,18 @@ export const adminApi = {
       body: JSON.stringify({ blurred }),
     });
   },
-
-  /**
-   * Reopen enrichment for editing (admin only) - reverts approved → completed
-   */
-  async reopenEnrichment(enrichmentId: string): Promise<{ enrichment: Enrichment; message: string }> {
-    return apiRequest(`/admin/enrichment/${enrichmentId}/reopen`, {
-      method: 'POST',
-    });
-  },
 };
 
 /**
  * Macroeconomics API (Admin only)
- * Manages economic indicators: SELIC, IPCA, USD/BRL
+ * Manages ALL economic indicators dynamically from database
  */
-export interface MacroValue {
+export interface MacroIndicator {
+  code: string;
+  name: string;
+  category: string;
   value: number;
+  unit: string;
   effective_date: string;
   reference_period?: string;
   source_code: string;
@@ -566,9 +538,7 @@ export interface MacroValue {
 }
 
 export interface MacroSnapshot {
-  selic?: MacroValue;
-  ipca?: MacroValue;
-  usd_brl?: MacroValue;
+  indicators: Record<string, MacroIndicator>;
   as_of: string;
 }
 
@@ -581,16 +551,27 @@ export interface MacroHistoryValue {
   fetched_at: string;
 }
 
+// Category configuration for display
+export const MACRO_CATEGORIES: Record<string, { label: string; order: number }> = {
+  interest_rate: { label: 'Taxa de Juros', order: 1 },
+  inflation: { label: 'Inflação', order: 2 },
+  exchange_rate: { label: 'Câmbio', order: 3 },
+  gdp: { label: 'PIB', order: 4 },
+  production: { label: 'Produção e Serviços', order: 5 },
+  employment: { label: 'Emprego', order: 6 },
+  construction: { label: 'Construção', order: 7 },
+};
+
 export const macroApi = {
   /**
-   * Get latest snapshot of all macro indicators
+   * Get latest snapshot of ALL macro indicators
    */
   async getLatestSnapshot(): Promise<{ snapshot: MacroSnapshot | null; message?: string }> {
     return apiRequest('/admin/macro/latest');
   },
 
   /**
-   * Refresh all macro indicators (SELIC, IPCA, USD/BRL)
+   * Refresh all macro indicators
    */
   async refreshAll(): Promise<{ message: string; snapshot: MacroSnapshot }> {
     return apiRequest('/admin/macro/refresh', {
@@ -599,10 +580,10 @@ export const macroApi = {
   },
 
   /**
-   * Refresh a specific indicator
-   * @param code - One of: 'selic', 'ipca', 'usd_brl'
+   * Refresh a specific indicator by code
+   * @param code - Indicator code (e.g., 'selic', 'ipca', 'gdp_growth')
    */
-  async refreshIndicator(code: 'selic' | 'ipca' | 'usd_brl'): Promise<{ message: string; indicator: string; snapshot: MacroSnapshot }> {
+  async refreshIndicator(code: string): Promise<{ message: string; indicator: string; snapshot: MacroSnapshot }> {
     return apiRequest(`/admin/macro/refresh/${code}`, {
       method: 'POST',
     });
@@ -610,12 +591,12 @@ export const macroApi = {
 
   /**
    * Get historical values for an indicator
-   * @param code - One of: 'selic', 'ipca', 'usd_brl'
+   * @param code - Indicator code
    * @param from - Start date (YYYY-MM-DD)
    * @param to - End date (YYYY-MM-DD)
    */
   async getHistory(
-    code: 'selic' | 'ipca' | 'usd_brl',
+    code: string,
     from?: string,
     to?: string
   ): Promise<{ indicator: string; count: number; from: string; to: string; history: MacroHistoryValue[] }> {
@@ -628,6 +609,170 @@ export const macroApi = {
   },
 };
 
+/**
+ * Companies API (User endpoints)
+ * Company-centric model for viewing user's companies
+ */
+export const companiesApi = {
+  /**
+   * Get all companies where the user is owner or in allowed_users
+   */
+  async getMyCompanies(): Promise<CompanyListResponse> {
+    return apiRequest('/companies');
+  },
+
+  /**
+   * Get company details by ID (user must have access)
+   */
+  async getById(id: string): Promise<CompanyDetailResponse> {
+    return apiRequest(`/companies/${id}`);
+  },
+
+  /**
+   * Add a user to company's allowed_users (owner or admin only)
+   */
+  async addUser(companyId: string, userId: string): Promise<{ message: string }> {
+    return apiRequest(`/companies/${companyId}/users`, {
+      method: 'POST',
+      body: JSON.stringify({ user_id: userId }),
+    });
+  },
+
+  /**
+   * Remove a user from company's allowed_users (owner or admin only)
+   */
+  async removeUser(companyId: string, userId: string): Promise<{ message: string }> {
+    return apiRequest(`/companies/${companyId}/users/${userId}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+/**
+ * Admin Companies API
+ * Company management for administrators
+ */
+export const adminCompaniesApi = {
+  /**
+   * List all companies with pagination (admin only)
+   */
+  async listAll(params?: { limit?: number; offset?: number }): Promise<AdminCompanyListResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+
+    const query = queryParams.toString();
+    const endpoint = query ? `/admin/companies?${query}` : '/admin/companies';
+
+    return apiRequest(endpoint);
+  },
+
+  /**
+   * Get company details with submissions and history (admin only)
+   */
+  async getById(id: string): Promise<AdminCompanyDetailResponse> {
+    return apiRequest(`/admin/companies/${id}`);
+  },
+
+  /**
+   * Verify a company (locks CNPJ uniqueness)
+   */
+  async verify(companyId: string): Promise<{ message: string; data: { company_id: string; is_verified: boolean; cnpj?: string } }> {
+    return apiRequest(`/admin/companies/${companyId}/verify`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Unverify a company
+   */
+  async unverify(companyId: string): Promise<{ message: string; data: { company_id: string; is_verified: boolean } }> {
+    return apiRequest(`/admin/companies/${companyId}/unverify`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Add a user to company's allowed_users (admin)
+   */
+  async addUser(companyId: string, userId: string): Promise<{ message: string }> {
+    return apiRequest(`/admin/companies/${companyId}/users`, {
+      method: 'POST',
+      body: JSON.stringify({ user_id: userId }),
+    });
+  },
+
+  /**
+   * Remove a user from company's allowed_users (admin)
+   */
+  async removeUser(companyId: string, userId: string): Promise<{ message: string }> {
+    return apiRequest(`/admin/companies/${companyId}/users/${userId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  /**
+   * Transfer company ownership to a new user
+   */
+  async transferOwnership(companyId: string, newOwnerId: string): Promise<{ message: string; data: { company_id: string; new_owner_id: string } }> {
+    return apiRequest(`/admin/companies/${companyId}/transfer-ownership`, {
+      method: 'POST',
+      body: JSON.stringify({ new_owner_id: newOwnerId }),
+    });
+  },
+
+  /**
+   * Update company fields (admin only)
+   * Updated fields become auto-verified
+   */
+  async updateCompany(companyId: string, fields: Record<string, unknown>): Promise<{ company: Company; message: string }> {
+    return apiRequest(`/admin/companies/${companyId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ fields }),
+    });
+  },
+
+  /**
+   * Re-enrich company (create new submission + enrichment)
+   */
+  async reEnrich(companyId: string): Promise<{ message: string; data: { submission_id: string; enrichment_id: string; company_id: string } }> {
+    return apiRequest(`/admin/companies/${companyId}/re-enrich`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Re-analyze company using the last submission's challenge
+   * (create new submission, copy enrichment, trigger analysis)
+   */
+  async reAnalyze(companyId: string): Promise<{ message: string; data: { submission_id: string; enrichment_id: string; company_id: string } }> {
+    return apiRequest(`/admin/companies/${companyId}/re-analyze`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Analyze company with a NEW challenge (create new submission, copy enrichment, trigger analysis)
+   * @param companyId - The company ID
+   * @param newChallenge - The business challenge to analyze (required)
+   */
+  async analyzeWithNewChallenge(companyId: string, newChallenge: string): Promise<{ message: string; data: { submission_id: string; enrichment_id: string; company_id: string } }> {
+    return apiRequest(`/admin/companies/${companyId}/re-analyze`, {
+      method: 'POST',
+      body: JSON.stringify({ new_challenge: newChallenge }),
+    });
+  },
+
+  /**
+   * Enrich and analyze company (create new submission, enrich, then auto-analyze)
+   */
+  async enrichAndAnalyze(companyId: string): Promise<{ message: string; data: { submission_id: string; enrichment_id: string; company_id: string } }> {
+    return apiRequest(`/admin/companies/${companyId}/enrich-and-analyze`, {
+      method: 'POST',
+    });
+  },
+};
+
 // Export all APIs as a single client
 export const apiClient = {
   auth: authApi,
@@ -637,6 +782,8 @@ export const apiClient = {
   user: userApi,
   admin: adminApi,
   macro: macroApi,
+  companies: companiesApi,
+  adminCompanies: adminCompaniesApi,
 };
 
 export default apiClient;
