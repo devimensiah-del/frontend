@@ -1,0 +1,146 @@
+{
+  "nav": {
+    "login": "Sign In"
+  },
+  "hero": {
+    "eyebrow": "Strategic Intelligence",
+    "title": "Make your company",
+    "titleHighlight": "immense",
+    "titleSuffix": "with AI + HI.",
+    "description": "We combine the speed of Artificial Intelligence with the wisdom of Human Intelligence. We transform data into strategic decisions in 48 hours.",
+    "cta": "Start Analysis",
+    "login": "Login",
+    "frameworks": "Analysis Frameworks",
+    "deliveryTime": "Delivery Time"
+  },
+  "process": {
+    "step1": {
+      "num": "01",
+      "title": "Ingestion",
+      "desc": "Share links and documents. Our AI enriches and structures the data automatically."
+    },
+    "step2": {
+      "num": "02",
+      "title": "Hybrid Processing",
+      "desc": "Algorithms apply Porter and PESTEL. Senior consultants validate strategic intuition."
+    },
+    "step3": {
+      "num": "03",
+      "title": "Decision",
+      "desc": "Receive a pragmatic executive report. Clear insights, ready for the board."
+    }
+  },
+  "testimonials": {
+    "eyebrow": "Who trusts IMENSIAH",
+    "title": "Companies that have already transformed their strategic decisions",
+    "testimonial1": {
+      "quote": "Renato combines board expertise with strategic AI — driving the future of corporate governance with clarity and impact. Highly recommended.",
+      "author": "Felipe Figueira",
+      "role": "General Coordinator of Thematic Committees",
+      "company": "Board Academy"
+    },
+    "testimonial2": {
+      "quote": "Renato combines deep experience with AI applied to strategy — transforming decisions at Associação Despertar. Clarity, pace and results. I recommend with conviction.",
+      "author": "Rodolfo Villela Marino",
+      "role": "President",
+      "company": "Associação Despertar"
+    }
+  },
+  "about": {
+    "eyebrow": "About Us",
+    "title": "Meet the founders who combine decades of experience with a vision for the future",
+    "founder1": {
+      "name": "Renato de Faria e Almeida Prado",
+      "role": "IMENSIAH Co-founder",
+      "bio": "With nearly 30 years of experience in boards, innovation, and purpose-driven leadership, Renato combines a rare strategic vision with the ability to translate complexity into action. Co-founder of 10xMentorAI and IMENSIAH, he works at the intersection of governance and artificial intelligence, helping leaders apply technology with wisdom — not just speed. His mission is clear: to make companies and leaders more human, sustainable, and exponential, uniting experience, intuition, and AI in a single flow of intelligent decision-making."
+    },
+    "founder2": {
+      "name": "Daniela de Luca Brandão",
+      "role": "IMENSIAH Co-founder",
+      "bio": "A specialist in strategy, management, process architecture, and finance, Daniela is the analytical and creative force behind IMENSIAH. Her journey combines structured reasoning and critical thinking with a human and innovative approach to solving complex problems. At IMENSIAH, she leads the integration between operational efficiency and strategic intelligence, ensuring that each solution is precise, practical, and oriented toward real results."
+    },
+    "founder3": {
+      "name": "Renato DAP",
+      "role": "IMENSIAH Co-founder",
+      "bio": "Engineer and developer specialized in artificial intelligence and full-stack systems. Currently pursuing Computer Science with a focus on Deep Learning and AI Research at Rose-Hulman Institute of Technology, he combines technical AI expertise (GPT-4, RAG, PyTorch) with practical development skills (Next.js, React Native, Golang). Creator of innovative solutions that unite technology and real impact, from voice-controlled culinary assistants to adaptive AI fitness platforms. At IMENSIAH, he leads the technical implementation of artificial intelligence solutions, ensuring that technology serves strategy with excellence and innovation."
+    }
+  },
+  "formUnavailable": {
+    "title": "Coming Soon to Your Region",
+    "message": "Our strategic analysis service is currently available only in Brazil. We're working to expand to other regions soon.",
+    "cta": "Contact Us",
+    "ctaEmail": "contact@imensiah.com"
+  },
+  "form": {
+    "title": "Request Strategic Diagnosis",
+    "subtitle": "Fill in the data below to start our hybrid analysis (AI + HI).",
+    "mandatory": "Required Information",
+    "optional": "Additional Information (Optional)",
+    "companyName": "Company Name",
+    "companyNamePlaceholder": "Acme Corp",
+    "contactName": "Your Name",
+    "contactNamePlaceholder": "John Smith",
+    "contactEmail": "Your Email",
+    "contactEmailPlaceholder": "john@acme.com",
+    "businessChallenge": "Main Challenge",
+    "businessChallengePlaceholder": "Describe the main strategic challenge your company faces today...",
+    "businessChallengeHint": "Be as specific as possible. This will guide our analysis.",
+    "website": "Website",
+    "websitePlaceholder": "https://acme.com",
+    "industry": "Industry",
+    "industryPlaceholder": "Technology, Healthcare, Finance...",
+    "companySize": "Company Size",
+    "companySizeSelect": "Select",
+    "companySizeOptions": {
+      "1-10": "1-10 employees",
+      "11-50": "11-50 employees",
+      "51-200": "51-200 employees",
+      "201-500": "201-500 employees",
+      "501+": "501+ employees"
+    },
+    "location": "Location",
+    "locationPlaceholder": "New York, NY",
+    "phone": "Phone",
+    "phonePlaceholder": "+1 (555) 123-4567",
+    "position": "Position",
+    "positionPlaceholder": "CEO, Director, Manager...",
+    "targetMarket": "Target Market",
+    "targetMarketPlaceholder": "B2B, B2C, B2B2C...",
+    "fundingStage": "Funding Stage",
+    "fundingStageSelect": "Select",
+    "fundingStageOptions": {
+      "bootstrapped": "Bootstrapped",
+      "seed": "Seed",
+      "series-a": "Series A",
+      "series-b": "Series B",
+      "series-c+": "Series C+",
+      "public": "Public"
+    },
+    "revenueMin": "Min. Annual Revenue ($)",
+    "revenueMinPlaceholder": "1000000",
+    "revenueMax": "Max. Annual Revenue ($)",
+    "revenueMaxPlaceholder": "5000000",
+    "linkedin": "Company LinkedIn",
+    "linkedinPlaceholder": "https://linkedin.com/company/...",
+    "twitter": "Twitter/X",
+    "twitterPlaceholder": "@acmecorp",
+    "instagram": "Instagram",
+    "instagramPlaceholder": "https://instagram.com/acmecorp",
+    "additionalNotes": "Additional Notes",
+    "additionalNotesPlaceholder": "Any additional information that may be relevant...",
+    "submit": "Submit for Analysis",
+    "submitting": "Processing...",
+    "disclaimer": "Your data is treated with strict confidentiality.",
+    "successTitle": "Diagnosis Requested!",
+    "successMessage": "We have received your data. You will receive your report soon.",
+    "errorTitle": "Submission Error",
+    "errorMessage": "An error occurred while processing your request. Please try again.",
+    "validation": {
+      "companyNameRequired": "Company name is required.",
+      "contactNameRequired": "Your name is required.",
+      "emailInvalid": "Invalid email.",
+      "urlInvalid": "Invalid URL.",
+      "challengeRequired": "Please describe your challenge in more detail (min. 10 characters)."
+    }
+  }
+}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -26,46 +26,53 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { useToast } from "@/components/ui/use-toast"
+import { useTranslations, useI18n } from "@/lib/i18n/context"
 
-// --- Zod Schema for Validation ---
-const formSchema = z.object({
-  // Company Information (5 fields)
-  companyName: z.string().min(2, { message: "Nome da empresa é obrigatório." }),
-  companyWebsite: z.string().url({ message: "URL inválida." }).optional().or(z.literal("")),
-  companyIndustry: z.string().optional(),
-  companySize: z.string().optional(),
-  companyLocation: z.string().optional(),
+type FormValues = z.infer<ReturnType<typeof createFormSchema>>
 
-  // Contact Information (4 fields)
-  contactName: z.string().min(2, { message: "Seu nome é obrigatório." }),
-  contactEmail: z.string().email({ message: "Email inválido." }),
-  contactPhone: z.string().optional(),
-  contactPosition: z.string().optional(),
+function createFormSchema(t: (key: string) => string) {
+  return z.object({
+    // Company Information (5 fields)
+    companyName: z.string().min(2, { message: t("form.validation.companyNameRequired") }),
+    companyWebsite: z.string().url({ message: t("form.validation.urlInvalid") }).optional().or(z.literal("")),
+    companyIndustry: z.string().optional(),
+    companySize: z.string().optional(),
+    companyLocation: z.string().optional(),
 
-  // Business Context (4 fields)
-  targetMarket: z.string().optional(),
-  annualRevenueMin: z.string().transform((val) => (val === "" ? undefined : Number(val))).optional(),
-  annualRevenueMax: z.string().transform((val) => (val === "" ? undefined : Number(val))).optional(),
-  fundingStage: z.string().optional(),
+    // Contact Information (4 fields)
+    contactName: z.string().min(2, { message: t("form.validation.contactNameRequired") }),
+    contactEmail: z.string().email({ message: t("form.validation.emailInvalid") }),
+    contactPhone: z.string().optional(),
+    contactPosition: z.string().optional(),
 
-  // Submission Details (5 fields)
-  businessChallenge: z.string().min(10, { message: "Descreva seu desafio com mais detalhes (mín. 10 caracteres)." }),
-  additionalNotes: z.string().optional(),
-  linkedinUrl: z.string().url({ message: "URL inválida." }).optional().or(z.literal("")),
-  twitterHandle: z.string().optional(),
-  instagramUrl: z.string().url({ message: "URL inválida." }).optional().or(z.literal("")),
-})
+    // Business Context (4 fields)
+    targetMarket: z.string().optional(),
+    annualRevenueMin: z.string().transform((val) => (val === "" ? undefined : Number(val))).optional(),
+    annualRevenueMax: z.string().transform((val) => (val === "" ? undefined : Number(val))).optional(),
+    fundingStage: z.string().optional(),
 
-type FormValues = z.infer<typeof formSchema>
+    // Submission Details (5 fields)
+    businessChallenge: z.string().min(10, { message: t("form.validation.challengeRequired") }),
+    additionalNotes: z.string().optional(),
+    linkedinUrl: z.string().url({ message: t("form.validation.urlInvalid") }).optional().or(z.literal("")),
+    twitterHandle: z.string().optional(),
+    instagramUrl: z.string().url({ message: t("form.validation.urlInvalid") }).optional().or(z.literal("")),
+  })
+}
 
 export function SubmissionForm() {
   const { toast } = useToast()
+  const t = useTranslations()
+  const { locale } = useI18n()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [accordionValue, setAccordionValue] = useState<string>("")
 
   const handleAccordionChange = useCallback((value: string) => {
     setAccordionValue(value)
   }, [])
+
+  // Create schema with translations - memoized to prevent unnecessary re-renders
+  const formSchema = useMemo(() => createFormSchema(t), [locale, t])
 
   // 1. Define form with react-hook-form and zod resolver
   const form = useForm<FormValues>({
@@ -137,16 +144,16 @@ export function SubmissionForm() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Falha no envio' }))
-        throw new Error(errorData.message || 'Erro ao enviar formulário')
+        const errorData = await response.json().catch(() => ({ message: t("form.errorMessage") }))
+        throw new Error(errorData.message || t("form.errorMessage"))
       }
 
       const result = await response.json()
       console.log("Submission successful:", result)
 
       toast({
-        title: "Diagnóstico Solicitado!",
-        description: "Recebemos seus dados. Em breve você receberá seu relatório.",
+        title: t("form.successTitle"),
+        description: t("form.successMessage"),
       })
       form.reset()
       // Optional: Redirect to a thank you page
@@ -155,8 +162,8 @@ export function SubmissionForm() {
     } catch (error) {
       console.error("Error submitting form:", error)
       toast({
-        title: "Erro no envio",
-        description: "Ocorreu um erro ao processar sua solicitação. Tente novamente.",
+        title: t("form.errorTitle"),
+        description: t("form.errorMessage"),
         variant: "destructive",
       })
     } finally {
@@ -171,16 +178,16 @@ export function SubmissionForm() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gold-500"></div>
 
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-medium mb-2">Solicitar Diagnóstico Estratégico</h2>
+          <h2 className="text-3xl font-medium mb-2">{t("form.title")}</h2>
           <p className="text-text-secondary text-sm">
-            Preencha os dados abaixo para iniciar nossa análise híbrida (IA + IH).
+            {t("form.subtitle")}
           </p>
         </div>
 
         {/* --- MANDATORY FIELDS (Always Visible) --- */}
         <div className="space-y-6">
           <h3 className="font-heading text-lg font-medium text-navy-900 border-b border-line pb-2">
-            Informações Obrigatórias
+            {t("form.mandatory")}
           </h3>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -190,9 +197,9 @@ export function SubmissionForm() {
               name="companyName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Nome da Empresa*</FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.companyName")}*</FormLabel>
                   <FormControl>
-                    <Input placeholder="Acme Corp" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                    <Input placeholder={t("form.companyNamePlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -205,9 +212,9 @@ export function SubmissionForm() {
               name="contactName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Seu Nome*</FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.contactName")}*</FormLabel>
                   <FormControl>
-                    <Input placeholder="João Silva" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                    <Input placeholder={t("form.contactNamePlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -220,9 +227,9 @@ export function SubmissionForm() {
               name="contactEmail"
               render={({ field }) => (
                 <FormItem className="md:col-span-2">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Seu Email*</FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.contactEmail")}*</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="joao@acme.com" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                    <Input type="email" placeholder={t("form.contactEmailPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -235,16 +242,16 @@ export function SubmissionForm() {
               name="businessChallenge"
               render={({ field }) => (
                 <FormItem className="md:col-span-2">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Desafio Principal*</FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.businessChallenge")}*</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Descreva o principal desafio estratégico que sua empresa enfrenta hoje..."
+                      placeholder={t("form.businessChallengePlaceholder")}
                       className="bg-surface-paper border-line min-h-[120px] focus:border-navy-900 resize-none p-4"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Seja o mais específico possível. Isso guiará nossa análise.
+                    {t("form.businessChallengeHint")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -263,7 +270,7 @@ export function SubmissionForm() {
         >
           <AccordionItem value="optional" className="border-b-0">
             <AccordionTrigger className="font-heading text-lg font-medium text-navy-900 hover:text-gold-500 py-4">
-              Informações Adicionais (Opcional)
+              {t("form.optional")}
             </AccordionTrigger>
             <AccordionContent className="pt-4 pb-6 space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
@@ -273,9 +280,9 @@ export function SubmissionForm() {
                   name="companyWebsite"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Website</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.website")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://acme.com" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input placeholder={t("form.websitePlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -288,9 +295,9 @@ export function SubmissionForm() {
                   name="companyIndustry"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Setor</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.industry")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Tecnologia, Saúde, Finanças..." {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input placeholder={t("form.industryPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -303,14 +310,14 @@ export function SubmissionForm() {
                   name="companySize"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Tamanho da Empresa</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.companySize")}</FormLabel>
                       <Select {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900">
-                        <SelectOption value="">Selecione</SelectOption>
-                        <SelectOption value="1-10">1-10 funcionários</SelectOption>
-                        <SelectOption value="11-50">11-50 funcionários</SelectOption>
-                        <SelectOption value="51-200">51-200 funcionários</SelectOption>
-                        <SelectOption value="201-500">201-500 funcionários</SelectOption>
-                        <SelectOption value="501+">501+ funcionários</SelectOption>
+                        <SelectOption value="">{t("form.companySizeSelect")}</SelectOption>
+                        <SelectOption value="1-10">{t("form.companySizeOptions.1-10")}</SelectOption>
+                        <SelectOption value="11-50">{t("form.companySizeOptions.11-50")}</SelectOption>
+                        <SelectOption value="51-200">{t("form.companySizeOptions.51-200")}</SelectOption>
+                        <SelectOption value="201-500">{t("form.companySizeOptions.201-500")}</SelectOption>
+                        <SelectOption value="501+">{t("form.companySizeOptions.501+")}</SelectOption>
                       </Select>
                       <FormMessage />
                     </FormItem>
@@ -323,9 +330,9 @@ export function SubmissionForm() {
                   name="companyLocation"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Localização</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.location")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="São Paulo, SP" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input placeholder={t("form.locationPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -338,9 +345,9 @@ export function SubmissionForm() {
                   name="contactPhone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Telefone</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.phone")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="(11) 98765-4321" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input placeholder={t("form.phonePlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -353,9 +360,9 @@ export function SubmissionForm() {
                   name="contactPosition"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Cargo</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.position")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="CEO, Diretor, Gerente..." {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input placeholder={t("form.positionPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -368,9 +375,9 @@ export function SubmissionForm() {
                   name="targetMarket"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Mercado Alvo</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.targetMarket")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="B2B, B2C, B2B2C..." {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input placeholder={t("form.targetMarketPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -383,15 +390,15 @@ export function SubmissionForm() {
                   name="fundingStage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Estágio de Financiamento</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.fundingStage")}</FormLabel>
                       <Select {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900">
-                        <SelectOption value="">Selecione</SelectOption>
-                        <SelectOption value="bootstrapped">Bootstrapped</SelectOption>
-                        <SelectOption value="seed">Seed</SelectOption>
-                        <SelectOption value="series-a">Series A</SelectOption>
-                        <SelectOption value="series-b">Series B</SelectOption>
-                        <SelectOption value="series-c+">Series C+</SelectOption>
-                        <SelectOption value="public">Pública</SelectOption>
+                        <SelectOption value="">{t("form.fundingStageSelect")}</SelectOption>
+                        <SelectOption value="bootstrapped">{t("form.fundingStageOptions.bootstrapped")}</SelectOption>
+                        <SelectOption value="seed">{t("form.fundingStageOptions.seed")}</SelectOption>
+                        <SelectOption value="series-a">{t("form.fundingStageOptions.series-a")}</SelectOption>
+                        <SelectOption value="series-b">{t("form.fundingStageOptions.series-b")}</SelectOption>
+                        <SelectOption value="series-c+">{t("form.fundingStageOptions.series-c+")}</SelectOption>
+                        <SelectOption value="public">{t("form.fundingStageOptions.public")}</SelectOption>
                       </Select>
                       <FormMessage />
                     </FormItem>
@@ -404,9 +411,9 @@ export function SubmissionForm() {
                   name="annualRevenueMin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Receita Anual Mín. (R$)</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.revenueMin")}</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="1000000" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input type="number" placeholder={t("form.revenueMinPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -419,9 +426,9 @@ export function SubmissionForm() {
                   name="annualRevenueMax"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Receita Anual Máx. (R$)</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.revenueMax")}</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="5000000" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input type="number" placeholder={t("form.revenueMaxPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -434,9 +441,9 @@ export function SubmissionForm() {
                   name="linkedinUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">LinkedIn da Empresa</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.linkedin")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://linkedin.com/company/..." {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input placeholder={t("form.linkedinPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -449,9 +456,9 @@ export function SubmissionForm() {
                   name="twitterHandle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Twitter/X</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.twitter")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="@acmecorp" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input placeholder={t("form.twitterPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -464,9 +471,9 @@ export function SubmissionForm() {
                   name="instagramUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Instagram</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.instagram")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://instagram.com/acmecorp" {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
+                        <Input placeholder={t("form.instagramPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -479,10 +486,10 @@ export function SubmissionForm() {
                   name="additionalNotes"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Notas Adicionais</FormLabel>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">{t("form.additionalNotes")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Qualquer informação adicional que possa ser relevante..."
+                          placeholder={t("form.additionalNotesPlaceholder")}
                           className="bg-surface-paper border-line min-h-[100px] focus:border-navy-900 resize-none p-4"
                           {...field}
                         />
@@ -501,16 +508,16 @@ export function SubmissionForm() {
           <Button type="submit" className="btn-architect w-full flex items-center justify-center gap-2" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Processando...
+                <Loader2 className="w-4 h-4 animate-spin" /> {t("form.submitting")}
               </>
             ) : (
               <>
-                Enviar para Análise <ArrowRight className="w-4 h-4" />
+                {t("form.submit")} <ArrowRight className="w-4 h-4" />
               </>
             )}
           </Button>
           <p className="text-xs text-center text-text-secondary mt-4">
-            Seus dados são tratados com estrita confidencialidade.
+            {t("form.disclaimer")}
           </p>
         </div>
       </form>
