@@ -95,32 +95,26 @@ export const dashboardNav: NavSection[] = [
   },
 ] as const;
 
-// Admin Navigation
+// Admin Navigation (Company-Centric Architecture)
 export const adminNav: NavSection[] = [
   {
     title: 'Principal',
     items: [
       {
-        title: 'Envios',
-        href: '/admin/envios',
-        icon: 'FileText',
-        description: 'Ver envios com dados do formulário',
+        title: 'Empresas',
+        href: '/admin',
+        icon: 'Building2',
+        description: 'Gerenciar empresas e análises',
       },
       {
-        title: 'Enriquecimento',
-        href: '/admin/enriquecimento',
-        icon: 'Database',
-        description: 'Aprovar dados enriquecidos',
-      },
-      {
-        title: 'Análise',
-        href: '/admin/analise',
-        icon: 'BarChart',
-        description: 'Editar análise e gerar PDF',
+        title: 'Macroeconomia',
+        href: '/dashboard/macroeconomia',
+        icon: 'TrendingUp',
+        description: 'Indicadores econômicos',
       },
       {
         title: 'Configurações',
-        href: '/admin/configuracoes',
+        href: '/dashboard/configuracoes',
         icon: 'Settings',
         description: 'Configurações do perfil',
       },
@@ -140,27 +134,28 @@ export interface WorkflowStage {
   description: string;
 }
 
+// Workflow stages (Company-Centric: Company → Enrichment → Analysis)
 export const workflowStages: WorkflowStage[] = [
   {
     stage: 1,
-    name: 'Envios',
-    href: '/admin/dashboard',
-    icon: 'FileText',
-    description: 'Revisar envios de clientes',
+    name: 'Empresas',
+    href: '/admin',
+    icon: 'Building2',
+    description: 'Gerenciar empresas cadastradas',
   },
   {
     stage: 2,
     name: 'Enriquecimento',
-    href: '/admin/enriquecimento',
+    href: '/admin', // Navigate to company, then to enrichment
     icon: 'Database',
-    description: 'Editar dados enriquecidos',
+    description: 'Revisar e aprovar dados enriquecidos',
   },
   {
     stage: 3,
     name: 'Análise',
-    href: '/admin/submissions',
+    href: '/admin', // Navigate to company, then to analysis
     icon: 'BarChart',
-    description: 'Criar relatórios estratégicos',
+    description: 'Gerar e editar análises estratégicas',
   },
 ] as const;
 
@@ -184,11 +179,9 @@ export const dashboardRoutes = {
 } as const;
 
 export const adminRoutes = {
-  dashboard: '/admin/envios', // Default admin landing page
-  envios: '/admin/envios',
-  enriquecimento: '/admin/enriquecimento',
-  analise: '/admin/analise',
-  configuracoes: '/admin/configuracoes',
+  dashboard: '/admin', // Default admin landing page (company list)
+  companies: '/admin', // Alias for clarity
+  configuracoes: '/dashboard/configuracoes',
 } as const;
 
 export const protectedRoutes = {
@@ -476,7 +469,7 @@ export function getDefaultRouteByRole(role: string | undefined): string {
   switch (role) {
     case 'admin':
     case 'super_admin':
-      return adminRoutes.dashboard; // /admin/envios
+      return adminRoutes.dashboard; // /admin (companies list)
     case 'user':
     default:
       return dashboardRoutes.main; // /dashboard
