@@ -11,7 +11,7 @@
 // All workflow state is tracked in Enrichment and Analysis entities
 export type SubmissionStatus = 'received';
 
-export type UserRole = 'admin' | 'user';
+export type UserRole = 'admin' | 'user' | 'super_admin';
 
 // ============================================================================
 // User Types
