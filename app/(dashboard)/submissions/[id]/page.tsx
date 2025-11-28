@@ -18,7 +18,7 @@ import { Select, SelectOption } from "@/components/ui/Select";
 import { SendAnalysisDialog } from "@/app/(dashboard)/_components/SendAnalysisDialog";
 import { WorkflowProgress } from "@/app/(dashboard)/_components/WorkflowProgress";
 import { ProgressBar } from "@/components/workflow";
-import { computeAdminStage, computeUserStage, getStageTransition, type AdminStage } from "@/lib/utils/workflow-stages";
+import { computeAdminStage, computeUserStage } from "@/lib/utils/workflow-stages";
 import { Download, Eye, EyeOff, Share2, ExternalLink, Copy } from "lucide-react";
 
 export default function SubmissionPage() {
@@ -142,49 +142,7 @@ export default function SubmissionPage() {
     }
   });
 
-  // Stage change mutation - handles all stage transitions via the progress bar
-  const stageChangeMutation = useMutation({
-    mutationFn: async (targetStage: number) => {
-      const currentStage = computeAdminStage(enrichment?.status, analysis?.status, isVisibleToUser);
-      const transition = getStageTransition(currentStage as AdminStage, targetStage as AdminStage);
-
-      if (!transition) return;
-
-      switch (transition.action) {
-        case 'approveEnrichment':
-          await adminApi.approveEnrichment(enrichment!.id);
-          break;
-        case 'reopenEnrichment':
-          await adminApi.reopenEnrichment(enrichment!.id);
-          break;
-        case 'approveAnalysis':
-          await adminApi.approveAnalysis(analysis!.id);
-          break;
-        case 'reopenAnalysis':
-          await adminApi.reopenAnalysis(analysis!.id);
-          break;
-        case 'toggleVisibility':
-          await adminApi.toggleVisibility(analysis!.id, transition.params?.visible ?? false);
-          break;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["enrichment", id] });
-      queryClient.invalidateQueries({ queryKey: ["analysis", id] });
-      toast({
-        title: "Sucesso",
-        description: "Estágio atualizado com sucesso.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível alterar o estágio.",
-        variant: "destructive"
-      });
-      console.error("Error changing stage:", error);
-    }
-  });
+  // Stage change functionality removed - use /admin/companies/[id] for workflow management
 
   // Blur toggle mutation - controls premium content blur on report
   const blurToggleMutation = useMutation({
@@ -466,7 +424,7 @@ export default function SubmissionPage() {
           </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Progress Bar (read-only - use /admin/companies/[id] for workflow management) */}
         <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
           <ProgressBar
             currentStage={
@@ -477,8 +435,6 @@ export default function SubmissionPage() {
             isAdmin={isAdmin}
             enrichmentStatus={enrichment?.status}
             analysisStatus={analysis?.status}
-            onStageChange={isAdmin ? (stage) => stageChangeMutation.mutateAsync(stage) : undefined}
-            isLoading={stageChangeMutation.isPending}
           />
         </div>
 

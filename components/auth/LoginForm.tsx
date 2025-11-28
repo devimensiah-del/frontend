@@ -62,7 +62,7 @@ export function LoginForm() {
 
       {/* Logo and Branding */}
       <div className="flex flex-col items-center mb-10">
-        <Logo className="w-12 h-12 mb-4" />
+        <Logo className="w-20 h-20 mb-4" />
         <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
           {siteConfig.brand.name}
         </Heading>

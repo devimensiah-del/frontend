@@ -565,6 +565,132 @@ export interface Report {
 }
 
 // ============================================================================
+// Company Types (Company-centric model)
+// ============================================================================
+
+export interface Company {
+  id: string;
+
+  // Core identifiers (from submission)
+  name: string;
+  cnpj?: string;
+  website?: string;
+
+  // Business context (from submission)
+  industry?: string;
+  company_size?: string;
+  location?: string;
+  target_market?: string;
+  funding_stage?: string;
+  annual_revenue_min?: number;
+  annual_revenue_max?: number;
+
+  // Enriched data (from AI enrichment)
+  foundation_year?: string;
+  legal_name?: string;
+  headquarters?: string;
+  sector?: string;
+  target_audience?: string;
+  value_proposition?: string;
+  employees_range?: string;
+  revenue_estimate?: string;
+  business_model?: string;
+  competitors?: string[];
+  market_share_status?: string;
+  digital_maturity?: number;
+  strengths?: string[];
+  weaknesses?: string[];
+
+  // Social links
+  linkedin_url?: string;
+  twitter_handle?: string;
+
+  // Verification & Access Control
+  is_verified: boolean;
+  allowed_users: string[]; // User IDs
+  owner_id?: string;
+
+  // Timestamps
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CompanySubmission {
+  company_id: string;
+  submission_id: string;
+  is_primary: boolean;
+  linked_at: string;
+  linked_by?: string;
+}
+
+export interface DataHistoryEntry {
+  id: string;
+  company_id: string;
+  field_name: string;
+  old_value?: string;
+  new_value?: string;
+  source: 'submission' | 'enrichment' | 'manual';
+  source_id?: string;
+  changed_by?: string;
+  changed_at: string;
+}
+
+export interface CompanyListResponse {
+  companies: Company[];
+  count: number;
+}
+
+export interface AdminCompanyListResponse {
+  companies: Company[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface CompanyDetailResponse {
+  company: Company;
+  primary_submission_id?: string; // Will be populated after backend enhancement
+}
+
+// EnrichmentStatusInfo contains current enrichment status for admin dashboard
+export interface EnrichmentStatusInfo {
+  enrichment_id: string;
+  submission_id: string;
+  status: 'pending' | 'completed' | 'failed';
+  progress: number;
+  current_step: string;
+  started_at?: string;
+  completed_at?: string;
+  error_message?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// AnalysisHistoryItem represents a single analysis with its associated challenge
+export interface AnalysisHistoryItem {
+  analysis_id: string;
+  submission_id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  business_challenge: string;
+  is_blurred: boolean;
+  is_visible_to_user: boolean;
+  access_code?: string;
+  pdf_url?: string;
+  completed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminCompanyDetailResponse {
+  company: Company;
+  submissions: CompanySubmission[];
+  history: DataHistoryEntry[];
+  enrichment_status?: EnrichmentStatusInfo;
+  enrichments_history?: EnrichmentStatusInfo[];
+  analyses_history?: AnalysisHistoryItem[];
+}
+
+// ============================================================================
 // API Response Wrappers
 // ============================================================================
 
