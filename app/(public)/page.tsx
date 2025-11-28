@@ -5,10 +5,13 @@ import { Section, Container } from "@/components/editorial/Section";
 import { Display, Heading, Eyebrow, Text } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/button";
 import { ProcessStep, MetricCard, TestimonialCard, FounderCard } from "@/components/editorial/Cards";
-import { useTranslations } from "@/lib/i18n/context";
+import { useTranslations, useI18n } from "@/lib/i18n/context";
+import { Mail } from "lucide-react";
 
 export default function EditorialPage() {
   const t = useTranslations();
+  const { locale } = useI18n();
+  const isPortuguese = locale === "pt";
 
   const processSteps = [
     {
@@ -88,10 +91,29 @@ export default function EditorialPage() {
       {/* --- THE FORM SECTION --- */}
       <Section id="diagnostico" className="flex flex-col items-center justify-center bg-surface-paper">
         <Container className="w-full flex justify-center">
-            <div className="max-w-3xl w-full">
-            {/* Render the dedicated form component here */}
-            <SubmissionForm />
-            </div>
+          <div className="max-w-3xl w-full">
+            {isPortuguese ? (
+              <SubmissionForm />
+            ) : (
+              <div className="bg-white p-8 md:p-12 border border-line shadow-sm relative text-center">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gold-500"></div>
+                <div className="py-12">
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-navy-100 flex items-center justify-center">
+                    <Mail className="w-8 h-8 text-navy-700" />
+                  </div>
+                  <h2 className="text-3xl font-medium mb-4">{t("formUnavailable.title")}</h2>
+                  <p className="text-text-secondary text-lg mb-8 max-w-md mx-auto">
+                    {t("formUnavailable.message")}
+                  </p>
+                  <Button asChild variant="architect">
+                    <a href={`mailto:${t("formUnavailable.ctaEmail")}`}>
+                      {t("formUnavailable.cta")}
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </Container>
       </Section>
 

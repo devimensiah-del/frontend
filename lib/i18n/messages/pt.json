@@ -65,6 +65,12 @@
       "bio": "Engenheiro e desenvolvedor especializado em inteligência artificial e sistemas full-stack. Atualmente cursando Ciência da Computação com foco em Deep Learning e AI Research na Rose-Hulman Institute of Technology, combina expertise técnica em IA (GPT-4, RAG, PyTorch) com habilidades práticas de desenvolvimento (Next.js, React Native, Golang). Criador de soluções inovadoras que unem tecnologia e impacto real, desde assistentes culinários com comando de voz até plataformas de fitness adaptativas com IA. Na IMENSIAH, lidera a implementação técnica das soluções de inteligência artificial, garantindo que a tecnologia sirva à estratégia com excelência e inovação."
     }
   },
+  "formUnavailable": {
+    "title": "Em breve na sua região",
+    "message": "Nosso serviço de análise estratégica está disponível apenas no Brasil no momento.",
+    "cta": "Fale Conosco",
+    "ctaEmail": "contato@imensiah.com"
+  },
   "form": {
     "title": "Solicitar Diagnóstico Estratégico",
     "subtitle": "Preencha os dados abaixo para iniciar nossa análise híbrida (IA + IH).",

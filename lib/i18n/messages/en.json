@@ -65,6 +65,12 @@
       "bio": "Engineer and developer specialized in artificial intelligence and full-stack systems. Currently pursuing Computer Science with a focus on Deep Learning and AI Research at Rose-Hulman Institute of Technology, he combines technical AI expertise (GPT-4, RAG, PyTorch) with practical development skills (Next.js, React Native, Golang). Creator of innovative solutions that unite technology and real impact, from voice-controlled culinary assistants to adaptive AI fitness platforms. At IMENSIAH, he leads the technical implementation of artificial intelligence solutions, ensuring that technology serves strategy with excellence and innovation."
     }
   },
+  "formUnavailable": {
+    "title": "Coming Soon to Your Region",
+    "message": "Our strategic analysis service is currently available only in Brazil. We're working to expand to other regions soon.",
+    "cta": "Contact Us",
+    "ctaEmail": "contact@imensiah.com"
+  },
   "form": {
     "title": "Request Strategic Diagnosis",
     "subtitle": "Fill in the data below to start our hybrid analysis (AI + HI).",
