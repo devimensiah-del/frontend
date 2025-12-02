@@ -26,7 +26,7 @@ export default function LandingPage() {
   const modelIncludes = messages.landing?.modelIncludes || [];
 
   return (
-    <>
+    <div className="[word-break:keep-all]">
       {/* --- HERO SECTION --- */}
       <Section variant="hero" className="grid lg:grid-cols-12">
         {/* Left: The Promise */}
@@ -294,7 +294,7 @@ export default function LandingPage() {
           </div>
         </Container>
       </Section>
-    </>
+    </div>
   );
 }
 
