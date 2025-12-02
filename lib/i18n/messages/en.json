@@ -72,153 +72,78 @@
     "ctaEmail": "contact@imensiah.com"
   },
   "landing": {
-    "nav": {
-      "methodology": "Methodology",
-      "challenges": "Challenges & Roadmap",
-      "model": "Business Model",
-      "security": "Security",
-      "login": "Login",
-      "cta": "Free Diagnosis"
-    },
-    "hero": {
-      "eyebrow": "Enterprise Strategic Intelligence",
-      "titleLine1": "Strategic",
-      "titleLine2": "Clarity",
-      "poweredBy": "Powered by",
-      "poweredByHighlight": "AI + Human Expertise",
-      "description": "Transform raw data into executive-level strategic decisions in 48 hours. The platform that combines analytical rigor with exponential speed.",
-      "cta": "Get your free diagnosis now",
-      "ctaSecondary": "View Methodology",
-      "badge1": "48h Diagnosis",
-      "badge2": "Human Validation",
-      "badge3": "Enterprise Security"
-    },
-    "systemStatus": {
-      "title": "SYSTEM STATUS",
-      "processing": "Processing Strategic Data",
-      "velocityLabel": "VELOCITY",
-      "velocityValue": "48h",
-      "typeLabel": "Intelligence Type",
-      "typeValue": "Hybrid (AI + Human)"
-    },
-    "problems": {
-      "eyebrow": "The Cost of Strategic Blindness",
-      "subtitle": "In a volatile market, slow decisions are bad decisions. SMEs and Mid-Market companies face structural challenges invisible until it's too late.",
-      "cards": [
-        {
-          "title": "Reactive Decisions",
-          "description": "Without real-time data, strategy becomes merely a response to crises, never an anticipation of opportunities."
-        },
-        {
-          "title": "Poor Prioritization",
-          "description": "Scarce resources are diluted in low-impact initiatives due to lack of clarity on what really moves the needle."
-        },
-        {
-          "title": "Competitive Blindness",
-          "description": "While you look inward, the market changes outside. The lack of market intelligence creates fatal vulnerabilities."
-        }
-      ]
-    },
-    "solution": {
-      "eyebrow": "THE SOLUTION",
-      "title": "A Strategic Decision System",
-      "subtitle": "Not just analytics. Not just AI. A complete operating system for high-level decisions.",
-      "features": [
-        "Advanced Generative AI Models",
-        "Classic Management Frameworks (Porter, SWOT, PESTEL)",
-        "Human Expert Validation (Human-in-the-loop)",
-        "Actionable Strategic Insights in 48h"
-      ],
-      "cards": [
-        {
-          "icon": "frameworks",
-          "title": "Frameworks",
-          "value": "11+",
-          "description": "Automatic multidimensional analysis."
-        },
-        {
-          "icon": "enterprise",
-          "title": "Enterprise Grade",
-          "value": "",
-          "description": "Corporate security and compliance."
-        },
-        {
-          "icon": "speed",
-          "title": "Speed",
-          "value": "",
-          "description": "From weeks to 48 hours."
-        },
-        {
-          "icon": "hybrid",
-          "title": "AI + Human",
-          "value": "",
-          "description": "The best of both worlds."
-        }
-      ]
-    },
-    "pipeline": {
-      "title": "Strategic Analysis Pipeline",
-      "subtitle": "Each framework feeds the next, creating cumulative strategic reasoning that reduces noise and eliminates bias.",
-      "steps": [
-        "PESTEL Analysis",
-        "Porter's 5 Forces",
-        "Benchmarking",
-        "Validated SWOT",
-        "TAM / SAM / SOM",
-        "Blue Ocean",
-        "Growth Loops",
-        "Future Scenarios",
-        "Decision Matrix",
-        "90-Day Plan",
-        "Balanced Scorecard",
-        "Risk Assessment"
-      ],
-      "stats": [
-        {
-          "value": "48h",
-          "label": "Delivery Time",
-          "description": "95% reduction in analysis time compared to traditional consultancies."
-        },
-        {
-          "value": "10x",
-          "label": "Estimated ROI",
-          "description": "More precise decisions avoid waste and focus on real growth levers."
-        },
-        {
-          "value": "100%",
-          "label": "Confidentiality",
-          "description": "Anonymized data treated with enterprise compliance rigor."
-        }
-      ]
-    },
-    "future": {
-      "eyebrow": "COMING SOON",
-      "integrations": ["P&L Integration", "Cash Flow", "Sales Performance", "Customer Mix"],
-      "title": "The Future: Strategic Operating System",
-      "description": "We're building the definitive \"Executive Decision Engine\". With integration of your internal data (P&L, CRM, ERP), ImensIAH evolves from a point diagnosis to a continuous operating system.",
-      "tagline": "CFO-Grade Forecast + CEO-Grade Clarity.",
-      "cta": "View Full Roadmap"
-    },
-    "pilot": {
-      "title": "Request Pilot Access",
-      "subtitle": "Join the exclusive group of Founding Advisors and get priority access to the platform.",
-      "benefits": ["Priority Access", "Founder Price (Lifetime)", "Dedicated Onboarding"],
-      "trustedBy": "Trusted By",
-      "form": {
-        "name": "Your name",
-        "email": "you@company.com",
-        "company": "Your company name",
-        "challenge": "Briefly describe your strategic challenge...",
-        "submit": "Start Analysis",
-        "disclaimer": "Your data is secure. Enterprise Compliance."
-      }
-    },
-    "footer": {
-      "copyright": "© 2025 ImensIAH. All rights reserved.",
-      "privacy": "Privacy Policy",
-      "terms": "Terms of Service",
-      "contact": "Contact"
-    }
+    "heroEyebrow": "Enterprise Strategic Intelligence",
+    "heroTitle1": "Strategic",
+    "heroTitle2": "Clarity",
+    "heroPoweredBy": "Powered by",
+    "heroPoweredByHighlight": "AI + Human Expertise",
+    "heroDescription": "Transform raw data into executive-level strategic decisions in 48 hours. The platform that combines analytical rigor with exponential speed.",
+    "heroCta": "Get your free diagnosis now",
+    "heroCtaSecondary": "View Methodology",
+    "heroBadge1": "48h Diagnosis",
+    "heroBadge2": "Human Validation",
+    "heroBadge3": "Enterprise Security",
+    "systemStatus": "SYSTEM STATUS",
+    "systemProcessing": "Processing Strategic Data",
+    "systemVelocity": "VELOCITY",
+    "systemType": "Intelligence Type",
+    "systemTypeValue": "Hybrid (AI + Human)",
+    "problemsTitle": "The Cost of Strategic Blindness",
+    "problemsSubtitle": "In a volatile market, slow decisions are bad decisions. SMEs and Mid-Market companies face structural challenges invisible until it's too late.",
+    "problem1Title": "Reactive Decisions",
+    "problem1Desc": "Without real-time data, strategy becomes merely a response to crises, never an anticipation of opportunities.",
+    "problem2Title": "Poor Prioritization",
+    "problem2Desc": "Scarce resources are diluted in low-impact initiatives due to lack of clarity on what really moves the needle.",
+    "problem3Title": "Competitive Blindness",
+    "problem3Desc": "While you look inward, the market changes outside. The lack of market intelligence creates fatal vulnerabilities.",
+    "solutionEyebrow": "THE SOLUTION",
+    "solutionTitle": "A Strategic Decision System",
+    "solutionSubtitle": "Not just analytics. Not just AI. A complete operating system for high-level decisions.",
+    "solutionFeature1": "Advanced Generative AI Models",
+    "solutionFeature2": "Classic Management Frameworks (Porter, SWOT, PESTEL)",
+    "solutionFeature3": "Human Expert Validation (Human-in-the-loop)",
+    "solutionFeature4": "Actionable Strategic Insights in 48h",
+    "card1Title": "Frameworks",
+    "card1Desc": "Automatic multidimensional analysis.",
+    "card2Title": "Enterprise Grade",
+    "card2Desc": "Corporate security and compliance.",
+    "card3Title": "Speed",
+    "card3Desc": "From weeks to 48 hours.",
+    "card4Title": "AI + Human",
+    "card4Desc": "The best of both worlds.",
+    "pipelineTitle": "Strategic Analysis Pipeline",
+    "pipelineSubtitle": "Each framework feeds the next, creating cumulative strategic reasoning that reduces noise and eliminates bias.",
+    "pipelineStep4": "Validated SWOT",
+    "pipelineStep8": "Future Scenarios",
+    "pipelineStep9": "Decision Matrix",
+    "pipelineStep10": "90-Day Plan",
+    "stat1Label": "Delivery Time",
+    "stat1Desc": "95% reduction in analysis time compared to traditional consultancies.",
+    "stat2Label": "Estimated ROI",
+    "stat2Desc": "More precise decisions avoid waste and focus on real growth levers.",
+    "stat3Label": "Confidentiality",
+    "stat3Desc": "Anonymized data treated with enterprise compliance rigor.",
+    "futureEyebrow": "COMING SOON",
+    "integration1": "P&L Integration",
+    "integration2": "Cash Flow",
+    "integration3": "Sales Performance",
+    "integration4": "Customer Mix",
+    "futureTitle": "The Future: Strategic Operating System",
+    "futureDescription": "We're building the definitive \"Executive Decision Engine\". With integration of your internal data (P&L, CRM, ERP), ImensIAH evolves from a point diagnosis to a continuous operating system.",
+    "futureTagline": "CFO-Grade Forecast + CEO-Grade Clarity.",
+    "futureCta": "View Full Roadmap",
+    "pilotTitle": "Request Pilot Access",
+    "pilotSubtitle": "Join the exclusive group of Founding Advisors and get priority access to the platform.",
+    "benefit1": "Priority Access",
+    "benefit2": "Founder Price (Lifetime)",
+    "benefit3": "Dedicated Onboarding",
+    "trustedBy": "Trusted By",
+    "formName": "Your name",
+    "formEmail": "you@company.com",
+    "formCompany": "Your company name",
+    "formChallenge": "Briefly describe your strategic challenge...",
+    "formSubmit": "Start Analysis",
+    "formDisclaimer": "Your data is secure. Enterprise Compliance."
   },
   "form": {
     "title": "Request Strategic Diagnosis",

@@ -72,153 +72,78 @@
     "ctaEmail": "contato@imensiah.com"
   },
   "landing": {
-    "nav": {
-      "methodology": "Metodologia",
-      "challenges": "Desafios & Roadmap",
-      "model": "Modelo de Negócio",
-      "security": "Segurança",
-      "login": "Login",
-      "cta": "Diagnóstico Grátis"
-    },
-    "hero": {
-      "eyebrow": "Enterprise Strategic Intelligence",
-      "titleLine1": "Strategic",
-      "titleLine2": "Clarity",
-      "poweredBy": "Powered by",
-      "poweredByHighlight": "AI + Human Expertise",
-      "description": "Transforme dados brutos em decisões estratégicas de nível executivo em 48 horas. A plataforma que une rigor analítico e velocidade exponencial.",
-      "cta": "Faça já seu diagnóstico grátis",
-      "ctaSecondary": "Ver Metodologia",
-      "badge1": "Diagnóstico em 48h",
-      "badge2": "Validação Humana",
-      "badge3": "Segurança Enterprise"
-    },
-    "systemStatus": {
-      "title": "SYSTEM STATUS",
-      "processing": "Processing Strategic Data",
-      "velocityLabel": "VELOCITY",
-      "velocityValue": "48h",
-      "typeLabel": "Intelligence Type",
-      "typeValue": "Hybrid (AI + Human)"
-    },
-    "problems": {
-      "eyebrow": "O Custo da Cegueira Estratégica",
-      "subtitle": "Em um mercado volátil, decisões lentas são decisões ruins. PMEs e empresas Mid-Market enfrentam desafios estruturais invisíveis até que seja tarde demais.",
-      "cards": [
-        {
-          "title": "Decisões Reativas",
-          "description": "Sem dados em tempo real, a estratégia se torna apenas uma resposta a crises, nunca uma antecipação de oportunidades."
-        },
-        {
-          "title": "Priorização Deficiente",
-          "description": "Recursos escassos são diluídos em iniciativas de baixo impacto por falta de clareza sobre o que realmente move o ponteiro."
-        },
-        {
-          "title": "Cegueira Competitiva",
-          "description": "Enquanto você olha para dentro, o mercado muda lá fora. A falta de inteligência de mercado cria vulnerabilidades fatais."
-        }
-      ]
-    },
-    "solution": {
-      "eyebrow": "THE SOLUTION",
-      "title": "A Strategic Decision System",
-      "subtitle": "Não apenas analytics. Não apenas IA. Um sistema operacional completo para decisões de alto nível.",
-      "features": [
-        "Modelos de IA Generativa Avançados",
-        "Frameworks Clássicos de Gestão (Porter, SWOT, PESTEL)",
-        "Validação por Especialistas Humanos (Human-in-the-loop)",
-        "Insights Estratégicos Acionáveis em 48h"
-      ],
-      "cards": [
-        {
-          "icon": "frameworks",
-          "title": "Frameworks",
-          "value": "11+",
-          "description": "Análise multidimensional automática."
-        },
-        {
-          "icon": "enterprise",
-          "title": "Enterprise Grade",
-          "value": "",
-          "description": "Segurança e compliance corporativo."
-        },
-        {
-          "icon": "speed",
-          "title": "Velocidade",
-          "value": "",
-          "description": "De semanas para 48 horas."
-        },
-        {
-          "icon": "hybrid",
-          "title": "IA + Humano",
-          "value": "",
-          "description": "O melhor dos dois mundos."
-        }
-      ]
-    },
-    "pipeline": {
-      "title": "Pipeline de Análise Estratégica",
-      "subtitle": "Cada framework alimenta o próximo, criando um raciocínio estratégico cumulativo que reduz ruído e elimina vieses.",
-      "steps": [
-        "PESTEL Analysis",
-        "Porter's 5 Forces",
-        "Benchmarking",
-        "SWOT Validado",
-        "TAM / SAM / SOM",
-        "Blue Ocean",
-        "Growth Loops",
-        "Cenários Futuros",
-        "Matriz de Decisão",
-        "Plano 90 Dias",
-        "Balanced Scorecard",
-        "Risk Assessment"
-      ],
-      "stats": [
-        {
-          "value": "48h",
-          "label": "Tempo de Entrega",
-          "description": "Redução de 95% no tempo de análise comparado a consultorias tradicionais."
-        },
-        {
-          "value": "10x",
-          "label": "ROI Estimado",
-          "description": "Decisões mais precisas evitam desperdícios e focam em alavancas de crescimento real."
-        },
-        {
-          "value": "100%",
-          "label": "Confidencialidade",
-          "description": "Dados anonimizados e tratados com rigor de compliance enterprise."
-        }
-      ]
-    },
-    "future": {
-      "eyebrow": "COMING SOON",
-      "integrations": ["Integração DRE", "Fluxo de Caixa", "Performance Comercial", "Mix de Clientes"],
-      "title": "O Futuro: Strategic Operating System",
-      "description": "Estamos construindo o \"Executive Decision Engine\" definitivo. Com a integração de seus dados internos (DRE, CRM, ERP), o ImensIAH evolui de um diagnóstico pontual para um sistema operacional contínuo.",
-      "tagline": "CFO-Grade Forecast + CEO-Grade Clarity.",
-      "cta": "Ver Roadmap Completo"
-    },
-    "pilot": {
-      "title": "Solicite Acesso ao Piloto",
-      "subtitle": "Junte-se ao grupo exclusivo de Founding Advisors e tenha acesso prioritário à plataforma.",
-      "benefits": ["Acesso Prioritário", "Preço de Fundador (Lifetime)", "Onboarding Dedicado"],
-      "trustedBy": "Trusted By",
-      "form": {
-        "name": "Seu nome",
-        "email": "voce@empresa.com",
-        "company": "Nome da sua empresa",
-        "challenge": "Descreva brevemente seu desafio estratégico...",
-        "submit": "Iniciar Análise",
-        "disclaimer": "Seus dados estão seguros. Compliance Enterprise."
-      }
-    },
-    "footer": {
-      "copyright": "© 2025 ImensIAH. All rights reserved.",
-      "privacy": "Privacy Policy",
-      "terms": "Terms of Service",
-      "contact": "Contact"
-    }
+    "heroEyebrow": "Inteligência Estratégica Empresarial",
+    "heroTitle1": "Clareza",
+    "heroTitle2": "Estratégica",
+    "heroPoweredBy": "Potencializado por",
+    "heroPoweredByHighlight": "IA + Expertise Humana",
+    "heroDescription": "Transforme dados brutos em decisões estratégicas de nível executivo em 48 horas. A plataforma que une rigor analítico e velocidade exponencial.",
+    "heroCta": "Faça já seu diagnóstico grátis",
+    "heroCtaSecondary": "Ver Metodologia",
+    "heroBadge1": "Diagnóstico em 48h",
+    "heroBadge2": "Validação Humana",
+    "heroBadge3": "Segurança Enterprise",
+    "systemStatus": "STATUS DO SISTEMA",
+    "systemProcessing": "Processando Dados Estratégicos",
+    "systemVelocity": "VELOCIDADE",
+    "systemType": "Tipo de Inteligência",
+    "systemTypeValue": "Híbrida (IA + Humana)",
+    "problemsTitle": "O Custo da Cegueira Estratégica",
+    "problemsSubtitle": "Em um mercado volátil, decisões lentas são decisões ruins. PMEs e empresas Mid-Market enfrentam desafios estruturais invisíveis até que seja tarde demais.",
+    "problem1Title": "Decisões Reativas",
+    "problem1Desc": "Sem dados em tempo real, a estratégia se torna apenas uma resposta a crises, nunca uma antecipação de oportunidades.",
+    "problem2Title": "Priorização Deficiente",
+    "problem2Desc": "Recursos escassos são diluídos em iniciativas de baixo impacto por falta de clareza sobre o que realmente move o ponteiro.",
+    "problem3Title": "Cegueira Competitiva",
+    "problem3Desc": "Enquanto você olha para dentro, o mercado muda lá fora. A falta de inteligência de mercado cria vulnerabilidades fatais.",
+    "solutionEyebrow": "A SOLUÇÃO",
+    "solutionTitle": "Um Sistema de Decisão Estratégica",
+    "solutionSubtitle": "Não apenas analytics. Não apenas IA. Um sistema operacional completo para decisões de alto nível.",
+    "solutionFeature1": "Modelos de IA Generativa Avançados",
+    "solutionFeature2": "Frameworks Clássicos de Gestão (Porter, SWOT, PESTEL)",
+    "solutionFeature3": "Validação por Especialistas Humanos (Human-in-the-loop)",
+    "solutionFeature4": "Insights Estratégicos Acionáveis em 48h",
+    "card1Title": "Frameworks",
+    "card1Desc": "Análise multidimensional automática.",
+    "card2Title": "Nível Enterprise",
+    "card2Desc": "Segurança e compliance corporativo.",
+    "card3Title": "Velocidade",
+    "card3Desc": "De semanas para 48 horas.",
+    "card4Title": "IA + Humano",
+    "card4Desc": "O melhor dos dois mundos.",
+    "pipelineTitle": "Pipeline de Análise Estratégica",
+    "pipelineSubtitle": "Cada framework alimenta o próximo, criando um raciocínio estratégico cumulativo que reduz ruído e elimina vieses.",
+    "pipelineStep4": "SWOT Validado",
+    "pipelineStep8": "Cenários Futuros",
+    "pipelineStep9": "Matriz de Decisão",
+    "pipelineStep10": "Plano 90 Dias",
+    "stat1Label": "Tempo de Entrega",
+    "stat1Desc": "Redução de 95% no tempo de análise comparado a consultorias tradicionais.",
+    "stat2Label": "ROI Estimado",
+    "stat2Desc": "Decisões mais precisas evitam desperdícios e focam em alavancas de crescimento real.",
+    "stat3Label": "Confidencialidade",
+    "stat3Desc": "Dados anonimizados e tratados com rigor de compliance enterprise.",
+    "futureEyebrow": "EM BREVE",
+    "integration1": "Integração DRE",
+    "integration2": "Fluxo de Caixa",
+    "integration3": "Performance Comercial",
+    "integration4": "Mix de Clientes",
+    "futureTitle": "O Futuro: Sistema Operacional Estratégico",
+    "futureDescription": "Estamos construindo o \"Executive Decision Engine\" definitivo. Com a integração de seus dados internos (DRE, CRM, ERP), o ImensIAH evolui de um diagnóstico pontual para um sistema operacional contínuo.",
+    "futureTagline": "Previsão de CFO + Clareza de CEO.",
+    "futureCta": "Ver Roadmap Completo",
+    "pilotTitle": "Solicite Acesso ao Piloto",
+    "pilotSubtitle": "Junte-se ao grupo exclusivo de Founding Advisors e tenha acesso prioritário à plataforma.",
+    "benefit1": "Acesso Prioritário",
+    "benefit2": "Preço de Fundador (Lifetime)",
+    "benefit3": "Onboarding Dedicado",
+    "trustedBy": "Empresas que Confiam",
+    "formName": "Seu nome",
+    "formEmail": "voce@empresa.com",
+    "formCompany": "Nome da sua empresa",
+    "formChallenge": "Descreva brevemente seu desafio estratégico...",
+    "formSubmit": "Iniciar Análise",
+    "formDisclaimer": "Seus dados estão seguros. Compliance Enterprise."
   },
   "form": {
     "title": "Solicitar Diagnóstico Estratégico",
