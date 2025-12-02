@@ -66,8 +66,7 @@ export function ProgressBar({
     );
 
     if (error) {
-      // Could show a toast here
-      console.warn('Cannot move to stage:', error);
+      // Stage transition blocked - toast could be shown here
       return;
     }
 
@@ -92,8 +91,7 @@ export function ProgressBar({
       });
       setDialogOpen(true);
     } else {
-      // Automatic transitions (worker-driven) - just show message
-      console.info('This stage change will happen automatically when processing completes');
+      // Automatic transitions (worker-driven) - reset selection
       setSelectedStage(null);
     }
   };

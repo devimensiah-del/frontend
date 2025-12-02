@@ -54,9 +54,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check if Supabase is configured
-  if (!supabaseUrl || !supabaseAnonKey || process.env.NODE_ENV === 'development') {
-    // Supabase not configured or in dev mode - allow all routes
-    console.warn('Auth middleware disabled (Dev mode or missing config)');
+  if (!supabaseUrl || !supabaseAnonKey) {
+    // Supabase not configured - allow all routes (ONLY in production this should never happen)
     return NextResponse.next();
   }
 
@@ -65,11 +64,8 @@ export async function middleware(request: NextRequest) {
 
   // If no token, redirect to login
   if (!accessToken) {
-    console.log('[AUTH MIDDLEWARE] No access token found, redirecting to /login');
-    console.log('[AUTH MIDDLEWARE] Requested path:', pathname);
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
-    console.log('[AUTH MIDDLEWARE] Redirect URL:', loginUrl.toString());
     return NextResponse.redirect(loginUrl);
   }
 
@@ -82,12 +78,8 @@ export async function middleware(request: NextRequest) {
 
     if (error || !user) {
       // Invalid token, redirect to login
-      console.log('[AUTH MIDDLEWARE] Invalid or expired token, redirecting to /login');
-      console.log('[AUTH MIDDLEWARE] Requested path:', pathname);
-      console.log('[AUTH MIDDLEWARE] Auth error:', error?.message || 'No user found');
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
-      console.log('[AUTH MIDDLEWARE] Redirect URL:', loginUrl.toString());
       const response = NextResponse.redirect(loginUrl);
 
       // Clear invalid cookies
@@ -102,10 +94,17 @@ export async function middleware(request: NextRequest) {
     // The middleware only verifies authentication, not authorization
     // This avoids issues with Supabase RLS policies on user_profiles table
 
-    // User is authenticated
+    // User is authenticated - add admin route protection
+    // Check if this is an admin route
+    if (pathname.startsWith('/admin')) {
+      // For admin routes, we need to verify the user has admin role
+      // Since we can't easily check the profile in middleware without another API call,
+      // we rely on the page-level protection for now
+      // The middleware ensures authentication, the page ensures authorization
+    }
+
     return NextResponse.next();
-  } catch (error) {
-    console.error('Middleware error:', error);
+  } catch {
     // On error, redirect to login
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);

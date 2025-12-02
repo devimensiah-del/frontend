@@ -35,9 +35,17 @@ export default function DashboardPage() {
   });
 
   const isLoading = isUserLoading || isCompaniesLoading;
+  const companies = companiesData?.companies || [];
 
-  // Don't render while redirecting admin
-  if (isAdmin) {
+  // Auto-redirect if user has exactly 1 company
+  React.useEffect(() => {
+    if (!isLoading && !isAdmin && companies.length === 1) {
+      router.replace(`/companies/${companies[0].id}`);
+    }
+  }, [isLoading, isAdmin, companies, router]);
+
+  // Show loading while redirecting (admin or single company)
+  if (isAdmin || (!isLoading && companies.length === 1)) {
     return (
       <Section className="bg-surface-paper border-0 min-h-screen">
         <Container>
@@ -62,8 +70,6 @@ export default function DashboardPage() {
       </Section>
     );
   }
-
-  const companies = companiesData?.companies || [];
 
   return (
     <Section className="bg-surface-paper border-0 min-h-screen">

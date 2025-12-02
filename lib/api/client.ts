@@ -519,6 +519,18 @@ export const adminApi = {
       body: JSON.stringify({ blurred }),
     });
   },
+
+  /**
+   * Toggle public access status (admin only)
+   * When public=true, anyone with access code can view without login
+   * When public=false, access code requires authentication
+   */
+  async togglePublic(analysisId: string, isPublic: boolean): Promise<{ analysis: Analysis; message: string }> {
+    return apiRequest(`/admin/analysis/${analysisId}/public`, {
+      method: 'POST',
+      body: JSON.stringify({ public: isPublic }),
+    });
+  },
 };
 
 /**
@@ -646,6 +658,70 @@ export const companiesApi = {
       method: 'DELETE',
     });
   },
+
+  /**
+   * Get field verification status for a company
+   * Returns list of all verifiable fields with their verification status
+   */
+  async getFieldVerifications(companyId: string): Promise<{
+    message: string;
+    data: {
+      company_id: string;
+      fields: Array<{
+        field_name: string;
+        verified: boolean;
+        verified_at?: string;
+        verified_by?: string;
+      }>;
+      total_verifiable: number;
+      total_verified: number;
+    };
+  }> {
+    return apiRequest(`/companies/${companyId}/verifications`);
+  },
+
+  /**
+   * Verify a single field on user's company
+   */
+  async verifyField(companyId: string, fieldName: string): Promise<{
+    message: string;
+    data: {
+      company_id: string;
+      field_name: string;
+      verified: boolean;
+    };
+  }> {
+    return apiRequest(`/companies/${companyId}/verifications`, {
+      method: 'POST',
+      body: JSON.stringify({ field_name: fieldName }),
+    });
+  },
+
+  /**
+   * Verify all fields on user's company
+   */
+  async verifyAllFields(companyId: string): Promise<{
+    message: string;
+    data: {
+      company_id: string;
+      fields_verified: number;
+    };
+  }> {
+    return apiRequest(`/companies/${companyId}/verifications/all`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Update company fields (owner only)
+   * Updated fields become auto-verified
+   */
+  async updateCompany(companyId: string, fields: Record<string, unknown>): Promise<{ company: Company; message: string }> {
+    return apiRequest(`/companies/${companyId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ fields }),
+    });
+  },
 };
 
 /**
@@ -769,6 +845,106 @@ export const adminCompaniesApi = {
   async enrichAndAnalyze(companyId: string): Promise<{ message: string; data: { submission_id: string; enrichment_id: string; company_id: string } }> {
     return apiRequest(`/admin/companies/${companyId}/enrich-and-analyze`, {
       method: 'POST',
+    });
+  },
+
+  /**
+   * Get field verification status (admin)
+   */
+  async getFieldVerifications(companyId: string): Promise<{
+    message: string;
+    data: {
+      company_id: string;
+      fields: Array<{
+        field_name: string;
+        verified: boolean;
+        verified_at?: string;
+        verified_by?: string;
+      }>;
+      total_verifiable: number;
+      total_verified: number;
+    };
+  }> {
+    return apiRequest(`/admin/companies/${companyId}/verifications`);
+  },
+
+  /**
+   * Verify a single field (admin)
+   */
+  async verifyField(companyId: string, fieldName: string): Promise<{
+    message: string;
+    data: {
+      company_id: string;
+      field_name: string;
+      verified: boolean;
+    };
+  }> {
+    return apiRequest(`/admin/companies/${companyId}/verifications`, {
+      method: 'POST',
+      body: JSON.stringify({ field_name: fieldName }),
+    });
+  },
+
+  /**
+   * Unverify a single field (admin only)
+   */
+  async unverifyField(companyId: string, fieldName: string): Promise<{
+    message: string;
+    data: {
+      company_id: string;
+      field_name: string;
+      verified: boolean;
+    };
+  }> {
+    return apiRequest(`/admin/companies/${companyId}/verifications/${fieldName}`, {
+      method: 'DELETE',
+    });
+  },
+
+  /**
+   * Verify multiple fields at once (admin)
+   */
+  async verifyFields(companyId: string, fieldNames: string[]): Promise<{
+    message: string;
+    data: {
+      company_id: string;
+      field_names: string[];
+      fields_verified: number;
+    };
+  }> {
+    return apiRequest(`/admin/companies/${companyId}/verifications/bulk`, {
+      method: 'POST',
+      body: JSON.stringify({ field_names: fieldNames }),
+    });
+  },
+
+  /**
+   * Verify all fields at once (admin)
+   */
+  async verifyAllFields(companyId: string): Promise<{
+    message: string;
+    data: {
+      company_id: string;
+      fields_verified: number;
+    };
+  }> {
+    return apiRequest(`/admin/companies/${companyId}/verifications/all`, {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Unverify all fields (admin only)
+   */
+  async unverifyAllFields(companyId: string): Promise<{
+    message: string;
+    data: {
+      company_id: string;
+      fields_unverified: number;
+    };
+  }> {
+    return apiRequest(`/admin/companies/${companyId}/verifications/all`, {
+      method: 'DELETE',
     });
   },
 };

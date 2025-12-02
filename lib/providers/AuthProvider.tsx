@@ -52,14 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       if (!response.ok) {
-        console.error('Failed to fetch user profile:', response.statusText);
+        // Profile fetch failed - user will be logged out
         return null;
       }
 
       const data = await response.json();
       return data.user;
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
+    } catch {
+      // Network error - user will be logged out
       return null;
     }
   };

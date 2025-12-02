@@ -12,8 +12,7 @@ export default function ThankYouPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Optional: Add analytics tracking here
-    console.log("Thank you page viewed");
+    // Analytics tracking handled by middleware/providers
   }, []);
 
   return (

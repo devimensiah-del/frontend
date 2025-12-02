@@ -148,8 +148,7 @@ export function SubmissionForm() {
         throw new Error(errorData.message || t("form.errorMessage"))
       }
 
-      const result = await response.json()
-      console.log("Submission successful:", result)
+      await response.json()
 
       toast({
         title: t("form.successTitle"),
@@ -159,8 +158,7 @@ export function SubmissionForm() {
       // Optional: Redirect to a thank you page
       // router.push("/obrigado")
 
-    } catch (error) {
-      console.error("Error submitting form:", error)
+    } catch {
       toast({
         title: t("form.errorTitle"),
         description: t("form.errorMessage"),

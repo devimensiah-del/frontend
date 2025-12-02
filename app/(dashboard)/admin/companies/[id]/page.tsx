@@ -46,6 +46,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { EnrichmentStatusInfo, AnalysisHistoryItem } from "@/lib/types";
 import { CompanyEditor } from "@/components/admin/editors/CompanyEditor";
+import { ReportVisibilityControls } from "@/components/admin/ReportVisibilityControls";
 
 // Helper to format date in São Paulo timezone (BRT/BRST)
 function formatInSaoPaulo(dateString: string, formatStr: string): string {
@@ -75,6 +76,12 @@ export default function AdminCompanyDetailPage() {
 
   // State for company edit mode
   const [isEditingCompany, setIsEditingCompany] = React.useState(false);
+
+  // State for visibility updates
+  const [updatingVisibilityFor, setUpdatingVisibilityFor] = React.useState<string | null>(null);
+
+  // State for expanded challenges
+  const [expandedChallenges, setExpandedChallenges] = React.useState<Set<string>>(new Set());
 
   // Fetch current user (admin check)
   const { data: user } = useQuery({
@@ -158,22 +165,60 @@ export default function AdminCompanyDetailPage() {
     },
   });
 
-  const toggleBlurMutation = useMutation({
-    mutationFn: ({ analysisId, blurred }: { analysisId: string; blurred: boolean }) =>
-      adminApi.toggleBlur(analysisId, blurred),
-    onSuccess: (_, { blurred }) => {
+  // Handle individual visibility control changes (4-state matrix)
+  const handleVisibilityToggle = async (analysisId: string, visible: boolean) => {
+    setUpdatingVisibilityFor(analysisId);
+    try {
+      await adminApi.toggleVisibility(analysisId, visible);
       queryClient.invalidateQueries({ queryKey: ["adminCompany", id] });
       toast({
-        title: blurred ? "Relatório borrado" : "Relatório desbloqueado",
-        description: blurred
-          ? "O relatório está agora borrado para não-admins."
-          : "O relatório está agora visível para todos.",
+        title: visible ? "Relatório visível" : "Relatório oculto",
+        description: visible
+          ? "O relatório agora está visível para o usuário."
+          : "O relatório não está mais visível para o usuário.",
       });
-    },
-    onError: () => {
+    } catch (error) {
+      toast({ title: "Erro", description: "Não foi possível alterar a visibilidade.", variant: "destructive" });
+    } finally {
+      setUpdatingVisibilityFor(null);
+    }
+  };
+
+  const handlePublicToggle = async (analysisId: string, isPublic: boolean) => {
+    setUpdatingVisibilityFor(analysisId);
+    try {
+      await adminApi.togglePublic(analysisId, isPublic);
+      queryClient.invalidateQueries({ queryKey: ["adminCompany", id] });
+      toast({
+        title: isPublic ? "Acesso público" : "Acesso privado",
+        description: isPublic
+          ? "Qualquer pessoa com o link pode acessar o relatório."
+          : "O relatório requer login para acesso.",
+      });
+    } catch (error) {
+      toast({ title: "Erro", description: "Não foi possível alterar o acesso público.", variant: "destructive" });
+    } finally {
+      setUpdatingVisibilityFor(null);
+    }
+  };
+
+  const handleBlurToggle = async (analysisId: string, blurred: boolean) => {
+    setUpdatingVisibilityFor(analysisId);
+    try {
+      await adminApi.toggleBlur(analysisId, blurred);
+      queryClient.invalidateQueries({ queryKey: ["adminCompany", id] });
+      toast({
+        title: blurred ? "Premium bloqueado" : "Premium liberado",
+        description: blurred
+          ? "As seções premium estão com blur (paywall)."
+          : "Todas as seções estão totalmente visíveis.",
+      });
+    } catch (error) {
       toast({ title: "Erro", description: "Não foi possível alterar o blur.", variant: "destructive" });
-    },
-  });
+    } finally {
+      setUpdatingVisibilityFor(null);
+    }
+  };
 
   // Update company fields mutation
   const updateCompanyMutation = useMutation({
@@ -664,11 +709,25 @@ export default function AdminCompanyDetailPage() {
                             : 'bg-red-50 border-red-200'
                         } ${isGenerating ? 'opacity-70 pointer-events-none' : ''}`}
                       >
-                        {/* Challenge Title */}
-                        <p className={`text-sm font-medium mb-1 ${
-                          isPending ? 'text-amber-800' : isCompleted ? 'text-green-800' : 'text-red-800'
-                        }`}>
-                          {truncateText(analysis.business_challenge, 80)}
+                        {/* Challenge Title - Click to expand */}
+                        <p
+                          className={`text-sm font-medium mb-1 cursor-pointer hover:underline ${
+                            isPending ? 'text-amber-800' : isCompleted ? 'text-green-800' : 'text-red-800'
+                          }`}
+                          onClick={() => {
+                            const newExpanded = new Set(expandedChallenges);
+                            if (newExpanded.has(analysis.analysis_id)) {
+                              newExpanded.delete(analysis.analysis_id);
+                            } else {
+                              newExpanded.add(analysis.analysis_id);
+                            }
+                            setExpandedChallenges(newExpanded);
+                          }}
+                          title={expandedChallenges.has(analysis.analysis_id) ? "Clique para minimizar" : "Clique para ver o desafio completo"}
+                        >
+                          {expandedChallenges.has(analysis.analysis_id)
+                            ? analysis.business_challenge
+                            : truncateText(analysis.business_challenge, 80)}
                         </p>
 
                         {/* Status Row */}
@@ -698,38 +757,23 @@ export default function AdminCompanyDetailPage() {
                             )}
                           </div>
 
-                          {/* Action Badges */}
-                          <div className="flex items-center gap-1">
+                          {/* Action Controls */}
+                          <div className="flex items-center gap-2">
                             {isCompleted && (
                               <>
-                                {/* Blur Toggle - per analysis */}
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] px-1.5 py-0.5 cursor-pointer ${
-                                    analysis.is_blurred
-                                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                      : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
-                                  }`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleBlurMutation.mutate({
-                                      analysisId: analysis.analysis_id,
-                                      blurred: !analysis.is_blurred,
-                                    });
-                                  }}
-                                >
-                                  {analysis.is_blurred ? (
-                                    <>
-                                      <Eye className="w-2 h-2 mr-0.5" />
-                                      Desborrar
-                                    </>
-                                  ) : (
-                                    <>
-                                      <EyeOff className="w-2 h-2 mr-0.5" />
-                                      Borrar
-                                    </>
-                                  )}
-                                </Badge>
+                                {/* Visibility Controls - 4-state matrix with 3 independent toggles */}
+                                <div onClick={(e) => e.stopPropagation()}>
+                                  <ReportVisibilityControls
+                                    isVisibleToUser={analysis.is_visible_to_user ?? false}
+                                    isPublic={analysis.is_public ?? false}
+                                    isBlurred={analysis.is_blurred ?? true}
+                                    isLoading={updatingVisibilityFor === analysis.analysis_id}
+                                    onVisibilityChange={(visible) => handleVisibilityToggle(analysis.analysis_id, visible)}
+                                    onPublicChange={(isPublic) => handlePublicToggle(analysis.analysis_id, isPublic)}
+                                    onBlurChange={(blurred) => handleBlurToggle(analysis.analysis_id, blurred)}
+                                    variant="compact"
+                                  />
+                                </div>
                                 <Badge
                                   variant="outline"
                                   className="text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-700 hover:bg-amber-100 cursor-pointer"

@@ -1,13 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle, Save, X, AlertCircle } from "lucide-react";
-import type { Company } from "@/lib/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, Save, X, AlertCircle, Circle } from "lucide-react";
+import { adminCompaniesApi } from "@/lib/api/client";
+import type { Company, FieldVerification } from "@/lib/types";
 
 // Field definitions with deprecation categories for display
 const COMPANY_FIELDS = [
@@ -49,7 +50,6 @@ const CATEGORY_INFO = {
 
 interface CompanyEditorProps {
   company: Company;
-  verifiedFields?: string[];
   onSave: (fields: Record<string, string>) => void;
   onCancel: () => void;
   isSaving?: boolean;
@@ -57,13 +57,30 @@ interface CompanyEditorProps {
 
 export function CompanyEditor({
   company,
-  verifiedFields = [],
   onSave,
   onCancel,
   isSaving = false,
 }: CompanyEditorProps) {
-  const [editedFields, setEditedFields] = React.useState<Record<string, string>>({});
-  const [showOnlyChanged, setShowOnlyChanged] = React.useState(false);
+  const [editedFields, setEditedFields] = useState<Record<string, string>>({});
+  const [showOnlyChanged, setShowOnlyChanged] = useState(false);
+  const [verifications, setVerifications] = useState<FieldVerification[]>([]);
+  const [isLoadingVerifications, setIsLoadingVerifications] = useState(true);
+
+  // Fetch verifications on mount
+  useEffect(() => {
+    if (company?.id) {
+      setIsLoadingVerifications(true);
+      adminCompaniesApi.getFieldVerifications(company.id)
+        .then((response) => {
+          setVerifications(response.data.fields || []);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch verifications:", err);
+          setVerifications([]);
+        })
+        .finally(() => setIsLoadingVerifications(false));
+    }
+  }, [company?.id]);
 
   // Get current value for a field
   const getValue = (key: string): string => {
@@ -93,7 +110,20 @@ export function CompanyEditor({
 
   // Check if a field is verified
   const isVerified = (key: string): boolean => {
-    return verifiedFields.includes(key);
+    const v = verifications.find((f) => f.field_name === key);
+    return v?.verified === true;
+  };
+
+  // Get verification info for a field
+  const getVerificationInfo = (key: string): FieldVerification | undefined => {
+    return verifications.find((f) => f.field_name === key);
+  };
+
+  // Format verification date
+  const formatVerificationDate = (dateStr?: string): string => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
   };
 
   // Check if a field has changes
@@ -127,8 +157,8 @@ export function CompanyEditor({
 
   return (
     <div className="space-y-6">
-      {/* Header with actions */}
-      <div className="flex items-center justify-between sticky top-0 bg-surface-paper z-10 py-2">
+      {/* Header - title and filter only */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h3 className="font-semibold text-lg">Editar Empresa</h3>
           {changedCount > 0 && (
@@ -137,27 +167,17 @@ export function CompanyEditor({
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          {changedCount > 0 && (
-            <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showOnlyChanged}
-                onChange={(e) => setShowOnlyChanged(e.target.checked)}
-                className="rounded"
-              />
-              Mostrar apenas alterados
-            </label>
-          )}
-          <Button variant="ghost" onClick={onCancel} disabled={isSaving}>
-            <X className="w-4 h-4 mr-2" />
-            Cancelar
-          </Button>
-          <Button onClick={handleSave} disabled={changedCount === 0 || isSaving}>
-            <Save className="w-4 h-4 mr-2" />
-            {isSaving ? "Salvando..." : `Salvar ${changedCount > 0 ? `(${changedCount})` : ""}`}
-          </Button>
-        </div>
+        {changedCount > 0 && (
+          <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showOnlyChanged}
+              onChange={(e) => setShowOnlyChanged(e.target.checked)}
+              className="rounded"
+            />
+            Mostrar apenas alterados
+          </label>
+        )}
       </div>
 
       {/* Info about auto-verification */}
@@ -189,19 +209,40 @@ export function CompanyEditor({
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredFields.map((field) => (
+                {filteredFields.map((field) => {
+                  const verification = getVerificationInfo(field.key);
+                  const fieldIsVerified = verification?.verified === true;
+                  const verifiedDate = verification?.verified_at ? formatVerificationDate(verification.verified_at) : null;
+
+                  return (
                   <div key={field.key} className={field.multiline ? "md:col-span-2" : ""}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <label htmlFor={field.key} className="text-sm font-medium">
-                        {field.label}
-                      </label>
-                      {isVerified(field.key) && (
-                        <span title="Campo verificado"><CheckCircle className="w-3 h-3 text-green-600" /></span>
-                      )}
-                      {hasChanges(field.key) && (
-                        <Badge variant="outline" className="text-[10px] px-1 py-0 bg-amber-50 text-amber-700">
-                          alterado
-                        </Badge>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <label htmlFor={field.key} className="text-sm font-medium">
+                          {field.label}
+                        </label>
+                        {hasChanges(field.key) && (
+                          <Badge variant="outline" className="text-[10px] px-1 py-0 bg-amber-50 text-amber-700">
+                            alterado
+                          </Badge>
+                        )}
+                      </div>
+                      {/* Verification status indicator */}
+                      {!isLoadingVerifications && (
+                        fieldIsVerified ? (
+                          <span
+                            className="flex items-center gap-1 text-xs text-green-600"
+                            title={`Verificado${verifiedDate ? ` em ${verifiedDate}` : ''}`}
+                          >
+                            <CheckCircle className="w-3 h-3" />
+                            <span className="hidden sm:inline">Verificado{verifiedDate ? ` ${verifiedDate}` : ''}</span>
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-xs text-gray-400">
+                            <Circle className="w-3 h-3" />
+                            <span className="hidden sm:inline">Não verificado</span>
+                          </span>
+                        )
                       )}
                     </div>
                     {field.multiline ? (
@@ -222,25 +263,27 @@ export function CompanyEditor({
                       />
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
         );
       })}
 
-      {/* Bottom save bar for long forms */}
-      {changedCount > 0 && (
-        <div className="sticky bottom-0 bg-surface-paper py-4 border-t border-line flex justify-end gap-2">
-          <Button variant="ghost" onClick={onCancel} disabled={isSaving}>
-            Cancelar
-          </Button>
+      {/* Bottom action bar - always visible */}
+      <div className="sticky bottom-0 bg-surface-paper py-4 border-t border-line flex justify-end gap-2">
+        <Button variant="outline" onClick={onCancel} disabled={isSaving}>
+          <X className="w-4 h-4 mr-2" />
+          Cancelar
+        </Button>
+        {changedCount > 0 && (
           <Button onClick={handleSave} disabled={isSaving}>
             <Save className="w-4 h-4 mr-2" />
-            {isSaving ? "Salvando..." : `Salvar ${changedCount} alteração(ões)`}
+            {isSaving ? "Salvando..." : `Salvar (${changedCount})`}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

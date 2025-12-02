@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { SkipToContent } from '@/components/a11y/SkipToContent';
 import Link from 'next/link';
 import { useProfile } from '@/lib/hooks/use-profile';
+import { useQuery } from '@tanstack/react-query';
+import { companiesApi } from '@/lib/api/client';
 
 export default function DashboardLayout({
   children,
@@ -17,6 +19,21 @@ export default function DashboardLayout({
 
   // Check if user is admin (includes super_admin)
   const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
+
+  // Fetch user's companies to determine navigation
+  const { data: companiesData } = useQuery({
+    queryKey: ['myCompanies'],
+    queryFn: companiesApi.getMyCompanies,
+    enabled: !!profile && !isAdmin,
+  });
+
+  const companies = companiesData?.companies || [];
+  const hasMultipleCompanies = companies.length > 1;
+  const singleCompanyId = companies.length === 1 ? companies[0].id : null;
+
+  // Determine the companies link and label
+  const companiesLink = singleCompanyId ? `/companies/${singleCompanyId}` : '/dashboard';
+  const companiesLabel = hasMultipleCompanies ? 'Minhas Empresas' : 'Minha Empresa';
 
   const handleLogout = () => {
     // Mock logout - clear auth and redirect
@@ -67,10 +84,10 @@ export default function DashboardLayout({
               ) : (
                 <>
                   <Link
-                    href="/dashboard"
+                    href={companiesLink}
                     className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
                   >
-                    Minhas Empresas
+                    {companiesLabel}
                   </Link>
                   <Link
                     href="/dashboard/configuracoes"
@@ -156,11 +173,11 @@ export default function DashboardLayout({
               ) : (
                 <>
                   <Link
-                    href="/dashboard"
+                    href={companiesLink}
                     onClick={closeMobileMenu}
                     className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
                   >
-                    Minhas Empresas
+                    {companiesLabel}
                   </Link>
                   <Link
                     href="/dashboard/configuracoes"

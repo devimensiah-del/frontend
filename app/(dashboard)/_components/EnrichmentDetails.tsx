@@ -35,8 +35,7 @@ function parseEnrichmentData(data: any): Record<string, any> {
     try {
       const parsed = JSON.parse(data);
       return typeof parsed === 'object' ? parsed : {};
-    } catch (e) {
-      console.warn('Failed to parse enrichment data string:', e);
+    } catch {
       return {};
     }
   }

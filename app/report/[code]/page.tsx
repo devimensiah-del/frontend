@@ -103,6 +103,45 @@ export default function PublicReportPage() {
     );
   }
 
+  // Check if error is authentication required (is_public=false)
+  const isAuthRequired = error &&
+    (error as any)?.message?.includes('autenticação') ||
+    (error as any)?.message?.includes('Authentication required');
+
+  // Auth Required State (report exists but is_public=false)
+  if (isAuthRequired) {
+    return (
+      <div className="min-h-screen bg-surface-paper flex flex-col">
+        <ReportHeader />
+        <main className="flex-1 flex items-center justify-center px-6">
+          <div className="text-center max-w-lg">
+            <div className="mb-8">
+              <div className="w-20 h-20 mx-auto rounded-full bg-blue-500/10 flex items-center justify-center">
+                <Lock className="w-10 h-10 text-blue-500" />
+              </div>
+            </div>
+            <h1 className="text-3xl lg:text-4xl font-medium text-navy-900 mb-4 tracking-tight">
+              Login necessário
+            </h1>
+            <p className="text-gray-600 mb-8 leading-relaxed">
+              Este relatório requer autenticação para ser acessado.
+              Faça login para visualizar o conteúdo completo.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild className="bg-navy-900 hover:bg-gold-500 text-white px-8 py-4 text-xs uppercase tracking-widest font-medium">
+                <a href={`/auth/signin?redirect=/report/${code}`}>Fazer Login</a>
+              </Button>
+              <Button asChild variant="outline" className="px-8 py-4 text-xs uppercase tracking-widest font-medium">
+                <a href="/">Ir para o início</a>
+              </Button>
+            </div>
+          </div>
+        </main>
+        <ReportFooter />
+      </div>
+    );
+  }
+
   // 404 State
   if (error || !report) {
     return (

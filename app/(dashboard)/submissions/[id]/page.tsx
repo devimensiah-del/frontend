@@ -96,13 +96,12 @@ export default function SubmissionPage() {
       queryClient.invalidateQueries({ queryKey: ["analysis", id] });
       setShowSendDialog(false);
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Erro",
         description: "Não foi possível liberar a análise.",
         variant: "destructive"
       });
-      console.error("Error sending analysis:", error);
     }
   });
 
@@ -132,13 +131,12 @@ export default function SubmissionPage() {
       toast({ title: "Sucesso", description: "Análise atualizada com sucesso." });
       queryClient.invalidateQueries({ queryKey: ["analysis", id] });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Erro",
         description: "Não foi possível salvar as alterações. Verifique se a análise está no status 'completed'.",
         variant: "destructive"
       });
-      console.error("Error saving analysis edits:", error);
     }
   });
 
@@ -158,13 +156,12 @@ export default function SubmissionPage() {
           : "As análises premium estão agora visíveis para o cliente.",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Erro",
         description: "Não foi possível alterar o status de blur.",
         variant: "destructive"
       });
-      console.error("Error toggling blur:", error);
     }
   });
 
@@ -197,13 +194,12 @@ export default function SubmissionPage() {
         // Generate new access code
         const response = await adminApi.generateAccessCode(analysis.id);
         router.push(`/report/${response.access_code}?preview=admin`);
-      } catch (error) {
+      } catch {
         toast({
           title: "Erro",
           description: "Não foi possível gerar o código de acesso.",
           variant: "destructive"
         });
-        console.error("Error generating access code:", error);
       } finally {
         setIsNavigatingToReport(false);
       }

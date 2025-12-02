@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { companiesApi, analysisApi, authApi } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,19 +10,14 @@ import { Section, Container } from "@/components/editorial/Section";
 import { Heading, Eyebrow, Text } from "@/components/ui/Typography";
 import { LoadingState, ErrorState } from "@/components/ui/state-components";
 import { Badge } from "@/components/ui/badge";
-import { InfoItem } from "@/components/ui/InfoItem";
+import { CompanyDataView } from "@/components/company/CompanyDataView";
 import {
   ArrowLeft,
   Building2,
-  Globe,
-  MapPin,
   Users,
   ShieldCheck,
   Calendar,
   FileText,
-  ExternalLink,
-  Linkedin,
-  Twitter,
   Clock,
   CheckCircle,
   Loader2,
@@ -34,6 +29,7 @@ import { ptBR } from "date-fns/locale";
 export default function CompanyDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const id = params.id as string;
 
   // Fetch current user
@@ -42,15 +38,38 @@ export default function CompanyDetailPage() {
     queryFn: authApi.getCurrentUser,
   });
 
+  // Fetch user's companies to determine if they have multiple
+  const { data: companiesData } = useQuery({
+    queryKey: ["myCompanies"],
+    queryFn: companiesApi.getMyCompanies,
+    enabled: !!user,
+  });
+
+  const hasMultipleCompanies = (companiesData?.companies?.length ?? 0) > 1;
+
   // Fetch company details
   const { data: companyData, isLoading, error } = useQuery({
     queryKey: ["company", id],
     queryFn: () => companiesApi.getById(id),
   });
 
+  // Fetch field verifications
+  const { data: verificationsData } = useQuery({
+    queryKey: ["company-verifications", id],
+    queryFn: () => companiesApi.getFieldVerifications(id),
+    enabled: !!companyData?.company,
+  });
+
   const company = companyData?.company;
   const primarySubmissionId = companyData?.primary_submission_id;
   const isOwner = company?.owner_id === user?.id;
+  const verifications = verificationsData?.data?.fields || [];
+
+  // Refresh verifications after a change
+  const handleVerificationChange = () => {
+    queryClient.invalidateQueries({ queryKey: ["company-verifications", id] });
+    queryClient.invalidateQueries({ queryKey: ["company", id] });
+  };
 
   // Fetch analysis data (if primary submission exists)
   const { data: analysis, isLoading: isLoadingAnalysis } = useQuery({
@@ -112,15 +131,17 @@ export default function CompanyDetailPage() {
   return (
     <Section className="bg-surface-paper border-0 min-h-screen">
       <Container>
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          className="mb-6"
-          onClick={() => router.push("/dashboard")}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
-        </Button>
+        {/* Back Button - only shown for users with multiple companies */}
+        {hasMultipleCompanies && (
+          <Button
+            variant="ghost"
+            className="mb-6"
+            onClick={() => router.push("/dashboard")}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Minhas Empresas
+          </Button>
+        )}
 
         {/* Company Header */}
         <div className="mb-12">
@@ -163,153 +184,26 @@ export default function CompanyDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Company Info Card */}
+            {/* Company Data with Verification */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="w-5 h-5" />
-                  Informações da Empresa
+                  Dados da Empresa
                 </CardTitle>
+                <CardDescription>
+                  Valide os dados para protegê-los de atualizações automáticas
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {company.industry && (
-                    <InfoItem label="Indústria" value={company.industry} />
-                  )}
-                  {company.sector && (
-                    <InfoItem label="Setor" value={company.sector} />
-                  )}
-                  {company.company_size && (
-                    <InfoItem label="Porte" value={company.company_size} />
-                  )}
-                  {company.employees_range && (
-                    <InfoItem label="Funcionários" value={company.employees_range} />
-                  )}
-                  {company.location && (
-                    <InfoItem label="Localização" value={company.location} icon={<MapPin className="w-4 h-4" />} />
-                  )}
-                  {company.headquarters && (
-                    <InfoItem label="Sede" value={company.headquarters} />
-                  )}
-                  {company.foundation_year && (
-                    <InfoItem label="Fundação" value={company.foundation_year} />
-                  )}
-                  {company.funding_stage && (
-                    <InfoItem label="Estágio de Financiamento" value={company.funding_stage} />
-                  )}
-                  {company.target_market && (
-                    <InfoItem label="Mercado Alvo" value={company.target_market} />
-                  )}
-                  {company.target_audience && (
-                    <InfoItem label="Público Alvo" value={company.target_audience} />
-                  )}
-                  {company.business_model && (
-                    <InfoItem label="Modelo de Negócio" value={company.business_model} />
-                  )}
-                  {company.revenue_estimate && (
-                    <InfoItem label="Receita Estimada" value={company.revenue_estimate} />
-                  )}
-                  {company.cnpj && (
-                    <InfoItem label="CNPJ" value={company.cnpj} />
-                  )}
-                </div>
-
-                {/* Links */}
-                <div className="mt-6 pt-6 border-t border-line flex flex-wrap gap-4">
-                  {company.website && (
-                    <a
-                      href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-gold-600 hover:text-gold-700"
-                    >
-                      <Globe className="w-4 h-4" />
-                      Website
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                  {company.linkedin_url && (
-                    <a
-                      href={company.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
-                    >
-                      <Linkedin className="w-4 h-4" />
-                      LinkedIn
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                  {company.twitter_handle && (
-                    <a
-                      href={`https://twitter.com/${company.twitter_handle.replace("@", "")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-sky-500 hover:text-sky-600"
-                    >
-                      <Twitter className="w-4 h-4" />
-                      {company.twitter_handle}
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                </div>
+                <CompanyDataView
+                  company={company}
+                  verifications={verifications}
+                  isOwner={isOwner}
+                  onVerificationChange={handleVerificationChange}
+                />
               </CardContent>
             </Card>
-
-            {/* Strategic Assessment */}
-            {(company.strengths?.length || company.weaknesses?.length || company.competitors?.length) && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Avaliação Estratégica</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {company.strengths && company.strengths.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-green-700 mb-2">Pontos Fortes</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                        {company.strengths.map((item: string, idx: number) => (
-                          <li key={idx} className="text-sm text-text-secondary">{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {company.weaknesses && company.weaknesses.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-red-700 mb-2">Pontos Fracos</h4>
-                      <ul className="list-disc list-inside space-y-1">
-                        {company.weaknesses.map((item: string, idx: number) => (
-                          <li key={idx} className="text-sm text-text-secondary">{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {company.competitors && company.competitors.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-text-primary mb-2">Concorrentes</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {company.competitors.map((competitor: string, idx: number) => (
-                          <Badge key={idx} variant="outline">{competitor}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {company.digital_maturity !== undefined && (
-                    <div>
-                      <h4 className="font-semibold text-text-primary mb-2">Maturidade Digital</h4>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gold-500 rounded-full"
-                            style={{ width: `${Math.min((company.digital_maturity / 10) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-sm font-medium">{Math.min(company.digital_maturity, 10)}/10</span>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* Sidebar */}

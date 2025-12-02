@@ -494,6 +494,11 @@ export interface Analysis {
   isBlurred?: boolean;
   is_blurred?: boolean; // Backend uses snake_case
 
+  // Public access control - When true, access code works without login
+  // When false, access code requires authentication
+  isPublic?: boolean;
+  is_public?: boolean; // Backend uses snake_case
+
   // Public sharing via access code
   accessCode?: string;
   access_code?: string; // Backend uses snake_case
@@ -544,6 +549,8 @@ export interface PublicReportData {
   is_admin_preview?: boolean;
   // When true, premium frameworks are blurred (paywall)
   is_blurred?: boolean;
+  // When true, report is publicly accessible without login
+  is_public?: boolean;
 }
 
 // Access Code Generation Response
@@ -635,6 +642,97 @@ export interface DataHistoryEntry {
   changed_at: string;
 }
 
+/**
+ * Field verification status for company data
+ * Tracks which fields have been verified by user or admin
+ */
+export interface FieldVerification {
+  field_name: string;
+  verified: boolean;
+  verified_at?: string;
+  verified_by?: string;
+}
+
+/**
+ * Deprecation categories for company fields
+ * Determines how long field verification remains valid
+ */
+export type DeprecationCategory = 'static' | 'core' | 'strategic' | 'financial';
+
+/**
+ * Field configuration with deprecation info
+ */
+export interface FieldConfig {
+  key: string;
+  label: string;
+  category: DeprecationCategory;
+  placeholder?: string;
+  multiline?: boolean;
+}
+
+/**
+ * Field deprecation periods in months
+ * static: never expires (0)
+ * core: 24 months
+ * strategic: 12 months
+ * financial: 6 months
+ */
+export const DEPRECATION_MONTHS: Record<DeprecationCategory, number> = {
+  static: 0,
+  core: 24,
+  strategic: 12,
+  financial: 6,
+};
+
+/**
+ * Category display info
+ */
+export const CATEGORY_INFO: Record<DeprecationCategory, { label: string; color: string; description: string }> = {
+  static: { label: 'Estático', color: 'bg-gray-100 text-gray-700', description: 'Nunca expira' },
+  core: { label: 'Core', color: 'bg-purple-100 text-purple-700', description: 'Expira em 2 anos' },
+  strategic: { label: 'Estratégico', color: 'bg-blue-100 text-blue-700', description: 'Expira em 1 ano' },
+  financial: { label: 'Financeiro', color: 'bg-amber-100 text-amber-700', description: 'Expira em 6 meses' },
+};
+
+/**
+ * All verifiable company fields organized by deprecation category
+ */
+export const COMPANY_FIELDS: FieldConfig[] = [
+  // Static fields (never expire)
+  { key: 'name', label: 'Nome', category: 'static', placeholder: 'Nome da empresa' },
+  { key: 'cnpj', label: 'CNPJ', category: 'static', placeholder: '00.000.000/0000-00' },
+  { key: 'legal_name', label: 'Razão Social', category: 'static', placeholder: 'Razão social' },
+  { key: 'foundation_year', label: 'Ano de Fundação', category: 'static', placeholder: '2020' },
+  { key: 'headquarters', label: 'Sede', category: 'static', placeholder: 'São Paulo, SP' },
+  { key: 'website', label: 'Website', category: 'static', placeholder: 'https://exemplo.com' },
+  { key: 'linkedin_url', label: 'LinkedIn', category: 'static', placeholder: 'https://linkedin.com/company/...' },
+  { key: 'twitter_handle', label: 'Twitter', category: 'static', placeholder: '@empresa' },
+  { key: 'location', label: 'Localização', category: 'static', placeholder: 'Brasil' },
+  { key: 'company_size', label: 'Porte', category: 'static', placeholder: 'Médio' },
+
+  // Core fields (24 months)
+  { key: 'industry', label: 'Indústria', category: 'core', placeholder: 'Tecnologia' },
+  { key: 'sector', label: 'Setor', category: 'core', placeholder: 'Software' },
+  { key: 'business_model', label: 'Modelo de Negócio', category: 'core', placeholder: 'SaaS B2B', multiline: true },
+  { key: 'target_audience', label: 'Público Alvo', category: 'core', placeholder: 'Empresas de médio porte', multiline: true },
+  { key: 'target_market', label: 'Mercado Alvo', category: 'core', placeholder: 'Brasil e LATAM' },
+
+  // Strategic fields (12 months)
+  { key: 'value_proposition', label: 'Proposta de Valor', category: 'strategic', placeholder: 'Descreva a proposta de valor', multiline: true },
+  { key: 'market_share_status', label: 'Status Market Share', category: 'strategic', placeholder: 'Challenger' },
+  { key: 'competitors', label: 'Concorrentes', category: 'strategic', placeholder: 'Empresa A, Empresa B' },
+  { key: 'strengths', label: 'Pontos Fortes', category: 'strategic', placeholder: 'Tecnologia, Equipe', multiline: true },
+  { key: 'weaknesses', label: 'Pontos Fracos', category: 'strategic', placeholder: 'Escala, Marketing', multiline: true },
+  { key: 'digital_maturity', label: 'Maturidade Digital', category: 'strategic', placeholder: '7' },
+
+  // Financial fields (6 months)
+  { key: 'revenue_estimate', label: 'Receita Estimada', category: 'financial', placeholder: 'R$ 1-5M' },
+  { key: 'funding_stage', label: 'Estágio de Funding', category: 'financial', placeholder: 'Série A' },
+  { key: 'employees_range', label: 'Funcionários', category: 'financial', placeholder: '51-200' },
+  { key: 'annual_revenue_min', label: 'Receita Mínima', category: 'financial', placeholder: '1000000' },
+  { key: 'annual_revenue_max', label: 'Receita Máxima', category: 'financial', placeholder: '5000000' },
+];
+
 export interface CompanyListResponse {
   companies: Company[];
   count: number;
@@ -674,6 +772,7 @@ export interface AnalysisHistoryItem {
   business_challenge: string;
   is_blurred: boolean;
   is_visible_to_user: boolean;
+  is_public: boolean;
   access_code?: string;
   pdf_url?: string;
   completed_at?: string;
