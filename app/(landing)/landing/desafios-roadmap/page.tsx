@@ -264,7 +264,7 @@ export default function DesafiosRoadmapPage() {
                 }`}
               >
                 <Text className="text-gold-500 text-sm font-medium mb-2">{phase.phase}</Text>
-                <Heading as="h3" className="text-white text-lg mb-4">
+                <Heading as="h3" className="text-white text-base font-semibold mb-4 break-normal hyphens-none">
                   {phase.title}
                 </Heading>
                 <ul className="space-y-2">
