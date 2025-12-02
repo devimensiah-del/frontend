@@ -31,7 +31,13 @@ export default function LandingPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = "/#diagnostico";
+    // Redirect to main form with query params to prefill
+    const params = new URLSearchParams();
+    if (formData.name) params.set("contactName", formData.name);
+    if (formData.email) params.set("contactEmail", formData.email);
+    if (formData.company) params.set("companyName", formData.company);
+    if (formData.challenge) params.set("businessChallenge", formData.challenge);
+    window.location.href = `/#diagnostico?${params.toString()}`;
   };
 
   const problemCards = [

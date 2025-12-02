@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { SubmissionForm } from "./_components/submission-form";
 import { Section, Container } from "@/components/editorial/Section";
 import { Display, Heading, Eyebrow, Text } from "@/components/ui/Typography";
@@ -92,7 +93,9 @@ export default function EditorialPage() {
         <Container className="w-full flex justify-center">
           <div className="max-w-3xl w-full">
             {isPortuguese ? (
-              <SubmissionForm />
+              <Suspense fallback={<div className="bg-white p-8 md:p-12 border border-line shadow-sm animate-pulse h-96" />}>
+                <SubmissionForm />
+              </Suspense>
             ) : (
               <div className="bg-white p-8 md:p-12 border border-line shadow-sm relative text-center">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gold-500"></div>

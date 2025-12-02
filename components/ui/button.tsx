@@ -51,7 +51,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             <span>{children}</span>
           </span>
         ) : (
-          children
+          <span className="flex items-center justify-center">{children}</span>
         )}
       </button>
     );

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -64,6 +65,7 @@ export function SubmissionForm() {
   const { toast } = useToast()
   const t = useTranslations()
   const { locale } = useI18n()
+  const searchParams = useSearchParams()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [accordionValue, setAccordionValue] = useState<string>("")
 
@@ -98,6 +100,19 @@ export function SubmissionForm() {
       instagramUrl: "",
     },
   })
+
+  // Prefill form from query params (from landing page)
+  useEffect(() => {
+    const contactName = searchParams.get("contactName")
+    const contactEmail = searchParams.get("contactEmail")
+    const companyName = searchParams.get("companyName")
+    const businessChallenge = searchParams.get("businessChallenge")
+
+    if (contactName) form.setValue("contactName", contactName)
+    if (contactEmail) form.setValue("contactEmail", contactEmail)
+    if (companyName) form.setValue("companyName", companyName)
+    if (businessChallenge) form.setValue("businessChallenge", businessChallenge)
+  }, [searchParams, form])
 
   // 2. Define submit handler
   async function onSubmit(data: FormValues) {
