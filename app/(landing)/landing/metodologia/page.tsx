@@ -5,7 +5,7 @@ import { Section, Container } from "@/components/editorial/Section";
 import { Display, Heading, Eyebrow, Text } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/lib/i18n/context";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, ArrowDownRight } from "lucide-react";
 
 export default function MetodologiaPage() {
   const t = useTranslations();
@@ -205,71 +205,103 @@ export default function MetodologiaPage() {
 
   return (
     <div className="[word-break:keep-all]">
-      {/* Hero */}
-      <Section className="bg-surface-paper py-16 md:py-24">
-        <Container>
-          <div className="max-w-4xl mx-auto text-center">
-            <Eyebrow className="mb-4">{t("metodologia.eyebrow")}</Eyebrow>
-            <Display variant="hero" className="mb-6">
-              {t("metodologia.title")}
-            </Display>
-            <Text variant="lead" className="max-w-2xl mx-auto">
-              {t("metodologia.subtitle")}
-            </Text>
+      {/* Hero - Split Layout */}
+      <Section variant="hero" className="grid lg:grid-cols-12 min-h-[50vh]">
+        <div className="lg:col-span-7 p-8 md:p-12 lg:p-24 flex flex-col justify-center border-r border-grid bg-white/50">
+          <div className="mb-8">
+            <Eyebrow>{t("metodologia.eyebrow")}</Eyebrow>
           </div>
-        </Container>
+          <Display variant="hero" className="mb-6">
+            {t("metodologia.title")}
+          </Display>
+          <Text variant="lead" className="max-w-xl">
+            {t("metodologia.subtitle")}
+          </Text>
+        </div>
+        <div className="lg:col-span-5 bg-navy-900 text-white flex flex-col relative overflow-hidden">
+          {/* Grid Pattern */}
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
+          />
+          {/* Metrics */}
+          <div className="flex-1 p-12 flex flex-col justify-end border-b border-white/10 relative">
+            <div className="text-6xl font-light mb-2 font-heading text-gold-500">12</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-gray-400">Frameworks</div>
+          </div>
+          <div className="flex-1 p-12 flex flex-col justify-end relative">
+            <div className="text-6xl font-light mb-2 font-heading text-white">48h</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-gray-400">Delivery</div>
+          </div>
+        </div>
       </Section>
 
-      {/* Pipeline Steps */}
-      <Section className="bg-white py-16">
+      {/* Pipeline Steps - Editorial Style */}
+      <Section className="bg-white border-b border-grid">
         <Container>
-          <div className="max-w-4xl mx-auto space-y-12">
+          <div className="max-w-5xl mx-auto">
             {pipelineSteps.map((step, index) => (
               <div
                 key={index}
-                className="border border-line p-6 md:p-8 hover:shadow-lg transition-shadow"
+                className={`grid lg:grid-cols-12 gap-8 py-12 ${
+                  index !== pipelineSteps.length - 1 ? "border-b border-line" : ""
+                } hover:bg-surface-paper transition-colors group`}
               >
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="flex-shrink-0 w-12 h-12 bg-navy-900 text-white flex items-center justify-center text-xl font-bold">
+                {/* Step Number - Large */}
+                <div className="lg:col-span-2 flex lg:justify-end">
+                  <div className="w-16 h-16 bg-navy-900 text-white flex items-center justify-center text-2xl font-light">
                     {step.num}
-                  </div>
-                  <div>
-                    <Heading as="h3" variant="subtitle" className="text-xl mb-2">
-                      {step.title}
-                    </Heading>
-                    <Text className="text-gray-600">{step.desc}</Text>
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  {/* Outputs */}
-                  <div className="bg-surface-paper p-4 rounded">
-                    <Text className="font-medium text-navy-900 mb-3 text-sm uppercase tracking-wide">
-                      {t("metodologia.outputsLabel")}
-                    </Text>
-                    <ul className="space-y-2">
-                      {step.outputs.map((output, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                          <CheckCircle2 className="w-4 h-4 text-gold-500 mt-0.5 flex-shrink-0" />
-                          {output}
-                        </li>
-                      ))}
-                    </ul>
+                {/* Content */}
+                <div className="lg:col-span-10">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <Heading as="h3" className="text-xl font-medium mb-2">
+                        {step.title}
+                      </Heading>
+                      <Text className="text-text-secondary max-w-2xl">{step.desc}</Text>
+                    </div>
+                    <ArrowDownRight className="w-5 h-5 text-line group-hover:text-gold-500 transition-colors hidden lg:block" />
                   </div>
 
-                  {/* Checkpoints */}
-                  <div className="bg-navy-900/5 p-4 rounded">
-                    <Text className="font-medium text-navy-900 mb-3 text-sm uppercase tracking-wide">
-                      {t("metodologia.checkpointLabel")}
-                    </Text>
-                    <ul className="space-y-2">
-                      {step.checkpoints.map((checkpoint, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                          <span className="text-gold-500">●</span>
-                          {checkpoint}
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="grid md:grid-cols-2 gap-6 mt-6">
+                    {/* Outputs */}
+                    <div className="border-l-2 border-gold-500 pl-4">
+                      <Text className="font-medium text-navy-900 mb-3 text-xs uppercase tracking-[0.15em]">
+                        {t("metodologia.outputsLabel")}
+                      </Text>
+                      <ul className="space-y-2">
+                        {step.outputs.map((output, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+                            <CheckCircle2 className="w-4 h-4 text-gold-500 mt-0.5 flex-shrink-0" />
+                            {output}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Checkpoints */}
+                    <div className="border-l-2 border-navy-900/20 pl-4">
+                      <Text className="font-medium text-navy-900 mb-3 text-xs uppercase tracking-[0.15em]">
+                        {t("metodologia.checkpointLabel")}
+                      </Text>
+                      <ul className="space-y-2">
+                        {step.checkpoints.map((checkpoint, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+                            <span className="w-4 h-4 rounded-full border border-gold-500 flex items-center justify-center text-[10px] text-gold-500 mt-0.5 flex-shrink-0">
+                              {i + 1}
+                            </span>
+                            {checkpoint}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -278,10 +310,19 @@ export default function MetodologiaPage() {
         </Container>
       </Section>
 
-      {/* CTA */}
-      <Section className="bg-navy-900 py-16">
-        <Container>
-          <div className="text-center">
+      {/* CTA - With Grid Pattern */}
+      <Section variant="dark" className="relative overflow-hidden">
+        {/* Grid Pattern */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <Container className="relative">
+          <div className="text-center py-12">
             <Heading as="h2" className="text-2xl md:text-3xl text-white mb-6">
               {t("metodologia.ctaTitle")}
             </Heading>
