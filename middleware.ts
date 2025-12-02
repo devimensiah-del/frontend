@@ -38,6 +38,7 @@ export async function middleware(request: NextRequest) {
     '/auth/reset-password',
     '/auth/verify-email',
     '/',
+    '/landing',
     '/privacy',
     '/terms',
     '/report', // Public report viewing (access code based, blurring controlled by admin)
