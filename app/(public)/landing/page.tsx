@@ -2,73 +2,229 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { Section, Container } from "@/components/editorial/Section";
-import { Display, Heading, Eyebrow, Text } from "@/components/ui/Typography";
+import { Display, Heading, Text } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/button";
-import { useTranslations, useI18n } from "@/lib/i18n/context";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { useI18n } from "@/lib/i18n/context";
 import {
-  Eye,
-  Target,
-  Brain,
-  Shield,
-  Lock,
-  FileSearch,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  Layers,
+  Shield,
+  Zap,
+  Users,
+  Activity,
 } from "lucide-react";
 
-export default function LandingPage() {
-  const t = useTranslations();
-  const { messages } = useI18n();
+// Type definitions for the landing page messages
+interface LandingMessages {
+  nav: {
+    methodology: string;
+    challenges: string;
+    model: string;
+    security: string;
+    login: string;
+    cta: string;
+  };
+  hero: {
+    eyebrow: string;
+    titleLine1: string;
+    titleLine2: string;
+    poweredBy: string;
+    poweredByHighlight: string;
+    description: string;
+    cta: string;
+    ctaSecondary: string;
+    badge1: string;
+    badge2: string;
+    badge3: string;
+  };
+  systemStatus: {
+    title: string;
+    processing: string;
+    velocityLabel: string;
+    velocityValue: string;
+    typeLabel: string;
+    typeValue: string;
+  };
+  problems: {
+    eyebrow: string;
+    subtitle: string;
+    cards: Array<{ title: string; description: string }>;
+  };
+  solution: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    features: string[];
+    cards: Array<{ icon: string; title: string; value: string; description: string }>;
+  };
+  pipeline: {
+    title: string;
+    subtitle: string;
+    steps: string[];
+    stats: Array<{ value: string; label: string; description: string }>;
+  };
+  future: {
+    eyebrow: string;
+    integrations: string[];
+    title: string;
+    description: string;
+    tagline: string;
+    cta: string;
+  };
+  pilot: {
+    title: string;
+    subtitle: string;
+    benefits: string[];
+    trustedBy: string;
+    form: {
+      name: string;
+      email: string;
+      company: string;
+      challenge: string;
+      submit: string;
+      disclaimer: string;
+    };
+  };
+  footer: {
+    copyright: string;
+    privacy: string;
+    terms: string;
+    contact: string;
+  };
+}
 
-  // Access the pipeline steps array from messages
-  const pipelineSteps = messages.landing?.pipelineSteps || [];
-  const modelIncludes = messages.landing?.modelIncludes || [];
+export default function LandingPage() {
+  const { messages } = useI18n();
+  const landing = (messages.landing || {}) as LandingMessages;
+
+  // Form state
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    company: "",
+    challenge: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Redirect to main form with data
+    window.location.href = `/#diagnostico`;
+  };
 
   return (
     <div className="[word-break:keep-all]">
+      {/* Custom Landing Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+        <Container>
+          <div className="flex items-center justify-between h-16">
+            <Link href="/landing" className="flex items-center">
+              <Image
+                src="/images/landing/logo.png"
+                alt="ImensIAH"
+                width={140}
+                height={40}
+                className="h-8 w-auto"
+              />
+            </Link>
+            <div className="hidden md:flex items-center gap-6">
+              <a href="#methodology" className="text-sm text-gray-600 hover:text-navy-900 transition-colors">
+                {landing.nav?.methodology}
+              </a>
+              <a href="#challenges" className="text-sm text-gray-600 hover:text-navy-900 transition-colors">
+                {landing.nav?.challenges}
+              </a>
+              <a href="#model" className="text-sm text-gray-600 hover:text-navy-900 transition-colors">
+                {landing.nav?.model}
+              </a>
+              <a href="#security" className="text-sm text-gray-600 hover:text-navy-900 transition-colors">
+                {landing.nav?.security}
+              </a>
+              <Link href="/login" className="text-sm text-gray-600 hover:text-navy-900 transition-colors">
+                {landing.nav?.login}
+              </Link>
+              <Button asChild size="sm" variant="architect">
+                <Link href="#pilot">{landing.nav?.cta}</Link>
+              </Button>
+            </div>
+          </div>
+        </Container>
+      </nav>
+
+      {/* Spacer for fixed nav */}
+      <div className="h-16" />
+
       {/* --- HERO SECTION --- */}
-      <Section variant="hero" className="grid lg:grid-cols-12">
+      <Section variant="hero" className="grid lg:grid-cols-12 min-h-[calc(100vh-4rem)]">
         {/* Left: The Promise */}
-        <div className="lg:col-span-7 p-8 md:p-12 lg:p-24 flex flex-col justify-center border-r border-grid relative bg-white/50">
-          <div className="absolute top-8 left-8 md:top-12 md:left-12">
-            <Eyebrow>{t("landing.eyebrow")}</Eyebrow>
+        <div className="lg:col-span-7 p-8 md:p-12 lg:p-16 xl:p-24 flex flex-col justify-center border-r border-grid relative bg-white">
+          <div className="mb-6">
+            <span className="text-xs font-medium tracking-[0.2em] uppercase text-gold-500">
+              {landing.hero?.eyebrow}
+            </span>
           </div>
 
-          <Display variant="hero" className="mt-12 md:mt-0 mb-6 md:mb-10">
-            {t("landing.heroTitle")} <br />
-            <span className="text-gold-500 italic serif-touch">{t("landing.heroHighlight")}</span>{" "}
-            {t("landing.heroSuffix")}
+          <Display variant="hero" className="mb-4">
+            <span className="text-navy-900">{landing.hero?.titleLine1}</span>
+            <br />
+            <span className="text-gold-500 italic">{landing.hero?.titleLine2}</span>
           </Display>
 
-          <Text variant="lead" className="max-w-lg mb-8 md:mb-12">
-            {t("landing.heroDescription")}
+          <Text className="text-sm text-gray-500 mb-6">
+            {landing.hero?.poweredBy}{" "}
+            <span className="text-gold-500 font-medium">{landing.hero?.poweredByHighlight}</span>
           </Text>
 
-          <div className="flex flex-wrap gap-4 md:gap-6">
-            <Button asChild variant="architect">
-              <Link href="/#diagnostico">
-                {t("landing.heroCta")}
+          <Text variant="lead" className="max-w-xl mb-8">
+            {landing.hero?.description}
+          </Text>
+
+          <div className="flex flex-wrap gap-4 mb-8">
+            <Button asChild variant="architect" size="lg">
+              <Link href="#pilot">
+                {landing.hero?.cta}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
+            <Button asChild variant="outline" size="lg">
+              <a href="#methodology">{landing.hero?.ctaSecondary}</a>
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            <span className="inline-flex items-center gap-2 px-3 py-1 bg-navy-900/5 text-navy-900 text-xs font-medium rounded-full">
+              <CheckCircle2 className="w-3 h-3" />
+              {landing.hero?.badge1}
+            </span>
+            <span className="inline-flex items-center gap-2 px-3 py-1 bg-navy-900/5 text-navy-900 text-xs font-medium rounded-full">
+              <CheckCircle2 className="w-3 h-3" />
+              {landing.hero?.badge2}
+            </span>
+            <span className="inline-flex items-center gap-2 px-3 py-1 bg-navy-900/5 text-navy-900 text-xs font-medium rounded-full">
+              <CheckCircle2 className="w-3 h-3" />
+              {landing.hero?.badge3}
+            </span>
           </div>
         </div>
 
-        {/* Right: Hero Image + Metrics */}
+        {/* Right: Hero Image + System Status */}
         <div className="lg:col-span-5 bg-navy-900 text-white flex flex-col relative overflow-hidden">
           {/* Background Pattern */}
           <div
             className="absolute inset-0 opacity-20"
             style={{
-              backgroundImage: 'url(/images/landing/bg-mesh-pattern.png)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
+              backgroundImage: "url(/images/landing/bg-mesh-pattern.png)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
             }}
           />
 
           {/* Hero Image */}
-          <div className="flex-1 relative min-h-[200px] lg:min-h-0">
+          <div className="flex-1 relative min-h-[300px] lg:min-h-0">
             <Image
               src="/images/landing/hero-strategic-intelligence.png"
               alt="Strategic Intelligence"
@@ -78,22 +234,23 @@ export default function LandingPage() {
             />
           </div>
 
-          {/* Metrics */}
-          <div className="grid grid-cols-2 divide-x divide-white/10">
-            <div className="p-6 md:p-8">
-              <div className="text-4xl md:text-5xl font-light mb-2 text-gold-500 font-heading">
-                {t("landing.heroMetric1")}
-              </div>
-              <div className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-gray-400">
-                {t("landing.heroMetric1Label")}
-              </div>
+          {/* System Status Card */}
+          <div className="relative bg-navy-900/90 backdrop-blur-sm border-t border-white/10 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Activity className="w-4 h-4 text-green-400 animate-pulse" />
+              <span className="text-xs font-medium tracking-wider text-gray-400">
+                {landing.systemStatus?.title}
+              </span>
             </div>
-            <div className="p-6 md:p-8">
-              <div className="text-4xl md:text-5xl font-light mb-2 text-white font-heading">
-                {t("landing.heroMetric2")}
+            <div className="text-sm text-gray-300 mb-4">{landing.systemStatus?.processing}</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs text-gray-500 mb-1">{landing.systemStatus?.velocityLabel}</div>
+                <div className="text-2xl font-bold text-gold-500">{landing.systemStatus?.velocityValue}</div>
               </div>
-              <div className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-gray-400">
-                {t("landing.heroMetric2Label")}
+              <div>
+                <div className="text-xs text-gray-500 mb-1">{landing.systemStatus?.typeLabel}</div>
+                <div className="text-sm text-white">{landing.systemStatus?.typeValue}</div>
               </div>
             </div>
           </div>
@@ -101,68 +258,61 @@ export default function LandingPage() {
       </Section>
 
       {/* --- PROBLEMS SECTION --- */}
-      <Section className="bg-surface-paper">
+      <Section id="challenges" className="bg-surface-paper py-20">
         <Container>
-          <div className="text-center mb-12 md:mb-16">
-            <Eyebrow className="mb-4">{t("landing.problemsEyebrow")}</Eyebrow>
+          <div className="text-center mb-12">
             <Heading variant="section" className="mb-4">
-              {t("landing.problemsTitle")}
+              {landing.problems?.eyebrow}
             </Heading>
             <Text variant="lead" className="max-w-3xl mx-auto">
-              {t("landing.problemsSubtitle")}
+              {landing.problems?.subtitle}
             </Text>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
-            <ProblemCard
-              icon={<Eye className="w-8 h-8" />}
-              title={t("landing.problem1Title")}
-              description={t("landing.problem1Desc")}
-            />
-            <ProblemCard
-              icon={<Target className="w-8 h-8" />}
-              title={t("landing.problem2Title")}
-              description={t("landing.problem2Desc")}
-            />
-            <ProblemCard
-              icon={<Brain className="w-8 h-8" />}
-              title={t("landing.problem3Title")}
-              description={t("landing.problem3Desc")}
-            />
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {landing.problems?.cards?.map((card, index) => (
+              <div
+                key={index}
+                className="p-6 md:p-8 border border-line bg-white hover:shadow-lg transition-shadow"
+              >
+                <Heading as="h3" variant="subtitle" className="mb-3 text-navy-900">
+                  {card.title}
+                </Heading>
+                <Text variant="small" className="text-gray-600">
+                  {card.description}
+                </Text>
+              </div>
+            ))}
           </div>
         </Container>
       </Section>
 
-      {/* --- FEATURES SECTION --- */}
-      <Section className="bg-white">
+      {/* --- SOLUTION SECTION --- */}
+      <Section id="methodology" className="bg-white py-20">
         <Container>
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
             <div>
-              <Eyebrow className="mb-4">{t("landing.featuresEyebrow")}</Eyebrow>
+              <span className="text-xs font-medium tracking-[0.2em] uppercase text-gold-500 mb-4 block">
+                {landing.solution?.eyebrow}
+              </span>
               <Heading variant="section" className="mb-4">
-                {t("landing.featuresTitle")}
+                {landing.solution?.title}
               </Heading>
               <Text variant="lead" className="mb-8">
-                {t("landing.featuresSubtitle")}
+                {landing.solution?.subtitle}
               </Text>
 
-              <div className="space-y-6">
-                <FeatureItem
-                  title={t("landing.feature1Title")}
-                  description={t("landing.feature1Desc")}
-                />
-                <FeatureItem
-                  title={t("landing.feature2Title")}
-                  description={t("landing.feature2Desc")}
-                />
-                <FeatureItem
-                  title={t("landing.feature3Title")}
-                  description={t("landing.feature3Desc")}
-                />
-              </div>
+              <ul className="space-y-3">
+                {landing.solution?.features?.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-gold-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="relative h-[300px] md:h-[500px] rounded-lg overflow-hidden border border-line shadow-lg">
+            <div className="relative h-[300px] md:h-[400px] rounded-lg overflow-hidden border border-line shadow-lg">
               <Image
                 src="/images/landing/feature-frameworks.png"
                 alt="Strategic Frameworks"
@@ -171,218 +321,210 @@ export default function LandingPage() {
               />
             </div>
           </div>
+
+          {/* Solution Cards */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {landing.solution?.cards?.map((card, index) => {
+              const icons = {
+                frameworks: <Layers className="w-8 h-8" />,
+                enterprise: <Shield className="w-8 h-8" />,
+                speed: <Zap className="w-8 h-8" />,
+                hybrid: <Users className="w-8 h-8" />,
+              };
+              return (
+                <div
+                  key={index}
+                  className="p-6 border border-line bg-white hover:shadow-lg transition-shadow text-center"
+                >
+                  <div className="text-gold-500 mb-4 flex justify-center">
+                    {icons[card.icon as keyof typeof icons]}
+                  </div>
+                  {card.value && (
+                    <div className="text-3xl font-bold text-navy-900 mb-2">{card.value}</div>
+                  )}
+                  <Heading as="h4" variant="subtitle" className="mb-2">
+                    {card.title}
+                  </Heading>
+                  <Text variant="small" className="text-gray-600">
+                    {card.description}
+                  </Text>
+                </div>
+              );
+            })}
+          </div>
         </Container>
       </Section>
 
       {/* --- PIPELINE SECTION --- */}
-      <Section variant="dark">
+      <Section className="bg-navy-900 py-20">
         <Container>
-          <div className="text-center mb-12 md:mb-16">
-            <Eyebrow className="mb-4 text-gold-500">{t("landing.pipelineEyebrow")}</Eyebrow>
-            <Heading as="h2" className="text-3xl lg:text-5xl font-medium text-white mb-4">
-              {t("landing.pipelineTitle")}
+          <div className="text-center mb-12">
+            <Heading as="h2" className="text-3xl lg:text-4xl font-medium text-white mb-4">
+              {landing.pipeline?.title}
             </Heading>
-            <Text variant="light" className="max-w-2xl mx-auto">
-              {t("landing.pipelineSubtitle")}
+            <Text className="text-gray-400 max-w-2xl mx-auto">
+              {landing.pipeline?.subtitle}
             </Text>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
-            {pipelineSteps.map((step: { title: string; desc: string }, index: number) => (
-              <PipelineStep
+          {/* Pipeline Steps Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-16">
+            {landing.pipeline?.steps?.map((step, index) => (
+              <div
                 key={index}
-                number={index + 1}
-                title={step.title}
-                description={step.desc}
-              />
+                className="p-3 border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-center"
+              >
+                <span className="text-white text-sm font-medium">{step}</span>
+              </div>
             ))}
           </div>
 
-          <div className="text-center">
-            <Text variant="light" className="mb-6 text-lg">
-              {t("landing.pipelineCta")}
+          {/* Stats */}
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {landing.pipeline?.stats?.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-5xl font-bold text-gold-500 mb-2">{stat.value}</div>
+                <div className="text-white font-medium mb-2">{stat.label}</div>
+                <Text className="text-gray-400 text-sm">{stat.description}</Text>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      {/* --- COMING SOON / FUTURE SECTION --- */}
+      <Section id="model" className="bg-surface-paper py-20">
+        <Container>
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-wrap gap-3 mb-6">
+              <span className="text-xs font-medium tracking-[0.2em] uppercase text-gold-500">
+                {landing.future?.eyebrow}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-3 mb-8">
+              {landing.future?.integrations?.map((integration, index) => (
+                <span
+                  key={index}
+                  className="px-4 py-2 bg-navy-900/5 text-navy-900 text-sm font-medium rounded-full"
+                >
+                  {integration}
+                </span>
+              ))}
+            </div>
+
+            <Heading variant="section" className="mb-4">
+              {landing.future?.title}
+            </Heading>
+            <Text variant="lead" className="mb-6">
+              {landing.future?.description}
             </Text>
-            <Button asChild variant="architect">
-              <Link href="/#diagnostico">
-                {t("landing.heroCta")}
+            <Text className="text-gold-500 font-medium text-lg mb-8">
+              {landing.future?.tagline}
+            </Text>
+
+            <Button asChild variant="outline" size="lg">
+              <a href="#pilot">
+                {landing.future?.cta}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+              </a>
             </Button>
           </div>
         </Container>
       </Section>
 
-      {/* --- MODEL SECTION --- */}
-      <Section className="bg-surface-paper">
+      {/* --- PILOT ACCESS FORM SECTION --- */}
+      <Section id="pilot" className="bg-white py-20">
         <Container>
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="relative h-[300px] md:h-[400px] rounded-lg overflow-hidden border border-line shadow-lg order-2 lg:order-1">
-              <Image
-                src="/images/landing/feature-speed.png"
-                alt="Speed and Delivery"
-                fill
-                className="object-cover"
-              />
-            </div>
-
-            <div className="order-1 lg:order-2">
-              <Eyebrow className="mb-4">{t("landing.modelEyebrow")}</Eyebrow>
+          <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            <div>
               <Heading variant="section" className="mb-4">
-                {t("landing.modelTitle")}
+                {landing.pilot?.title}
               </Heading>
               <Text variant="lead" className="mb-8">
-                {t("landing.modelSubtitle")}
+                {landing.pilot?.subtitle}
               </Text>
 
               <ul className="space-y-4 mb-8">
-                {modelIncludes.map((item: string, index: number) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-gold-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-text-primary">{item}</span>
+                {landing.pilot?.benefits?.map((benefit, index) => (
+                  <li key={index} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-gold-500 flex-shrink-0" />
+                    <span className="text-gray-700 font-medium">{benefit}</span>
                   </li>
                 ))}
               </ul>
 
-              <div className="p-4 bg-navy-900/5 rounded-lg border border-line">
-                <Text variant="small" className="text-navy-900 font-medium">
-                  {t("landing.modelFocus")}
+              <div className="text-sm text-gray-500">{landing.pilot?.trustedBy}</div>
+            </div>
+
+            <div className="bg-surface-paper p-8 rounded-lg border border-line">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  placeholder={landing.pilot?.form?.name}
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+                <Input
+                  type="email"
+                  placeholder={landing.pilot?.form?.email}
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+                <Input
+                  placeholder={landing.pilot?.form?.company}
+                  value={formData.company}
+                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                  required
+                />
+                <Textarea
+                  placeholder={landing.pilot?.form?.challenge}
+                  value={formData.challenge}
+                  onChange={(e) => setFormData({ ...formData, challenge: e.target.value })}
+                  rows={4}
+                />
+                <Button type="submit" variant="architect" size="lg" className="w-full">
+                  {landing.pilot?.form?.submit}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Text variant="small" className="text-center text-gray-500">
+                  {landing.pilot?.form?.disclaimer}
                 </Text>
-              </div>
+              </form>
             </div>
           </div>
         </Container>
       </Section>
 
-      {/* --- SECURITY SECTION --- */}
-      <Section className="bg-navy-900">
+      {/* --- FOOTER --- */}
+      <footer id="security" className="bg-navy-900 py-8">
         <Container>
-          <div className="text-center mb-12 md:mb-16">
-            <Eyebrow className="mb-4 text-gold-500">{t("landing.securityEyebrow")}</Eyebrow>
-            <Heading as="h2" className="text-3xl lg:text-5xl font-medium text-white mb-4">
-              {t("landing.securityTitle")}
-            </Heading>
-            <Text variant="light" className="max-w-3xl mx-auto">
-              {t("landing.securitySubtitle")}
-            </Text>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
-            <SecurityCard
-              icon={<Lock className="w-8 h-8" />}
-              title={t("landing.security1Title")}
-              description={t("landing.security1Desc")}
-            />
-            <SecurityCard
-              icon={<FileSearch className="w-8 h-8" />}
-              title={t("landing.security2Title")}
-              description={t("landing.security2Desc")}
-            />
-            <SecurityCard
-              icon={<Shield className="w-8 h-8" />}
-              title={t("landing.security3Title")}
-              description={t("landing.security3Desc")}
-            />
-          </div>
-
-          <div className="text-center mt-12">
-            <Button asChild variant="architect">
-              <Link href="/#diagnostico">
-                {t("landing.heroCta")}
-                <ArrowRight className="ml-2 h-4 w-4" />
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Image
+                src="/images/landing/logo.png"
+                alt="ImensIAH"
+                width={100}
+                height={30}
+                className="h-6 w-auto brightness-0 invert"
+              />
+              <span className="text-gray-400 text-sm">{landing.footer?.copyright}</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+                {landing.footer?.privacy}
               </Link>
-            </Button>
+              <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+                {landing.footer?.terms}
+              </Link>
+              <a href="mailto:contato@imensiah.com" className="text-gray-400 hover:text-white text-sm transition-colors">
+                {landing.footer?.contact}
+              </a>
+            </div>
           </div>
         </Container>
-      </Section>
-    </div>
-  );
-}
-
-/* ============================================
-   INTERNAL COMPONENTS
-   ============================================ */
-
-interface ProblemCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-function ProblemCard({ icon, title, description }: ProblemCardProps) {
-  return (
-    <div className="p-6 md:p-8 border border-line bg-white hover:shadow-lg transition-shadow group">
-      <div className="text-gold-500 mb-4 group-hover:scale-110 transition-transform">
-        {icon}
-      </div>
-      <Heading as="h3" variant="subtitle" className="mb-3">
-        {title}
-      </Heading>
-      <Text variant="small">
-        {description}
-      </Text>
-    </div>
-  );
-}
-
-interface FeatureItemProps {
-  title: string;
-  description: string;
-}
-
-function FeatureItem({ title, description }: FeatureItemProps) {
-  return (
-    <div className="flex gap-4">
-      <div className="flex-shrink-0">
-        <CheckCircle2 className="w-6 h-6 text-gold-500" />
-      </div>
-      <div>
-        <Heading as="h4" variant="subtitle" className="mb-1 text-lg">
-          {title}
-        </Heading>
-        <Text variant="small">{description}</Text>
-      </div>
-    </div>
-  );
-}
-
-interface PipelineStepProps {
-  number: number;
-  title: string;
-  description: string;
-}
-
-function PipelineStep({ number, title, description }: PipelineStepProps) {
-  return (
-    <div className="p-4 border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group">
-      <div className="flex items-center gap-3 mb-2">
-        <span className="text-xs font-bold text-gold-500 border border-gold-500 px-2 py-0.5 rounded-full">
-          {number.toString().padStart(2, '0')}
-        </span>
-        <span className="text-white font-medium text-sm">{title}</span>
-      </div>
-      <p className="text-gray-400 text-xs leading-relaxed">{description}</p>
-    </div>
-  );
-}
-
-interface SecurityCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-function SecurityCard({ icon, title, description }: SecurityCardProps) {
-  return (
-    <div className="p-6 md:p-8 border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group">
-      <div className="text-gold-500 mb-4 group-hover:scale-110 transition-transform">
-        {icon}
-      </div>
-      <Heading as="h3" className="text-lg font-medium text-white mb-3">
-        {title}
-      </Heading>
-      <Text variant="light" className="text-sm">
-        {description}
-      </Text>
+      </footer>
     </div>
   );
 }

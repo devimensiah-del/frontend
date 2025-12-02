@@ -72,71 +72,153 @@
     "ctaEmail": "contact@imensiah.com"
   },
   "landing": {
-    "eyebrow": "Enterprise Platform",
-    "heroTitle": "Transform raw data into",
-    "heroHighlight": "strategic decisions",
-    "heroSuffix": "at executive level in 48 hours.",
-    "heroDescription": "The platform that combines analytical rigor with exponential speed.",
-    "heroCta": "Get your free diagnosis now",
-    "heroMetric1": "95%",
-    "heroMetric1Label": "Reduction in analysis time",
-    "heroMetric2": "11",
-    "heroMetric2Label": "Strategic Frameworks",
-    "problemsEyebrow": "The Problem",
-    "problemsTitle": "Strategic Blindness",
-    "problemsSubtitle": "In a volatile market, slow decisions are bad decisions. SMEs and Mid-Market companies face structural challenges invisible until it's too late.",
-    "problem1Title": "Reactive Vision",
-    "problem1Desc": "Without real-time data, strategy becomes merely a response to crises, never an anticipation of opportunities.",
-    "problem2Title": "Scattered Resources",
-    "problem2Desc": "Scarce resources are diluted in low-impact initiatives due to lack of clarity on what really moves the needle.",
-    "problem3Title": "Lack of Intelligence",
-    "problem3Desc": "While you look inward, the market changes outside. The lack of market intelligence creates fatal vulnerabilities.",
-    "featuresEyebrow": "The Solution",
-    "featuresTitle": "Classic Management Frameworks",
-    "featuresSubtitle": "Porter, SWOT, PESTEL, TAM-SAM-SOM, Blue Ocean and more.",
-    "feature1Title": "Multidimensional Analysis",
-    "feature1Desc": "Automatic analysis using 11 classic strategic frameworks applied to your specific context.",
-    "feature2Title": "Intelligent Pipeline",
-    "feature2Desc": "Each framework feeds the next, creating cumulative strategic reasoning that reduces noise and eliminates bias.",
-    "feature3Title": "Exponential Speed",
-    "feature3Desc": "95% reduction in analysis time compared to traditional consultancies.",
-    "pipelineEyebrow": "How It Works",
-    "pipelineTitle": "Strategic Analysis Pipeline",
-    "pipelineSubtitle": "A systematic process that transforms complexity into clarity.",
-    "pipelineSteps": [
-      {"title": "PESTEL", "desc": "Competitive intensity analysis using macroeconomic assumptions."},
-      {"title": "Porter 5+2", "desc": "Classic competitive forces + digital ecosystem and sustainability."},
-      {"title": "TAM-SAM-SOM", "desc": "Market sizing using SWOT to define scope."},
-      {"title": "SWOT", "desc": "Analysis of strengths, weaknesses, opportunities and threats with confidence and sources."},
-      {"title": "Benchmarking", "desc": "Comparison with competitors and industry best practices."},
-      {"title": "Blue Ocean", "desc": "Definition of the new value curve to exit irrelevant competition."},
-      {"title": "Growth Hacking", "desc": "Growth mechanisms based on Blue Ocean strategy."},
-      {"title": "Scenarios", "desc": "Strategic responses: What can kill the plan?"},
-      {"title": "OKRs", "desc": "Delivery horizon with objectives and key results."},
-      {"title": "BSC", "desc": "Final dashboard for strategy monitoring."},
-      {"title": "Decision Matrix", "desc": "Final prioritization of strategic initiatives."}
-    ],
-    "pipelineCta": "Ready to apply this pipeline to your company?",
-    "modelEyebrow": "Transparency",
-    "modelTitle": "What We Deliver Today",
-    "modelSubtitle": "Radical transparency about the platform's current capabilities.",
-    "modelIncludes": [
-      "Definition of short/medium-term strategic priorities",
-      "Actionable 90-day plan",
-      "Red Ocean vs. Blue Ocean diagnosis",
-      "Minimum structure of strategic KPIs (BSC)",
-      "Recognition of ignored strategic risks"
-    ],
-    "modelFocus": "Focus: strategic diagnosis, not operational efficiency.",
-    "securityEyebrow": "Security",
-    "securityTitle": "Strategic Shielding",
-    "securitySubtitle": "Your strategy is your greatest asset. Our architecture ensures it remains confidential, isolated, and under your absolute control.",
-    "security1Title": "Total Isolation",
-    "security1Desc": "Each client operates in a logically segregated environment. Company A's information never crosses with Company B.",
-    "security2Title": "Traceability",
-    "security2Desc": "Full traceability of decisions. Know exactly which user or AI agent generated each strategic insight.",
-    "security3Title": "Absolute Control",
-    "security3Desc": "Your strategic intelligence lives in an exclusive digital vault under your control."
+    "nav": {
+      "methodology": "Methodology",
+      "challenges": "Challenges & Roadmap",
+      "model": "Business Model",
+      "security": "Security",
+      "login": "Login",
+      "cta": "Free Diagnosis"
+    },
+    "hero": {
+      "eyebrow": "Enterprise Strategic Intelligence",
+      "titleLine1": "Strategic",
+      "titleLine2": "Clarity",
+      "poweredBy": "Powered by",
+      "poweredByHighlight": "AI + Human Expertise",
+      "description": "Transform raw data into executive-level strategic decisions in 48 hours. The platform that combines analytical rigor with exponential speed.",
+      "cta": "Get your free diagnosis now",
+      "ctaSecondary": "View Methodology",
+      "badge1": "48h Diagnosis",
+      "badge2": "Human Validation",
+      "badge3": "Enterprise Security"
+    },
+    "systemStatus": {
+      "title": "SYSTEM STATUS",
+      "processing": "Processing Strategic Data",
+      "velocityLabel": "VELOCITY",
+      "velocityValue": "48h",
+      "typeLabel": "Intelligence Type",
+      "typeValue": "Hybrid (AI + Human)"
+    },
+    "problems": {
+      "eyebrow": "The Cost of Strategic Blindness",
+      "subtitle": "In a volatile market, slow decisions are bad decisions. SMEs and Mid-Market companies face structural challenges invisible until it's too late.",
+      "cards": [
+        {
+          "title": "Reactive Decisions",
+          "description": "Without real-time data, strategy becomes merely a response to crises, never an anticipation of opportunities."
+        },
+        {
+          "title": "Poor Prioritization",
+          "description": "Scarce resources are diluted in low-impact initiatives due to lack of clarity on what really moves the needle."
+        },
+        {
+          "title": "Competitive Blindness",
+          "description": "While you look inward, the market changes outside. The lack of market intelligence creates fatal vulnerabilities."
+        }
+      ]
+    },
+    "solution": {
+      "eyebrow": "THE SOLUTION",
+      "title": "A Strategic Decision System",
+      "subtitle": "Not just analytics. Not just AI. A complete operating system for high-level decisions.",
+      "features": [
+        "Advanced Generative AI Models",
+        "Classic Management Frameworks (Porter, SWOT, PESTEL)",
+        "Human Expert Validation (Human-in-the-loop)",
+        "Actionable Strategic Insights in 48h"
+      ],
+      "cards": [
+        {
+          "icon": "frameworks",
+          "title": "Frameworks",
+          "value": "11+",
+          "description": "Automatic multidimensional analysis."
+        },
+        {
+          "icon": "enterprise",
+          "title": "Enterprise Grade",
+          "value": "",
+          "description": "Corporate security and compliance."
+        },
+        {
+          "icon": "speed",
+          "title": "Speed",
+          "value": "",
+          "description": "From weeks to 48 hours."
+        },
+        {
+          "icon": "hybrid",
+          "title": "AI + Human",
+          "value": "",
+          "description": "The best of both worlds."
+        }
+      ]
+    },
+    "pipeline": {
+      "title": "Strategic Analysis Pipeline",
+      "subtitle": "Each framework feeds the next, creating cumulative strategic reasoning that reduces noise and eliminates bias.",
+      "steps": [
+        "PESTEL Analysis",
+        "Porter's 5 Forces",
+        "Benchmarking",
+        "Validated SWOT",
+        "TAM / SAM / SOM",
+        "Blue Ocean",
+        "Growth Loops",
+        "Future Scenarios",
+        "Decision Matrix",
+        "90-Day Plan",
+        "Balanced Scorecard",
+        "Risk Assessment"
+      ],
+      "stats": [
+        {
+          "value": "48h",
+          "label": "Delivery Time",
+          "description": "95% reduction in analysis time compared to traditional consultancies."
+        },
+        {
+          "value": "10x",
+          "label": "Estimated ROI",
+          "description": "More precise decisions avoid waste and focus on real growth levers."
+        },
+        {
+          "value": "100%",
+          "label": "Confidentiality",
+          "description": "Anonymized data treated with enterprise compliance rigor."
+        }
+      ]
+    },
+    "future": {
+      "eyebrow": "COMING SOON",
+      "integrations": ["P&L Integration", "Cash Flow", "Sales Performance", "Customer Mix"],
+      "title": "The Future: Strategic Operating System",
+      "description": "We're building the definitive \"Executive Decision Engine\". With integration of your internal data (P&L, CRM, ERP), ImensIAH evolves from a point diagnosis to a continuous operating system.",
+      "tagline": "CFO-Grade Forecast + CEO-Grade Clarity.",
+      "cta": "View Full Roadmap"
+    },
+    "pilot": {
+      "title": "Request Pilot Access",
+      "subtitle": "Join the exclusive group of Founding Advisors and get priority access to the platform.",
+      "benefits": ["Priority Access", "Founder Price (Lifetime)", "Dedicated Onboarding"],
+      "trustedBy": "Trusted By",
+      "form": {
+        "name": "Your name",
+        "email": "you@company.com",
+        "company": "Your company name",
+        "challenge": "Briefly describe your strategic challenge...",
+        "submit": "Start Analysis",
+        "disclaimer": "Your data is secure. Enterprise Compliance."
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 ImensIAH. All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact"
+    }
   },
   "form": {
     "title": "Request Strategic Diagnosis",
