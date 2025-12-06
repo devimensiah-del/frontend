@@ -11,9 +11,10 @@ import { EnrichmentStatus, AnalysisStatus } from "@/lib/types";
  * Enrichment workflow labels
  */
 export const ENRICHMENT_LABELS: Record<EnrichmentStatus, string> = {
-  pending: "Coletando dados de mercado...",
+  pending: "Aguardando início...",
+  processing: "Coletando dados de mercado...",
   completed: "Análise de mercado concluída",
-  approved: "Pronto para relatório estratégico",
+  failed: "Erro no enriquecimento",
 };
 
 /**
@@ -60,8 +61,8 @@ export const getWorkflowStage = (
     return "submission";
   }
 
-  // If enrichment not approved, enrichment stage
-  if (enrichmentStatus !== "approved") {
+  // If enrichment not completed, enrichment stage
+  if (enrichmentStatus !== "completed") {
     return "enrichment";
   }
 
@@ -107,12 +108,12 @@ export const getStatusDescription = (
     return "Coletando e analisando dados de mercado";
   }
 
-  if (enrichmentStatus === "completed") {
-    return "Aguardando revisão dos dados coletados";
+  if (enrichmentStatus === "completed" && !analysisStatus) {
+    return "Dados coletados - Pronto para análise";
   }
 
-  if (enrichmentStatus === "approved" && !analysisStatus) {
-    return "Iniciando análise estratégica";
+  if (enrichmentStatus === "processing") {
+    return "Coletando dados de mercado";
   }
 
   if (analysisStatus === "pending") {

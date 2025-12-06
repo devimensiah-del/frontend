@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/accordion"
 import { useToast } from "@/components/ui/use-toast"
 import { useTranslations, useI18n } from "@/lib/i18n/context"
+import { CHALLENGE_CATEGORIES, CHALLENGE_TYPES, type ChallengeCategory } from "@/lib/config/challenges"
 
 type FormValues = z.infer<ReturnType<typeof createFormSchema>>
 
@@ -52,6 +53,10 @@ function createFormSchema(t: (key: string) => string) {
     annualRevenueMax: z.string().transform((val) => (val === "" ? undefined : Number(val))).optional(),
     fundingStage: z.string().optional(),
 
+    // Challenge Definition (structured)
+    challengeCategory: z.string().optional(),
+    challengeType: z.string().optional(),
+
     // Submission Details (5 fields)
     businessChallenge: z.string().min(10, { message: t("form.validation.challengeRequired") }),
     additionalNotes: z.string().optional(),
@@ -68,6 +73,7 @@ export function SubmissionForm() {
   const searchParams = useSearchParams()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [accordionValue, setAccordionValue] = useState<string>("")
+  const [selectedCategory, setSelectedCategory] = useState<ChallengeCategory | "">("")
 
   const handleAccordionChange = useCallback((value: string) => {
     setAccordionValue(value)
@@ -93,6 +99,8 @@ export function SubmissionForm() {
       annualRevenueMin: undefined,
       annualRevenueMax: undefined,
       fundingStage: "",
+      challengeCategory: "",
+      challengeType: "",
       businessChallenge: "",
       additionalNotes: "",
       linkedinUrl: "",
@@ -142,6 +150,8 @@ export function SubmissionForm() {
         industry: data.companyIndustry || "",
         companySize: data.companySize || "",
         website: data.companyWebsite || null,
+        challengeCategory: data.challengeCategory || null,
+        challengeType: data.challengeType || null,
         strategicGoal: data.businessChallenge,  // User's strategic goal/challenge
         currentChallenges: "",  // Leave empty - will be filled during enrichment
         competitivePosition: "Em análise",
@@ -244,6 +254,64 @@ export function SubmissionForm() {
                   <FormControl>
                     <Input type="email" placeholder={t("form.contactEmailPlaceholder")} {...field} className="bg-surface-paper border-line h-12 focus:border-navy-900" />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Challenge Category */}
+            <FormField
+              control={form.control}
+              name="challengeCategory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+                    Categoria do Desafio
+                  </FormLabel>
+                  <Select
+                    {...field}
+                    className="bg-surface-paper border-line h-12 focus:border-navy-900"
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setSelectedCategory(e.target.value as ChallengeCategory);
+                      form.setValue("challengeType", ""); // Reset type when category changes
+                    }}
+                  >
+                    <SelectOption value="">Selecione uma categoria</SelectOption>
+                    {CHALLENGE_CATEGORIES.map((cat) => (
+                      <SelectOption key={cat.code} value={cat.code}>
+                        {cat.label}
+                      </SelectOption>
+                    ))}
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Challenge Type */}
+            <FormField
+              control={form.control}
+              name="challengeType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+                    Tipo do Desafio
+                  </FormLabel>
+                  <Select
+                    {...field}
+                    className="bg-surface-paper border-line h-12 focus:border-navy-900"
+                    disabled={!selectedCategory}
+                  >
+                    <SelectOption value="">
+                      {selectedCategory ? "Selecione o tipo" : "Selecione a categoria primeiro"}
+                    </SelectOption>
+                    {selectedCategory && CHALLENGE_TYPES[selectedCategory]?.map((type) => (
+                      <SelectOption key={type.code} value={type.code}>
+                        {type.label}
+                      </SelectOption>
+                    ))}
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

@@ -16,6 +16,7 @@ interface AuthContextType {
   user: User | null;
   supabaseUser: SupabaseUser | null;
   session: Session | null;
+  token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<any>;
@@ -254,6 +255,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     supabaseUser,
     session,
+    token: session?.access_token ?? null,
     isLoading,
     isAuthenticated: !!user,
     signIn,

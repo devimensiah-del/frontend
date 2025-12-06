@@ -31,27 +31,36 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: "h-10 w-10 p-0",
     };
 
+    const buttonClasses = cn(
+      variants[variant],
+      sizes[size],
+      "inline-flex items-center justify-center",
+      "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold-500)] focus-visible:ring-offset-2",
+      isLoading && "opacity-70 cursor-not-allowed",
+      className
+    );
+
+    // Handle asChild - clone the child element with button styles
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement<{ className?: string }>, {
+        className: cn(buttonClasses, (children as React.ReactElement<{ className?: string }>).props.className),
+      });
+    }
+
     return (
       <button
         ref={ref}
-        className={cn(
-          variants[variant],
-          sizes[size],
-          // Focus visible styles
-          "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold-500)] focus-visible:ring-offset-2",
-          isLoading && "opacity-70 cursor-not-allowed",
-          className
-        )}
+        className={buttonClasses}
         disabled={disabled || isLoading}
         {...props}
       >
         {isLoading ? (
-          <span className="flex items-center justify-center space-x-2">
+          <>
             <Spinner size={16} />
-            <span>{children}</span>
-          </span>
+            <span className="ml-2">{children}</span>
+          </>
         ) : (
-          <span className="flex items-center justify-center">{children}</span>
+          children
         )}
       </button>
     );

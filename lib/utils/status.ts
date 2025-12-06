@@ -44,10 +44,12 @@ export function getEnrichmentStatusVariant(status: EnrichmentStatus): BadgeVaria
   switch (status) {
     case 'pending':
       return 'warning'; // Yellow - waiting
+    case 'processing':
+      return 'primary'; // Blue - in progress
     case 'completed':
-      return 'gold'; // Gold - ready for review
-    case 'approved':
-      return 'success'; // Green - approved
+      return 'success'; // Green - done
+    case 'failed':
+      return 'error'; // Red - error
     default:
       return 'default';
   }
@@ -57,10 +59,11 @@ export function getEnrichmentStatusVariant(status: EnrichmentStatus): BadgeVaria
  * Get human-readable label for enrichment status
  */
 export function getEnrichmentStatusLabel(status: EnrichmentStatus): string {
-  const labels: Partial<Record<EnrichmentStatus, string>> = {
+  const labels: Record<EnrichmentStatus, string> = {
     pending: 'Pendente',
-    completed: 'Pronto',
-    approved: 'Aprovado',
+    processing: 'Processando',
+    completed: 'Concluído',
+    failed: 'Falhou',
   };
 
   return labels[status] || status;
@@ -73,10 +76,12 @@ export function getEnrichmentStatusDescription(status: EnrichmentStatus): string
   switch (status) {
     case 'pending':
       return 'Aguardando início do enriquecimento de dados.';
+    case 'processing':
+      return 'Coletando e processando informações da empresa.';
     case 'completed':
-      return 'Enriquecimento concluído. Aguardando revisão administrativa.';
-    case 'approved':
-      return 'Dados enriquecidos aprovados. Pronto para análise estratégica.';
+      return 'Enriquecimento concluído com sucesso.';
+    case 'failed':
+      return 'Erro durante o enriquecimento.';
     default:
       return 'Status desconhecido.';
   }
@@ -148,10 +153,10 @@ export function canApproveEnrichment(status: EnrichmentStatus): boolean {
 }
 
 /**
- * Check if analysis can be generated (enrichment must be approved)
+ * Check if analysis can be generated (enrichment must be completed)
  */
 export function canGenerateAnalysis(enrichmentStatus: EnrichmentStatus): boolean {
-  return enrichmentStatus === 'approved';
+  return enrichmentStatus === 'completed';
 }
 
 /**

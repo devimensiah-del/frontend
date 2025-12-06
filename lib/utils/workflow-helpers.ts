@@ -67,19 +67,26 @@ export function getTimelineEvents(
   ];
 
   if (enrichment) {
-    if (enrichment.status === 'pending') {
+    if (enrichment.status === 'pending' || enrichment.status === 'processing') {
       events.push({
         type: 'pending',
         title: 'Pesquisa Iniciada',
         timestamp: enrichment.createdAt,
         description: 'Coletando dados de mercado e contexto competitivo',
       });
-    } else if (enrichment.status === 'completed' || enrichment.status === 'approved') {
+    } else if (enrichment.status === 'completed') {
       events.push({
         type: 'success',
         title: 'Pesquisa Concluída',
         timestamp: enrichment.updatedAt,
         description: 'Dados de mercado coletados e validados',
+      });
+    } else if (enrichment.status === 'failed') {
+      events.push({
+        type: 'info',
+        title: 'Erro na Pesquisa',
+        timestamp: enrichment.updatedAt,
+        description: 'Falha ao coletar dados de mercado',
       });
     }
   }
@@ -195,8 +202,9 @@ export function getNextAction(
  */
 export function getEnrichmentCompletion(enrichment: Enrichment | null): number {
   if (!enrichment) return 0;
-  if (enrichment.status === 'approved') return 100;
-  if (enrichment.status === 'completed') return 90;
+  if (enrichment.status === 'completed') return 100;
+  if (enrichment.status === 'processing') return enrichment.progress || 50;
+  if (enrichment.status === 'failed') return 0;
   return enrichment.progress || 0;
 }
 

@@ -17,11 +17,9 @@ import type { Company, Submission, Enrichment, Analysis } from '@/types';
 export interface CompanyWorkflowPanelProps {
   company: Company;
   submission?: Submission | null;
-  enrichment?: Enrichment | null;
   analysis?: Analysis | null;
   isAdmin: boolean;
   // Admin-only callbacks (undefined for users)
-  onUpdateEnrichment?: (data: any) => void;
   onUpdateAnalysis?: (data: any) => void;
   onStageChange?: (stage: number) => Promise<void>;
   onToggleVisibility?: (visible: boolean) => Promise<void>;
@@ -29,7 +27,6 @@ export interface CompanyWorkflowPanelProps {
   onGenerateAccessCode?: () => Promise<string>;
   // Loading states
   isStageChanging?: boolean;
-  isUpdatingEnrichment?: boolean;
   isUpdatingAnalysis?: boolean;
   isTogglingBlur?: boolean;
   // Optional: Show header
@@ -40,17 +37,14 @@ export interface CompanyWorkflowPanelProps {
 export function CompanyWorkflowPanel({
   company,
   submission,
-  enrichment,
   analysis,
   isAdmin,
-  onUpdateEnrichment,
   onUpdateAnalysis,
   onStageChange,
   onToggleVisibility,
   onToggleBlur,
   onGenerateAccessCode,
   isStageChanging = false,
-  isUpdatingEnrichment = false,
   isUpdatingAnalysis = false,
   isTogglingBlur = false,
   showHeader = true,
@@ -67,10 +61,10 @@ export function CompanyWorkflowPanel({
   // Get blur status (default to true = blurred)
   const isBlurred = analysis ? ((analysis as any).isBlurred ?? (analysis as any).is_blurred ?? true) : true;
 
-  // Compute current stage
+  // Compute current stage (enrichment status now from company)
   const currentStage = isAdmin
-    ? computeAdminStage(enrichment?.status, analysis?.status, isVisibleToUser)
-    : computeUserStage(enrichment?.status, analysis?.status, isVisibleToUser);
+    ? computeAdminStage(company.enrichment_status, analysis?.status, isVisibleToUser)
+    : computeUserStage(company.enrichment_status, analysis?.status, isVisibleToUser);
 
   // Handle share link generation
   const handleShareLink = async () => {
@@ -132,7 +126,6 @@ export function CompanyWorkflowPanel({
           createdAt={submission.createdAt}
           isAdmin={isAdmin}
           submission={submission}
-          enrichment={enrichment}
           analysis={analysis}
           isReleased={analysis?.status === 'approved' && isVisibleToUser}
           onShareLink={isAdmin && onGenerateAccessCode ? handleShareLink : undefined}
@@ -144,7 +137,7 @@ export function CompanyWorkflowPanel({
         <ProgressBar
           currentStage={currentStage}
           isAdmin={isAdmin}
-          enrichmentStatus={enrichment?.status}
+          enrichmentStatus={company.enrichment_status}
           analysisStatus={analysis?.status}
           onStageChange={isAdmin && onStageChange ? onStageChange : undefined}
           isLoading={isStageChanging}
@@ -183,17 +176,15 @@ export function CompanyWorkflowPanel({
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsContent value="enrichment" className="mt-0">
               <EnrichmentPanel
-                enrichment={enrichment}
+                company={company}
                 isAdmin={isAdmin}
-                onUpdate={isAdmin ? onUpdateEnrichment : undefined}
-                isUpdating={isUpdatingEnrichment}
               />
             </TabsContent>
 
             <TabsContent value="analysis" className="mt-0">
               <AnalysisPanel
                 analysis={analysis}
-                enrichment={enrichment}
+                company={company}
                 isAdmin={isAdmin}
                 isVisibleToUser={isVisibleToUser}
                 onUpdate={isAdmin ? onUpdateAnalysis : undefined}

@@ -1,442 +1,290 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Save, Eye, EyeOff, Trash2 } from 'lucide-react';
+import React from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { authApi, userApi } from "@/lib/api/client";
+import { Button } from "@/components/atoms/Button";
+import { Input } from "@/components/atoms/Input";
+import { Label } from "@/components/atoms/Label";
+import { Card, CardHeader, CardBody, CardFooter } from "@/components/organisms/Card";
+import { AlertBox } from "@/components/molecules/AlertBox";
+import { Skeleton } from "@/components/atoms/Skeleton";
+import { Settings, User, Lock, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/Input';
-import { FormFieldWrapper } from '@/components/ui/FormFieldWrapper';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { authApi, userApi } from '@/lib/api/client';
-import { useToast } from '@/components/ui/use-toast';
-import { Section, Container } from '@/components/editorial/Section';
-import { Heading, Eyebrow, Text } from '@/components/ui/Typography';
-import { useProfile } from '@/lib/hooks/use-profile';
+export default function SettingsPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
-export default function ConfiguracoesPage() {
-  const { toast } = useToast();
+  // Form states
+  const [currentPassword, setCurrentPassword] = React.useState("");
+  const [newPassword, setNewPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [passwordError, setPasswordError] = React.useState("");
 
-  const { profile, isLoading: profileLoading, update, isUpdating: isUpdatingProfile, updateError } =
-    useProfile(undefined, { enabled: true });
-
-  const [profileForm, setProfileForm] = useState({
-    fullName: '',
+  // Fetch current user
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: authApi.getCurrentUser,
   });
 
-  const normalizedFullName = profile?.fullName?.trim() || '';
-  const isProfileDirty = profile ? profileForm.fullName.trim() !== normalizedFullName : false;
+  // Update password mutation
+  const updatePasswordMutation = useMutation({
+    mutationFn: () => authApi.updatePassword(currentPassword, newPassword),
+    onSuccess: () => {
+      toast.success("Senha atualizada com sucesso!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordError("");
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Erro ao atualizar senha");
+    },
+  });
 
-  useEffect(() => {
-    if (profile?.fullName) {
-      setProfileForm({ fullName: profile.fullName });
-    }
-  }, [profile]);
+  // Delete account mutation (placeholder)
+  const deleteAccountMutation = useMutation({
+    mutationFn: userApi.deleteAccount,
+    onSuccess: () => {
+      toast.success("Conta desativada com sucesso");
+      localStorage.removeItem("auth_token");
+      router.push("/login");
+    },
+    onError: () => {
+      toast.error("Erro ao desativar conta");
+    },
+  });
 
-  // Profile form state
-  const [profileError, setProfileError] = useState('');
-
-  const handleProfileSave = async (e: React.FormEvent) => {
+  const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setProfileError('');
-
-    if (!profile) {
-      setProfileError('Usuário não autenticado.');
-      return;
-    }
-
-    try {
-      await update({ fullName: profileForm.fullName.trim() });
-      toast({
-        title: 'Perfil atualizado',
-        description: 'Seu nome foi salvo com sucesso.',
-        variant: 'success',
-      });
-    } catch (error: any) {
-      setProfileError(error?.message || 'Erro ao salvar perfil.');
-    }
-  };
-
-  // Password change state
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  });
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-  });
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
-
-  // Delete account dialog state
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteConfirmation, setDeleteConfirmation] = useState('');
-  const [deleteLoading, setDeleteLoading] = useState(false);
-
-  // Handle password change
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordError('');
+    setPasswordError("");
 
     // Validation
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError('As senhas não coincidem.');
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("Todos os campos são obrigatórios");
       return;
     }
 
-    if (passwordForm.newPassword.length < 8) {
-      setPasswordError('A nova senha deve ter pelo menos 8 caracteres.');
+    if (newPassword.length < 8) {
+      setPasswordError("A nova senha deve ter pelo menos 8 caracteres");
       return;
     }
 
-    // Require at least one special character for stronger passwords
-    if (!/[!@#$%^&*()_+[\]{};':"\\|,.<>/?~-]/.test(passwordForm.newPassword)) {
-      setPasswordError('Use pelo menos um caractere especial.');
+    if (newPassword !== confirmPassword) {
+      setPasswordError("As senhas não coincidem");
       return;
     }
 
-    setPasswordLoading(true);
+    updatePasswordMutation.mutate();
+  };
 
-    try {
-      await authApi.updatePassword(passwordForm.currentPassword, passwordForm.newPassword);
-
-      toast({
-        title: 'Senha alterada',
-        description: 'Sua senha foi alterada com sucesso!',
-        variant: 'success',
-      });
-
-      setPasswordForm({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
-    } catch (error: any) {
-      setPasswordError(error.message || 'Erro ao alterar senha. Verifique sua senha atual.');
-    } finally {
-      setPasswordLoading(false);
+  const handleDeleteAccount = () => {
+    if (confirm("Tem certeza que deseja desativar sua conta? Esta ação não pode ser desfeita.")) {
+      deleteAccountMutation.mutate();
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (deleteConfirmation !== 'EXCLUIR') return;
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="space-y-4">
+          <Skeleton variant="text" width={200} height={32} />
+          <Skeleton variant="text" width={400} height={20} />
+        </div>
 
-    setDeleteLoading(true);
-    try {
-      await userApi.deleteAccount();
-      await authApi.logout();
-      window.location.href = '/';
-    } catch (error: any) {
-      toast({
-        title: 'Erro',
-        description: error?.message || 'Erro ao excluir conta. Tente novamente.',
-        variant: 'error',
-      });
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  return (
-    <Section className="bg-gray-50 min-h-screen border-0">
-      <Container className="py-8">
-        <div className="max-w-3xl mx-auto space-y-8">
-          {/* Page Header */}
-          <div>
-            <Eyebrow className="mb-2">Sua Conta</Eyebrow>
-            <Heading variant="section">Configurações</Heading>
-            <Text className="mt-2 text-text-secondary">
-              Gerencie sua conta, senha e preferências.
-            </Text>
-          </div>
-
-          {/* Profile Section */}
+        <div className="space-y-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Meu Perfil</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleProfileSave} className="space-y-4">
-                {(!profile && profileLoading) ? (
-                  <p className="text-sm text-text-secondary">Carregando seus dados...</p>
-                ) : (
-                  <div className="space-y-4">
-                    <FormFieldWrapper
-                      label="Nome Completo"
-                      id="fullName"
-                      required
-                    >
-                      <Input
-                        id="fullName"
-                        value={profileForm.fullName}
-                        onChange={(e) => setProfileForm({ fullName: e.target.value })}
-                        placeholder="Seu nome completo"
-                        className="pr-10"
-                      />
-                    </FormFieldWrapper>
-
-                    <FormFieldWrapper label="E-mail" id="email">
-                      <Input
-                        id="email"
-                        value={profile?.email || ''}
-                        disabled
-                        className="bg-gray-50 text-gray-500 cursor-not-allowed"
-                      />
-                    </FormFieldWrapper>
-
-                    {profile?.role && (
-                      <Text className="text-sm text-text-secondary">
-                        Perfil: {profile.role === 'admin' ? 'Administrador' : 'Usuário'}
-                      </Text>
-                    )}
-                  </div>
-                )}
-
-                {(profileError || updateError) && (
-                  <Alert variant="error">
-                    <AlertDescription>{profileError || updateError?.message}</AlertDescription>
-                  </Alert>
-                )}
-
-                <Button
-                  type="submit"
-                  variant="architect"
-                  disabled={
-                    profileLoading ||
-                    isUpdatingProfile ||
-                    !profile ||
-                    profileForm.fullName.trim().length < 2 ||
-                    !isProfileDirty
-                  }
-                  className="w-full sm:w-auto"
-                >
-                  {isUpdatingProfile ? (
-                    <>Salvando...</>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Salvar Alterações
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
+            <CardBody>
+              <Skeleton variant="rectangular" height={200} />
+            </CardBody>
           </Card>
-
-          {/* Change Password Section */}
           <Card>
-            <CardHeader>
-              <CardTitle>Alterar Senha</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePasswordChange} className="space-y-4">
-                {/* Current Password */}
-                <FormFieldWrapper
-                  label="Senha Atual"
-                  id="currentPassword"
-                  required
-                  error={passwordError && passwordForm.currentPassword === '' ? 'Campo obrigatório' : undefined}
-                >
-                  <div className="relative">
-                    <Input
-                      id="currentPassword"
-                      type={showPasswords.current ? 'text' : 'password'}
-                      value={passwordForm.currentPassword}
-                      onChange={(e) =>
-                        setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
-                      }
-                      placeholder="Digite sua senha atual"
-                      className="pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowPasswords({ ...showPasswords, current: !showPasswords.current })
-                      }
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    >
-                      {showPasswords.current ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </FormFieldWrapper>
-
-                {/* New Password */}
-                <FormFieldWrapper
-                  label="Nova Senha"
-                  id="newPassword"
-                  required
-                  helperText="Mínimo de 8 caracteres e 1 caractere especial"
-                >
-                  <div className="relative">
-                    <Input
-                      id="newPassword"
-                      type={showPasswords.new ? 'text' : 'password'}
-                      value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                      placeholder="Digite sua nova senha"
-                      className="pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    >
-                      {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </FormFieldWrapper>
-
-                {/* Confirm Password */}
-                <FormFieldWrapper
-                  label="Confirmar Nova Senha"
-                  id="confirmPassword"
-                  required
-                  error={
-                    passwordForm.confirmPassword &&
-                    passwordForm.newPassword !== passwordForm.confirmPassword
-                      ? 'As senhas não coincidem'
-                      : undefined
-                  }
-                >
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showPasswords.confirm ? 'text' : 'password'}
-                      value={passwordForm.confirmPassword}
-                      onChange={(e) =>
-                        setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
-                      }
-                      placeholder="Confirme sua nova senha"
-                      className="pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })
-                      }
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    >
-                      {showPasswords.confirm ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </FormFieldWrapper>
-
-                {/* Error Message */}
-                {passwordError && (
-                  <Alert variant="error">
-                    <AlertDescription>{passwordError}</AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  variant="architect"
-                  disabled={
-                    passwordLoading ||
-                    !passwordForm.currentPassword ||
-                    !passwordForm.newPassword ||
-                    !passwordForm.confirmPassword
-                  }
-                  className="w-full sm:w-auto"
-                >
-                  {passwordLoading ? (
-                    <>Salvando...</>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Salvar Nova Senha
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Delete Account Section */}
-          <Card className="border-red-200 bg-red-50">
-            <CardHeader>
-              <CardTitle className="text-red-900">Zona de Perigo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <p className="font-medium text-red-900">Excluir Conta</p>
-                  <p className="text-sm text-red-700 mt-1">
-                    Ação permanente. Sua conta será desativada e o acesso removido.
-                  </p>
-                </div>
-
-                <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="border-red-300 text-red-700 hover:bg-red-100">
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Excluir Minha Conta
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Tem certeza absoluta?</DialogTitle>
-                      <DialogDescription>
-                        Esta ação não pode ser desfeita. Isso desativará permanentemente sua conta e removerá seu acesso.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                      <p className="text-sm text-gray-700 mb-3">
-                        Por favor, digite <strong>EXCLUIR</strong> para confirmar:
-                      </p>
-                      <Input
-                        value={deleteConfirmation}
-                        onChange={(e) => setDeleteConfirmation(e.target.value)}
-                        placeholder="EXCLUIR"
-                        className="font-mono"
-                      />
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setDeleteDialogOpen(false);
-                          setDeleteConfirmation('');
-                        }}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={handleDeleteAccount}
-                        disabled={deleteConfirmation !== 'EXCLUIR' || deleteLoading}
-                        className="bg-red-600 hover:bg-red-700 text-white"
-                      >
-                        {deleteLoading ? 'Excluindo...' : 'Excluir Permanentemente'}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardContent>
+            <CardBody>
+              <Skeleton variant="rectangular" height={250} />
+            </CardBody>
           </Card>
         </div>
-      </Container>
-    </Section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-2 flex items-center gap-3">
+          <Settings className="w-8 h-8 text-gold-600" />
+          Configurações
+        </h1>
+        <p className="text-base text-text-secondary">
+          Gerencie suas informações pessoais e preferências da conta.
+        </p>
+      </div>
+
+      {/* Profile Section */}
+      <Card variant="bordered">
+        <CardHeader>
+          <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
+            <User className="w-5 h-5" />
+            Perfil
+          </h2>
+        </CardHeader>
+        <CardBody>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">Nome completo</Label>
+              <Input
+                id="name"
+                type="text"
+                value={user?.fullName || ""}
+                disabled
+                className="bg-surface-paper"
+              />
+              <p className="text-xs text-text-tertiary mt-1">
+                Entre em contato com o suporte para alterar seu nome
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={user?.email || ""}
+                disabled
+                className="bg-surface-paper"
+              />
+              <p className="text-xs text-text-tertiary mt-1">
+                Entre em contato com o suporte para alterar seu email
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="role">Função</Label>
+              <Input
+                id="role"
+                type="text"
+                value={user?.role === "admin" || user?.role === "super_admin" ? "Administrador" : "Usuário"}
+                disabled
+                className="bg-surface-paper"
+              />
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Security Section */}
+      <Card variant="bordered">
+        <CardHeader>
+          <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
+            <Lock className="w-5 h-5" />
+            Segurança
+          </h2>
+        </CardHeader>
+        <CardBody>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="current-password">Senha atual</Label>
+              <Input
+                id="current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Digite sua senha atual"
+                disabled={updatePasswordMutation.isPending}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="new-password">Nova senha</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Digite sua nova senha (mín. 8 caracteres)"
+                disabled={updatePasswordMutation.isPending}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="confirm-password">Confirmar nova senha</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Digite novamente sua nova senha"
+                disabled={updatePasswordMutation.isPending}
+              />
+            </div>
+
+            {passwordError && (
+              <AlertBox variant="error">
+                {passwordError}
+              </AlertBox>
+            )}
+
+            <Button
+              type="submit"
+              disabled={updatePasswordMutation.isPending}
+              className="w-full sm:w-auto"
+            >
+              {updatePasswordMutation.isPending ? "Atualizando..." : "Atualizar Senha"}
+            </Button>
+          </form>
+        </CardBody>
+      </Card>
+
+      {/* Preferences Section (Placeholder) */}
+      <Card variant="bordered">
+        <CardHeader>
+          <h2 className="text-xl font-bold text-text-primary">Preferências</h2>
+        </CardHeader>
+        <CardBody>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="language">Idioma</Label>
+              <select
+                id="language"
+                className="w-full px-3 py-2 border border-line rounded-sm bg-white text-text-primary focus:outline-none focus:ring-2 focus:ring-gold-500"
+                disabled
+              >
+                <option value="pt">Português (Brasil)</option>
+                <option value="en">English</option>
+              </select>
+              <p className="text-xs text-text-tertiary mt-1">
+                Configurações de idioma em breve
+              </p>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Danger Zone */}
+      <Card variant="bordered" className="border-semantic-error">
+        <CardHeader>
+          <h2 className="text-xl font-bold text-semantic-error flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" />
+            Zona de Perigo
+          </h2>
+        </CardHeader>
+        <CardBody>
+          <p className="text-sm text-text-secondary mb-4">
+            Desativar sua conta irá remover o acesso a todas as empresas e análises. Esta ação não pode ser desfeita.
+          </p>
+          <Button
+            variant="outline"
+            onClick={handleDeleteAccount}
+            disabled={deleteAccountMutation.isPending}
+            className="border-semantic-error text-semantic-error hover:bg-semantic-error-light"
+          >
+            {deleteAccountMutation.isPending ? "Desativando..." : "Desativar Conta"}
+          </Button>
+        </CardBody>
+      </Card>
+    </div>
   );
 }

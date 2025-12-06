@@ -1,6 +1,16 @@
 {
+  "maintenance": {
+    "title": "Em Manutenção",
+    "message": "Estamos realizando melhorias para que tudo funcione ainda melhor para você. Voltaremos em breve.",
+    "status": "Trabalhando nisso"
+  },
   "nav": {
-    "login": "Entrar"
+    "login": "Entrar",
+    "methodology": "Metodologia",
+    "process": "Como Funciona",
+    "diagnostic": "Diagnóstico",
+    "startAnalysis": "Iniciar Análise",
+    "about": "Quem Somos"
   },
   "hero": {
     "eyebrow": "Inteligência Estratégica",

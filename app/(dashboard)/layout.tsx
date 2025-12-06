@@ -1,215 +1,77 @@
 'use client';
 
-import { useState } from 'react';
-import { Logo } from '@/components/ui/Logo';
-import { Button } from '@/components/ui/button';
-import { SkipToContent } from '@/components/a11y/SkipToContent';
-import Link from 'next/link';
-import { useProfile } from '@/lib/hooks/use-profile';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { companiesApi } from '@/lib/api/client';
+import { authApi } from '@/lib/api/client';
+import { DashboardNav } from '@/components/dashboard/DashboardNav';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { useRouter } from 'next/navigation';
+import { SkipToContent } from '@/components/a11y/SkipToContent';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { profile } = useProfile(undefined, { enabled: true });
+  const router = useRouter();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
 
-  // Check if user is admin (includes super_admin)
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
-
-  // Fetch user's companies to determine navigation
-  const { data: companiesData } = useQuery({
-    queryKey: ['myCompanies'],
-    queryFn: companiesApi.getMyCompanies,
-    enabled: !!profile && !isAdmin,
+  // Fetch current user
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: authApi.getCurrentUser,
   });
 
-  const companies = companiesData?.companies || [];
-  const hasMultipleCompanies = companies.length > 1;
-  const singleCompanyId = companies.length === 1 ? companies[0].id : null;
-
-  // Determine the companies link and label
-  const companiesLink = singleCompanyId ? `/companies/${singleCompanyId}` : '/dashboard';
-  const companiesLabel = hasMultipleCompanies ? 'Minhas Empresas' : 'Minha Empresa';
-
-  const handleLogout = () => {
-    // Mock logout - clear auth and redirect
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-      window.location.href = '/login';
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Always redirect to login, even if API call fails
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        router.push('/login');
+      }
     }
   };
 
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-paper">
       <SkipToContent />
 
-      {/* Top Navigation */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50" role="banner">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link href="/dashboard" className="flex items-center -ml-2">
-              <Logo className="w-52 h-14" />
-            </Link>
+      {/* Desktop: Sidebar + Content */}
+      <div className="flex h-screen overflow-hidden">
+        {/* Desktop Sidebar */}
+        <DashboardNav.Desktop
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8" role="navigation" aria-label="Navegação do painel">
-              {isAdmin ? (
-                <>
-                  <Link
-                    href="/admin"
-                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
-                  >
-                    Empresas
-                  </Link>
-                  <Link
-                    href="/dashboard/macroeconomia"
-                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
-                  >
-                    Macroeconomia
-                  </Link>
-                  <Link
-                    href="/dashboard/configuracoes"
-                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
-                  >
-                    Configurações
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href={companiesLink}
-                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
-                  >
-                    {companiesLabel}
-                  </Link>
-                  <Link
-                    href="/dashboard/configuracoes"
-                    className="text-sm font-medium text-gray-700 hover:text-gold-600 transition-colors"
-                  >
-                    Configurações
-                  </Link>
-                </>
-              )}
-            </nav>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Header */}
+          <DashboardHeader
+            userName={user?.fullName || 'Usuário'}
+            userEmail={user?.email}
+            onLogout={handleLogout}
+          />
 
-            {/* User Menu */}
-            <div className="hidden md:flex items-center space-x-4">
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="text-sm"
-              >
-                Sair
-              </Button>
+          {/* Main Content */}
+          <main
+            id="main-content"
+            className="flex-1 overflow-y-auto pb-20 md:pb-0"
+            role="main"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+              {children}
             </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold-500)]"
-              aria-label="Abrir menu de navegação"
-              aria-expanded={isMobileMenuOpen}
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                {isMobileMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
-              {isAdmin ? (
-                <>
-                  <Link
-                    href="/admin"
-                    onClick={closeMobileMenu}
-                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-                  >
-                    Empresas
-                  </Link>
-                  <Link
-                    href="/dashboard/macroeconomia"
-                    onClick={closeMobileMenu}
-                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-                  >
-                    Macroeconomia
-                  </Link>
-                  <Link
-                    href="/dashboard/configuracoes"
-                    onClick={closeMobileMenu}
-                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-                  >
-                    Configurações
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href={companiesLink}
-                    onClick={closeMobileMenu}
-                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-                  >
-                    {companiesLabel}
-                  </Link>
-                  <Link
-                    href="/dashboard/configuracoes"
-                    onClick={closeMobileMenu}
-                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
-                  >
-                    Configurações
-                  </Link>
-                </>
-              )}
-              <div className="border-t border-gray-200 pt-2">
-                <Button
-                  onClick={handleLogout}
-                  variant="outline"
-                  className="w-full text-sm"
-                >
-                  Sair
-                </Button>
-              </div>
-            </div>
-          )}
+          </main>
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
-      <main
-        id="main-content"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
-        role="main"
-      >
-        {children}
-      </main>
+      {/* Mobile Bottom Nav */}
+      <DashboardNav.Mobile />
     </div>
   );
 }

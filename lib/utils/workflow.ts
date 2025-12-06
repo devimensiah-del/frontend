@@ -3,7 +3,7 @@
  *
  * Workflow based on Enrichment and Analysis statuses:
  * - Submission: Always 'received'
- * * - Enrichment: pending -> completed -> approved
+ * - Enrichment: pending -> processing -> completed | failed
  * - Analysis: pending -> completed -> approved -> sent
  */
 
@@ -45,9 +45,9 @@ export function getWorkflowStage(
     return 'complete';
   }
 
-  // Stage 3: Analysis (enrichment approved, analysis in progress)
+  // Stage 3: Analysis (enrichment completed, analysis in progress)
   if (
-    enrichment?.status === 'approved' &&
+    enrichment?.status === 'completed' &&
     (analysis?.status === 'pending' ||
      analysis?.status === 'completed' ||
      analysis?.status === 'approved')
@@ -87,26 +87,34 @@ export function getEnrichmentActions(enrichment: Enrichment | null): {
   switch (status) {
     case 'pending':
       return {
-        canEdit: true,
+        canEdit: false,
         canApprove: false,
         canGenerateAnalysis: false,
-        message: 'Aguardando worker processar',
+        message: 'Aguardando início',
+      };
+
+    case 'processing':
+      return {
+        canEdit: false,
+        canApprove: false,
+        canGenerateAnalysis: false,
+        message: 'Worker processando dados',
       };
 
     case 'completed':
       return {
         canEdit: true,
-        canApprove: true,
-        canGenerateAnalysis: false,
-        message: 'Pronto para revisão e aprovação',
+        canApprove: false,
+        canGenerateAnalysis: true,
+        message: 'Enriquecimento concluído - Análise pode ser gerada',
       };
 
-    case 'approved':
+    case 'failed':
       return {
         canEdit: false,
         canApprove: false,
-        canGenerateAnalysis: true,
-        message: 'Aprovado - Análise será gerada automaticamente',
+        canGenerateAnalysis: false,
+        message: 'Erro no enriquecimento',
       };
 
     default:
@@ -305,12 +313,14 @@ export function getWorkflowProgress(
   // Enrichment stage (20-55%)
   if (stage === 'enrichment') {
     switch (enrichment?.status) {
-      case 'approved':
-        return 55;
       case 'completed':
-        return 45;
+        return 55;
+      case 'processing':
+        return 40;
       case 'pending':
         return 20;
+      case 'failed':
+        return 15;
       default:
         return 25;
     }

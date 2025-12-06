@@ -19,7 +19,7 @@ import { SendAnalysisDialog } from "@/app/(dashboard)/_components/SendAnalysisDi
 import { WorkflowProgress } from "@/app/(dashboard)/_components/WorkflowProgress";
 import { ProgressBar } from "@/components/workflow";
 import { computeAdminStage, computeUserStage } from "@/lib/utils/workflow-stages";
-import { Download, Eye, EyeOff, Share2, ExternalLink, Copy } from "lucide-react";
+import { Download, Eye, EyeOff, Share2, ExternalLink, Copy, Play } from "lucide-react";
 
 export default function SubmissionPage() {
   const params = useParams();
@@ -342,6 +342,18 @@ export default function SubmissionPage() {
               </Button>
             )}
 
+
+            {/* Start Wizard - Admin only when enrichment is completed */}
+            {isAdmin && enrichment?.status === 'completed' && (
+              <Button
+                size="sm"
+                onClick={() => router.push(`/submissions/${id}/wizard`)}
+                className="bg-navy-600 hover:bg-navy-700"
+              >
+                <Play className="w-4 h-4 mr-1.5 flex-shrink-0" />
+                {analysis ? "Continuar Wizard" : "Iniciar Wizard"}
+              </Button>
+            )}
 
             {/* Admin: Blur Toggle (Premium unlock) - Only when analysis is approved AND visible to user (stage 6) */}
             {isAdmin && analysis?.status === 'approved' && isVisibleToUser && (

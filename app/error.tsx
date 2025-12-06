@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/atoms/Button";
 
 /**
  * Error Page - Next.js Error Boundary
@@ -33,13 +33,13 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-architect-cream p-6">
+    <div className="min-h-screen flex items-center justify-center bg-surface-paper p-6">
       <div className="max-w-md w-full space-y-8 text-center">
         {/* Error Icon */}
         <div className="flex justify-center">
-          <div className="w-20 h-20 bg-architect-gold/10 rounded-full flex items-center justify-center">
+          <div className="w-20 h-20 bg-semantic-error-light rounded-full flex items-center justify-center">
             <svg
-              className="w-10 h-10 text-architect-gold"
+              className="w-10 h-10 text-semantic-error"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -56,10 +56,10 @@ export default function Error({
 
         {/* Error Message */}
         <div className="space-y-3">
-          <h1 className="text-3xl font-heading font-light text-architect-black tracking-tight">
+          <h1 className="text-3xl font-heading font-bold text-navy-900 tracking-wide uppercase">
             Algo deu errado
           </h1>
-          <p className="text-architect-gray-dark font-body text-sm leading-relaxed">
+          <p className="text-text-secondary text-sm leading-relaxed">
             Encontramos um problema inesperado ao processar sua solicitação.
             Por favor, tente novamente.
           </p>
@@ -108,7 +108,7 @@ export default function Error({
         </div>
 
         {/* Support Message */}
-        <p className="text-xs text-architect-gray font-body">
+        <p className="text-xs text-text-tertiary">
           Se o problema persistir, entre em contato com nosso suporte.
         </p>
       </div>

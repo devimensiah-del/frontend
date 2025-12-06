@@ -5,11 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { NoDataYet } from '@/components/ui/state-components';
 import { AnalysisDetails } from '@/app/(dashboard)/_components/AnalysisDetails';
 import { WorkflowProgress } from '@/app/(dashboard)/_components/WorkflowProgress';
-import type { Enrichment, Analysis } from '@/types';
+import type { Company, Analysis } from '@/types';
 
 export interface AnalysisPanelProps {
   analysis?: Analysis | null;
-  enrichment?: Enrichment | null;
+  company?: Company | null;
   isAdmin: boolean;
   isVisibleToUser?: boolean;
   onUpdate?: (data: any) => void;
@@ -19,7 +19,7 @@ export interface AnalysisPanelProps {
 
 export function AnalysisPanel({
   analysis,
-  enrichment,
+  company,
   isAdmin,
   isVisibleToUser = false,
   onUpdate,
@@ -39,7 +39,7 @@ export function AnalysisPanel({
       <Card className={`border border-gray-200 shadow-sm ${className || ''}`}>
         <CardContent className="p-4 sm:p-6">
           <WorkflowProgress
-            enrichmentStatus={enrichment?.status}
+            enrichmentStatus={company?.enrichment_status}
             analysisStatus={analysis?.status}
             isAdmin={false}
           />

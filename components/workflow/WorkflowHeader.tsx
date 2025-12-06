@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, ExternalLink, Eye, Share2 } from 'lucide-react';
-import type { Submission, Enrichment, Analysis } from '@/types';
+import type { Submission, Analysis } from '@/types';
 
 export interface WorkflowHeaderProps {
   companyName: string;
@@ -11,7 +11,6 @@ export interface WorkflowHeaderProps {
   createdAt?: string;
   isAdmin: boolean;
   submission?: Submission | null;
-  enrichment?: Enrichment | null;
   analysis?: Analysis | null;
   isReleased?: boolean;
   onExportJson?: () => void;
@@ -27,7 +26,6 @@ export function WorkflowHeader({
   createdAt,
   isAdmin,
   submission,
-  enrichment,
   analysis,
   isReleased = false,
   onExportJson,
@@ -48,9 +46,9 @@ export function WorkflowHeader({
       onExportJson();
       return;
     }
-    // Default behavior: download all data as JSON
+    // Default behavior: download submission and analysis as JSON
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(
-      JSON.stringify({ submission, enrichment, analysis }, null, 2)
+      JSON.stringify({ submission, analysis }, null, 2)
     );
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);

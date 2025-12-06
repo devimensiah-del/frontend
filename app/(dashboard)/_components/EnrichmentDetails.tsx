@@ -1,21 +1,17 @@
 "use client";
 
 import React from "react";
-import { Enrichment, SubmittedData, DiscoveredData } from "@/lib/types";
-import { EnrichmentEditor } from "./EnrichmentEditor";
-import { Button } from "@/components/ui/button";
-import { RefreshCcw } from "lucide-react";
+import { Company, Enrichment } from "@/lib/types";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectOption } from "@/components/ui/Select";
-import { getEnrichmentActions } from "@/lib/utils/workflow";
 import { NoDataYet, ProcessingState, ErrorState } from "@/components/ui/state-components";
+import { Badge } from "@/components/ui/badge";
 
 interface EnrichmentDetailsProps {
-  enrichment?: Enrichment;
+  enrichment: Enrichment;
+  company?: Company;
   isAdmin: boolean;
-  onUpdate: (data: any) => void;
-  onRetry?: () => void;
-  onEdit?: () => void; // optional external edit handler
+  onUpdate?: (data: any) => void;
 }
 
 /**
@@ -53,55 +49,40 @@ function formatCurrency(value: number | undefined): string {
 
 export function EnrichmentDetails({
   enrichment,
+  company,
   isAdmin,
-  onUpdate,
-  onRetry: _onRetry,
-  onEdit: _onEdit,
 }: EnrichmentDetailsProps) {
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState("submitted");
+  const [activeTab, setActiveTab] = React.useState("overview");
 
-  if (!enrichment) {
-    return (
-      <NoDataYet
-        dataType="Dados de enriquecimento"
-        expectedWhen="Os dados serão gerados automaticamente após o envio inicial. Aguarde alguns minutos."
-      />
-    );
-  }
-
-  // Handle pending status (enrichment is being processed)
-  if (enrichment.status === 'pending') {
+  // Handle pending/processing status
+  if (enrichment.status === 'pending' || enrichment.status === 'processing') {
     return (
       <ProcessingState
         title="Enriquecimento em Andamento"
         description="Nossa IA está coletando e analisando informações adicionais sobre a empresa. Este processo pode levar alguns minutos."
-        progress={enrichment.progress}
         estimatedTime="2-5 minutos"
       />
     );
   }
 
-  // Edit mode – show the rich editor
-  if (isEditing && isAdmin) {
+  // Handle failed status
+  if (enrichment.status === 'failed') {
     return (
-      <EnrichmentEditor
-        enrichment={enrichment}
-        onSave={(data) => {
-          onUpdate(data);
-          setIsEditing(false);
-        }}
+      <ErrorState
+        title="Erro no Enriquecimento"
+        message="Ocorreu um erro durante o enriquecimento. Tente novamente."
+        variant="error"
       />
     );
   }
 
-  // Parse data - handle double-encoded JSON from backend
-  const parsedData = parseEnrichmentData(enrichment.data);
-  const { status, progress, updatedAt } = enrichment;
-
-  // Extract submitted and discovered data
-  const submittedData = parsedData.submitted_data as SubmittedData | undefined;
-  const discoveredData = parsedData.discovered_data as DiscoveredData | undefined;
+  // Status is 'completed' - show enriched data
+  const data = enrichment.data || {};
+  const profile = (data.profile_overview || {}) as any;
+  const financials = (data.financials || {}) as any;
+  const marketPos = (data.market_position || {}) as any;
+  const strategic = (data.strategic_assessment || {}) as any;
+  const competitive = (data.competitive_landscape || {}) as any;
 
   /**
    * Normalize a value that might be a comma-separated string into an array
@@ -158,26 +139,22 @@ export function EnrichmentDetails({
     );
   };
 
-  const enrichmentActions = getEnrichmentActions(enrichment);
-
   return (
     <div className="space-y-6">
-      {/* Admin actions - Only show if enrichment can be edited (not approved) */}
-      {isAdmin && enrichmentActions.canEdit && (
-        <div className="mb-4">
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-              title="Editar dados de enriquecimento"
-            >
-              <RefreshCcw className="w-4 h-4 mr-2" />
-              Editar Dados
-            </Button>
-          </div>
+      {/* Status Badge */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Badge
+            variant={enrichment.status === 'completed' ? 'success' : 'default'}
+            className="text-xs"
+          >
+            {enrichment.status === 'completed' ? 'Enriquecimento Concluído' : enrichment.status}
+          </Badge>
+          <span className="text-xs text-gray-500">
+            {new Date(enrichment.updatedAt).toLocaleString('pt-BR')}
+          </span>
         </div>
-      )}
+      </div>
 
       {/* Section Selector Dropdown */}
       <div className="mb-4">
@@ -186,117 +163,32 @@ export function EnrichmentDetails({
           onChange={(e) => setActiveTab(e.target.value)}
           className="w-full md:w-[300px]"
         >
-          <SelectOption value="submitted">Dados Enviados</SelectOption>
-          <SelectOption value="discovered">Dados Descobertos (IA)</SelectOption>
           <SelectOption value="overview">Perfil da Empresa</SelectOption>
           <SelectOption value="strategic">Avaliação Estratégica</SelectOption>
           <SelectOption value="financial">Contexto Financeiro</SelectOption>
           <SelectOption value="market">Posição de Mercado</SelectOption>
-          <SelectOption value="macro">Contexto Macroeconômico</SelectOption>
-          <SelectOption value="metadata">Metadados</SelectOption>
         </Select>
       </div>
 
       {/* Tabbed view */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 
-        {/* NEW: Submitted Data Tab - User form input preserved exactly */}
-        <TabsContent value="submitted" className="space-y-6">
-          {submittedData ? (
-            <>
-              {/* Company Information */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Informações da Empresa</h4>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Field label="Nome da Empresa" value={submittedData.company_name} />
-                  <Field label="CNPJ" value={submittedData.cnpj} />
-                  <Field label="Website" value={submittedData.website} />
-                  <Field label="Setor/Indústria" value={submittedData.industry} />
-                  <Field label="Tamanho da Empresa" value={submittedData.company_size} />
-                  <Field label="Localização" value={submittedData.location} />
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Informações de Contato</h4>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Field label="Nome do Contato" value={submittedData.contact_name} />
-                  <Field label="Email do Contato" value={submittedData.contact_email} />
-                  <Field label="Telefone" value={submittedData.contact_phone} />
-                  <Field label="Cargo" value={submittedData.contact_position} />
-                </div>
-              </div>
-
-              {/* Business Context */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Contexto de Negócio</h4>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Field label="Mercado Alvo" value={submittedData.target_market} />
-                  <Field label="Estágio de Financiamento" value={submittedData.funding_stage} />
-                  <Field label="Receita Anual (Mín)" value={formatCurrency(submittedData.annual_revenue_min)} />
-                  <Field label="Receita Anual (Máx)" value={formatCurrency(submittedData.annual_revenue_max)} />
-                </div>
-                <Field label="Desafio Principal" value={submittedData.business_challenge} multiline />
-                <Field label="Notas Adicionais" value={submittedData.additional_notes} multiline />
-              </div>
-
-              {/* Social Links */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Redes Sociais</h4>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Field label="LinkedIn" value={submittedData.linkedin_url} />
-                  <Field label="Twitter/X" value={submittedData.twitter_handle} />
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>Dados enviados não disponíveis para este enriquecimento.</p>
-              <p className="text-xs mt-2">Enriquecimentos anteriores podem não ter esta informação.</p>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* NEW: Discovered Data Tab - AI-enriched public information */}
-        <TabsContent value="discovered" className="space-y-6">
-          {discoveredData ? (
-            <>
-              {/* Discovered Company Info */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Informações Descobertas</h4>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Field label="CNPJ Descoberto" value={discoveredData.cnpj} />
-                  <Field label="Website Oficial" value={discoveredData.website} />
-                  <Field label="LinkedIn da Empresa" value={discoveredData.linkedin_url} />
-                  <Field label="Twitter/X" value={discoveredData.twitter_handle} />
-                  <Field label="Setor/Indústria" value={discoveredData.industry} />
-                  <Field label="Tamanho Estimado" value={discoveredData.company_size} />
-                  <Field label="Localização" value={discoveredData.location} />
-                  <Field label="Ano de Fundação" value={discoveredData.foundation_year} />
-                  <Field label="Estágio de Financiamento" value={discoveredData.funding_stage} />
-                  <Field label="Faturamento Estimado" value={discoveredData.annual_revenue_estimate} />
-                  <Field label="Mercado Alvo" value={discoveredData.target_market} />
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>Nenhum dado adicional foi descoberto pela IA.</p>
-              <p className="text-xs mt-2">O usuário pode ter fornecido todas as informações necessárias.</p>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* Overview Tab - Company Profile (Existing) */}
+        {/* Overview Tab - Company Profile */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
-            <Field label="Razão Social" value={parsedData.profile_overview?.legal_name} />
-            <Field label="Website" value={parsedData.profile_overview?.website} />
-            <Field label="Ano de Fundação" value={parsedData.profile_overview?.foundation_year} />
-            <Field label="Sede" value={parsedData.profile_overview?.headquarters} />
+            <Field label="Razão Social" value={profile.legal_name} />
+            <Field label="Website" value={profile.website} />
+            <Field label="Ano de Fundação" value={profile.foundation_year} />
+            <Field label="Sede" value={profile.headquarters} />
+            <Field label="Setor" value={marketPos.sector} />
             <div className="md:col-span-2">
-              <Field label="Proposta de Valor" value={parsedData.market_position?.value_proposition} multiline />
+              <Field label="Descrição" value={profile.description} multiline />
+            </div>
+            <div className="md:col-span-2">
+              <Field label="Proposta de Valor" value={marketPos.value_proposition} multiline />
+            </div>
+            <div className="md:col-span-2">
+              <Field label="Público Alvo" value={marketPos.target_audience} multiline />
             </div>
           </div>
         </TabsContent>
@@ -304,20 +196,19 @@ export function EnrichmentDetails({
         {/* Strategic Tab - Assessment & Insights */}
         <TabsContent value="strategic" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <Field label="Maturidade Digital (0‑10)" value={parsedData.strategic_assessment?.digital_maturity} />
-            <Field label="Setor de Atuação" value={parsedData.market_position?.sector} />
+            <Field label="Maturidade Digital (0‑10)" value={strategic.digital_maturity} />
           </div>
-          <ListField label="Forças Identificadas" items={parsedData.strategic_assessment?.strengths} />
-          <ListField label="Pontos de Atenção" items={parsedData.strategic_assessment?.weaknesses} />
+          <ListField label="Forças Identificadas" items={strategic.strengths} />
+          <ListField label="Pontos de Atenção" items={strategic.weaknesses} />
         </TabsContent>
 
         {/* Financial Tab */}
         <TabsContent value="financial" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
-            <Field label="Faixa de Funcionários" value={parsedData.financials?.employees_range} />
-            <Field label="Estimativa de Receita" value={parsedData.financials?.revenue_estimate} />
+            <Field label="Faixa de Funcionários" value={financials.employees_range} />
+            <Field label="Estimativa de Receita" value={financials.revenue_estimate} />
             <div className="md:col-span-2">
-              <Field label="Modelo de Negócio" value={parsedData.financials?.business_model} multiline />
+              <Field label="Modelo de Negócio" value={financials.business_model} multiline />
             </div>
           </div>
         </TabsContent>
@@ -325,110 +216,9 @@ export function EnrichmentDetails({
         {/* Market Tab - Position & Competition */}
         <TabsContent value="market" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6 mb-6 border-b pb-6">
-            <Field label="Público Alvo" value={parsedData.market_position?.target_audience} />
-            <Field label="Status de Market Share" value={parsedData.competitive_landscape?.market_share_status} />
+            <Field label="Status de Market Share" value={competitive.market_share_status} />
           </div>
-          <ListField label="Principais Concorrentes" items={parsedData.competitive_landscape?.competitors} />
-
-          {/* Market Signals from Macro Context */}
-          {parsedData.macro_context?.market_signals && (
-            <div className="mt-6 pt-6 border-t space-y-4">
-              <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Sinais de Mercado</h4>
-              <Field label="Sentimento do Consumidor" value={parsedData.macro_context.market_signals.consumer_sentiment} />
-              <Field label="Cadeia de Suprimentos" value={parsedData.macro_context.market_signals.supply_chain_status} />
-              <ListField label="Preços de Commodities" items={parsedData.macro_context.market_signals.commodity_prices} />
-              <ListField label="Atividade de Concorrentes" items={parsedData.macro_context.market_signals.competitor_activity} />
-              <ListField label="Ameaças Emergentes" items={parsedData.macro_context.market_signals.emerging_threats} />
-            </div>
-          )}
-        </TabsContent>
-
-        {/* Macro Context Tab - Economic & Industry Context */}
-        <TabsContent value="macro" className="space-y-6">
-          {parsedData.macro_context ? (
-            <>
-              {/* Economic Indicators */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Indicadores Econômicos</h4>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <Field label="País" value={parsedData.macro_context.economic_indicators?.country} />
-                  <Field label="Crescimento PIB" value={parsedData.macro_context.economic_indicators?.gdp_growth} />
-                  <Field label="Taxa de Inflação" value={parsedData.macro_context.economic_indicators?.inflation_rate} />
-                  <Field label="Taxa de Juros" value={parsedData.macro_context.economic_indicators?.interest_rate} />
-                  <Field label="Câmbio" value={parsedData.macro_context.economic_indicators?.exchange_rate} />
-                  <Field label="Taxa de Desemprego" value={parsedData.macro_context.economic_indicators?.unemployment_rate} />
-                </div>
-                <Field label="Estabilidade Política" value={parsedData.macro_context.economic_indicators?.political_stability} />
-                <Field label="Perspectiva Econômica" value={parsedData.macro_context.economic_indicators?.economic_outlook} multiline />
-                <ListField label="Mudanças Recentes de Política" items={parsedData.macro_context.economic_indicators?.recent_policy_changes} />
-              </div>
-
-              {/* Industry Trends */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Tendências da Indústria</h4>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <Field label="Setor" value={parsedData.macro_context.industry_trends?.industry_sector} />
-                  <Field label="Taxa de Crescimento" value={parsedData.macro_context.industry_trends?.growth_rate} />
-                  <Field label="Concentração de Mercado" value={parsedData.macro_context.industry_trends?.market_concentration} />
-                  <Field label="Barreiras de Entrada" value={parsedData.macro_context.industry_trends?.barriers_to_entry} />
-                </div>
-                <Field label="Adoção de Tecnologia" value={parsedData.macro_context.industry_trends?.technology_adoption} multiline />
-                <ListField label="Principais Tendências" items={parsedData.macro_context.industry_trends?.key_trends} />
-                <ListField label="Fusões e Aquisições" items={parsedData.macro_context.industry_trends?.mergers_aquisições || parsedData.macro_context.industry_trends?.mergers_acquisitions} />
-              </div>
-
-              {/* Regulatory Landscape */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Ambiente Regulatório</h4>
-                <Field label="Requisitos de Conformidade" value={parsedData.macro_context.regulatory_landscape?.compliance_requirements} multiline />
-                <ListField label="Regulamentações Recentes" items={parsedData.macro_context.regulatory_landscape?.recent_regulations} />
-                <ListField label="Mudanças Previstas" items={parsedData.macro_context.regulatory_landscape?.upcoming_changes} />
-                <ListField label="Padrões da Indústria" items={parsedData.macro_context.regulatory_landscape?.industry_standards} />
-              </div>
-
-              {/* Data Sources */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider border-b pb-2">Fontes de Dados</h4>
-                <div className="flex flex-wrap gap-2">
-                  {parsedData.macro_context.data_sources?.map((source: string, i: number) => (
-                    <a
-                      key={i}
-                      href={source}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200 text-blue-600 truncate max-w-[200px]"
-                      title={source}
-                    >
-                      {source.replace(/https?:\/\/(www\.)?/, '').split('/')[0]}
-                    </a>
-                  ))}
-                </div>
-                <Field label="Última Atualização" value={parsedData.macro_context.last_updated} />
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>Dados de contexto macro não disponíveis para este enriquecimento.</p>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* Metadata Tab - Status & Raw Data */}
-        <TabsContent value="metadata" className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-6 mb-6 border-b pb-6">
-            <Field label="Status" value={status} />
-            <Field label="Progresso" value={progress !== undefined ? `${progress}%` : "—"} />
-            <Field label="Aprovado" value={status === "approved" ? "Sim" : "Não"} />
-            <Field label="Atualizado em" value={updatedAt ? new Date(updatedAt).toLocaleString('pt-BR') : "—"} />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
-              Dados Brutos (JSON)
-            </label>
-            <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm text-navy-900 max-h-[400px]">
-              {JSON.stringify(parsedData, null, 2)}
-            </pre>
-          </div>
+          <ListField label="Principais Concorrentes" items={competitive.competitors} />
         </TabsContent>
       </Tabs>
     </div>

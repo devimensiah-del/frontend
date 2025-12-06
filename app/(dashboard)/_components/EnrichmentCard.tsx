@@ -43,10 +43,12 @@ export function EnrichmentCard({ enrichment }: EnrichmentCardProps) {
           <div className="flex items-center gap-2">
             <StatusBadge
               status={
-                enrichment.status === 'approved'
-                  ? 'approved'
-                  : enrichment.status === 'pending'
+                enrichment.status === 'processing'
                   ? 'processing'
+                  : enrichment.status === 'pending'
+                  ? 'pending'
+                  : enrichment.status === 'failed'
+                  ? 'failed'
                   : 'completed'
               }
               size="sm"

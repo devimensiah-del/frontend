@@ -82,11 +82,13 @@ export interface Submission {
 // Enrichment Types (The Researcher Agent)
 // ============================================================================
 
-// Enrichment workflow: pending -> completed -> approved
+// Enrichment workflow: pending -> processing -> completed (or failed)
+// NOTE: New architecture - enrichment is part of company record
 export type EnrichmentStatus =
   | 'pending'      // Initial state, waiting for worker
-  | 'completed'     // Worker completed, waiting for admin review
-  | 'approved';    // Admin approved, ready for analysis
+  | 'processing'   // Worker is actively enriching
+  | 'completed'    // Worker completed, enriched data is in company
+  | 'failed';      // Enrichment failed (error stored in company.enrichment_error)
 
 // =================================================================
 // SUBMITTED DATA (User form input - preserved exactly as submitted)
@@ -611,6 +613,11 @@ export interface Company {
   // Social links
   linkedin_url?: string;
   twitter_handle?: string;
+
+  // Enrichment status (NEW: enrichment is part of company record)
+  enrichment_status: 'pending' | 'processing' | 'completed' | 'failed';
+  enrichment_completed_at?: string;
+  enrichment_error?: string;
 
   // Verification & Access Control
   is_verified: boolean;

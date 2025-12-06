@@ -68,9 +68,10 @@ export const STATUS_ICONS: Record<string, IconComponent> = {
  */
 export const getEnrichmentIcon = (status: EnrichmentStatus): IconComponent => {
   const iconMap: Record<EnrichmentStatus, IconComponent> = {
-    pending: Loader,
+    pending: Clock,
+    processing: Loader,
     completed: CheckCircle,
-    approved: BadgeCheck,
+    failed: AlertCircle,
   };
 
   return iconMap[status] || Clock;

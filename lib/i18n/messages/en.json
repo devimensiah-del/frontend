@@ -1,6 +1,16 @@
 {
+  "maintenance": {
+    "title": "Under Maintenance",
+    "message": "We are making improvements to ensure everything runs smoothly for you. We will be back soon.",
+    "status": "Working on it"
+  },
   "nav": {
-    "login": "Sign In"
+    "login": "Sign In",
+    "methodology": "Methodology",
+    "process": "How It Works",
+    "diagnostic": "Diagnostic",
+    "startAnalysis": "Start Analysis",
+    "about": "About Us"
   },
   "hero": {
     "eyebrow": "Strategic Intelligence",

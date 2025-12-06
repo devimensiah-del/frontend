@@ -270,12 +270,13 @@ export const submissionsApi = {
 };
 
 /**
- * Enrichment API
- * Note: Admin operations (update, approve) are in adminApi
+ * Enrichment API - DEPRECATED
+ * Enrichment is now part of the company record.
+ * Use companiesApi to access enrichment status and data.
  */
 export const enrichmentApi = {
   /**
-   * Get enrichment data for submission
+   * @deprecated Use companiesApi.getById() instead - enrichment is now part of company record
    */
   async getBySubmissionId(submissionId: string): Promise<Enrichment> {
     const response = await apiRequest<{ enrichment: Enrichment }>(`/submissions/${submissionId}/enrichment`);
@@ -394,7 +395,7 @@ export const adminApi = {
   },
 
   /**
-   * Get enrichment by submission ID (admin only)
+   * @deprecated Enrichment is now part of company record - use adminCompaniesApi.getById()
    */
   async getEnrichmentBySubmissionId(submissionId: string): Promise<Enrichment> {
     const response = await apiRequest<{ enrichment: Enrichment }>(
@@ -404,7 +405,7 @@ export const adminApi = {
   },
 
   /**
-   * Get enrichment by ID (admin only)
+   * @deprecated Enrichment is now part of company record - use adminCompaniesApi.getById()
    */
   async getEnrichmentById(enrichmentId: string): Promise<Enrichment> {
     const response = await apiRequest<{ enrichment: Enrichment }>(
@@ -434,7 +435,7 @@ export const adminApi = {
   },
 
   /**
-   * Update enrichment fields (admin only) - status remains unchanged
+   * @deprecated Enrichment is now part of company record - use adminCompaniesApi.updateCompany()
    */
   async updateEnrichment(enrichmentId: string, data: Record<string, any>): Promise<Enrichment> {
     const response = await apiRequest<{ enrichment: Enrichment }>(
@@ -462,7 +463,7 @@ export const adminApi = {
   },
 
   /**
-   * Retry enrichment for a submission
+   * @deprecated Use adminCompaniesApi.reEnrich(companyId) instead
    */
   async retryEnrichment(submissionId: string): Promise<{ message: string }> {
     return apiRequest(`/admin/submissions/${submissionId}/retry-enrichment`, {
@@ -624,10 +625,12 @@ export const macroApi = {
 /**
  * Companies API (User endpoints)
  * Company-centric model for viewing user's companies
+ * NOTE: Enrichment is now part of the company record (enrichment_status field)
  */
 export const companiesApi = {
   /**
    * Get all companies where the user is owner or in allowed_users
+   * Companies include enrichment_status, enrichment_completed_at, enrichment_error
    */
   async getMyCompanies(): Promise<CompanyListResponse> {
     return apiRequest('/companies');
@@ -635,9 +638,28 @@ export const companiesApi = {
 
   /**
    * Get company details by ID (user must have access)
+   * Includes enrichment status and enriched data fields
    */
   async getById(id: string): Promise<CompanyDetailResponse> {
     return apiRequest(`/companies/${id}`);
+  },
+
+  /**
+   * Create a new company (triggers automatic enrichment)
+   * The backend will automatically start the enrichment workflow
+   */
+  async create(data: {
+    name: string;
+    cnpj?: string;
+    website?: string;
+    industry?: string;
+    company_size?: string;
+    location?: string;
+  }): Promise<{ company: Company; message: string }> {
+    return apiRequest('/companies', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
   /**

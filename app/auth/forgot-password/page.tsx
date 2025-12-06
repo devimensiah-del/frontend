@@ -2,143 +2,123 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { Container } from "@/components/ui/Grid";
-import { Heading, Text } from "@/components/ui/Typography";
-import { Button } from "@/components/ui/button";
-import { FormField } from "@/components/ui/FormField";
-import { Logo } from "@/components/ui/Logo";
-import { useAuthContext } from "@/lib/providers/AuthProvider";
-import { useToast } from "@/components/ui/use-toast";
-import { siteConfig, authRoutes } from "@/lib/config/site";
+import { Card, CardBody } from "@/components/organisms/Card";
+import { Stack } from "@/components/layouts/Stack";
+import { FormField } from "@/components/molecules/FormField";
+import { Button } from "@/components/atoms/Button";
+import { AlertBox } from "@/components/molecules/AlertBox";
+import { authApi } from "@/lib/api/client";
 
 export default function ForgotPasswordPage() {
-  const { sendPasswordReset } = useAuthContext();
-  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess(false);
 
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Email inválido");
+      setError("Por favor, insira um email válido");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      await sendPasswordReset(email);
-      setIsSuccess(true);
-
-      toast({
-        title: "Email Enviado",
-        description: "Verifique sua caixa de entrada.",
-        variant: "success",
-      });
+      await authApi.forgotPassword(email);
+      setSuccess(true);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao enviar email";
       setError(errorMessage);
-
-      toast({
-        title: "Erro",
-        description: errorMessage,
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Container className="min-h-screen flex items-center justify-center bg-surface-paper">
-      <div className="max-w-md w-full bg-white p-12 border border-line shadow-sm relative">
-        {/* Gold Accent Top */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gold-500" />
-
-        {/* Logo and Branding */}
-        <div className="flex flex-col items-center mb-10">
-          <Logo className="w-20 h-20 mb-4" />
-          <Heading as="h1" className="text-2xl font-heading font-bold tracking-widest text-navy-900 text-center">
-            {siteConfig.brand.name}
-          </Heading>
-          <Text variant="small" className="text-center mt-2 text-text-secondary">
-            Recuperar Senha
-          </Text>
-        </div>
-
-        {isSuccess ? (
-          <div className="space-y-6">
-            <div className="p-6 bg-green-50 border border-green-200 rounded">
-              <Text className="text-green-800 text-center">
-                Um email com instruções para redefinir sua senha foi enviado para <strong>{email}</strong>.
-              </Text>
-            </div>
-            <Text variant="small" className="text-center text-text-tertiary">
-              Verifique sua caixa de entrada e spam. O link expira em 1 hora.
-            </Text>
-            <Link href={authRoutes.login} className="block">
-              <Button variant="architect" className="w-full">
-                Voltar ao Login
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <>
-            {/* Instructions */}
-            <div className="mb-6">
-              <Text variant="small" className="text-center text-text-secondary">
-                Digite seu email para receber um link de recuperação de senha.
-              </Text>
+    <div className="min-h-screen flex items-center justify-center bg-surface-paper p-4">
+      <Card variant="elevated" className="w-full max-w-md">
+        <CardBody className="p-8">
+          <Stack spacing="lg">
+            {/* Header */}
+            <div className="text-center">
+              <h1 className="font-heading text-3xl font-bold text-navy-900 mb-2 uppercase tracking-wider">
+                Recuperar Senha
+              </h1>
+              <p className="text-sm text-text-secondary">
+                Insira seu email para receber instruções
+              </p>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded">
-                <Text variant="small" className="text-red-600">
-                  {error}
-                </Text>
-              </div>
-            )}
+            {/* Success Message */}
+            {success ? (
+              <Stack spacing="md">
+                <AlertBox variant="success" title="Email Enviado">
+                  Enviamos instruções para recuperação de senha para o seu email.
+                  Verifique sua caixa de entrada e siga os passos indicados.
+                </AlertBox>
 
-            {/* Forgot Password Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <FormField
-                label="Email"
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-
-              <Button
-                variant="architect"
-                type="submit"
-                className="w-full mt-8"
-                isLoading={isLoading}
-              >
-                Enviar Link de Recuperação
-              </Button>
-            </form>
-
-            {/* Footer Links */}
-            <div className="mt-8 text-center space-y-2">
-              <Text variant="small" className="text-text-tertiary">
-                Lembrou sua senha?{" "}
-                <Link href={authRoutes.login} className="text-gold-600 hover:text-gold-700 font-medium">
-                  Fazer login
+                <Link href="/login">
+                  <Button variant="outline" className="w-full">
+                    Voltar para Login
+                  </Button>
                 </Link>
-              </Text>
-            </div>
-          </>
-        )}
-      </div>
-    </Container>
+              </Stack>
+            ) : (
+              <>
+                {/* Error Message */}
+                {error && (
+                  <AlertBox variant="error" title="Erro">
+                    {error}
+                  </AlertBox>
+                )}
+
+                {/* Form */}
+                <form onSubmit={handleSubmit}>
+                  <Stack spacing="md">
+                    <FormField
+                      label="Email"
+                      type="input"
+                      required
+                      inputProps={{
+                        type: "email",
+                        value: email,
+                        onChange: (e) => setEmail(e.target.value),
+                        placeholder: "seu@email.com",
+                        disabled: isLoading,
+                        autoComplete: "email",
+                      }}
+                    />
+
+                    <Button
+                      type="submit"
+                      variant="architect"
+                      size="lg"
+                      loading={isLoading}
+                      className="w-full"
+                    >
+                      Enviar Instruções
+                    </Button>
+                  </Stack>
+                </form>
+
+                {/* Back to Login */}
+                <div className="text-center pt-4 border-t border-line">
+                  <Link
+                    href="/login"
+                    className="text-sm text-gold-500 hover:text-gold-600 transition-colors"
+                  >
+                    ← Voltar para login
+                  </Link>
+                </div>
+              </>
+            )}
+          </Stack>
+        </CardBody>
+      </Card>
+    </div>
   );
 }

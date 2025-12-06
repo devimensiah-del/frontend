@@ -7,12 +7,12 @@
  * Stage Mapping (Admin 6 Stages):
  * | Stage | Label                    | enrichment.status | analysis.status | is_visible_to_user |
  * |-------|--------------------------|-------------------|-----------------|-------------------|
- * | 1     | Enriquecimento em Andamento | pending         | —               | —                 |
+ * | 1     | Enriquecimento em Andamento | pending/processing | —            | —                 |
  * | 2     | Enriquecimento Concluído    | completed       | —               | —                 |
- * | 3     | Análise em Andamento        | approved        | pending         | false             |
- * | 4     | Análise Concluída           | approved        | completed       | false             |
- * | 5     | Análise Aprovada            | approved        | approved        | false             |
- * | 6     | Relatório Disponível        | approved        | approved        | true              |
+ * | 3     | Análise em Andamento        | completed       | pending         | false             |
+ * | 4     | Análise Concluída           | completed       | completed       | false             |
+ * | 5     | Análise Aprovada            | completed       | approved        | false             |
+ * | 6     | Relatório Disponível        | completed       | approved        | true              |
  *
  * User 3 Stages (Derived):
  * | Stage | Label               | Condition                                        |
@@ -146,18 +146,18 @@ export function computeAdminStage(
     return 1;
   }
 
-  // Stage 1: Enrichment pending
-  if (enrichmentStatus === 'pending') {
+  // Stage 1: Enrichment pending or processing
+  if (enrichmentStatus === 'pending' || enrichmentStatus === 'processing') {
     return 1;
   }
 
-  // Stage 2: Enrichment completed, not yet approved
-  if (enrichmentStatus === 'completed') {
+  // Stage 2: Enrichment completed, no analysis yet
+  if (enrichmentStatus === 'completed' && !analysisStatus) {
     return 2;
   }
 
-  // From here, enrichment is approved
-  if (enrichmentStatus === 'approved') {
+  // From here, enrichment is completed and analysis exists
+  if (enrichmentStatus === 'completed') {
     // No analysis yet or analysis pending
     if (!analysisStatus || analysisStatus === 'pending') {
       return 3;

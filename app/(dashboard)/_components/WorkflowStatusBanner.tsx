@@ -55,13 +55,10 @@ function getWorkflowStage(
   // Analysis pending = being generated
   if (analysisStatus === 'pending') return 'analysis_pending';
 
-  // Enrichment approved but no analysis = analysis about to start
-  if (enrichmentStatus === 'approved') return 'analysis_pending';
-
-  // Enrichment completed = needs admin approval
+  // Enrichment completed but no analysis = ready for analysis
   if (enrichmentStatus === 'completed') return 'enrichment_completed';
 
-  // Default = enrichment pending
+  // Default = enrichment pending or processing
   return 'enrichment_pending';
 }
 

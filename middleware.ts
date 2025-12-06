@@ -1,6 +1,7 @@
 /**
  * Next.js Middleware for Route Protection
  * Protects admin and dashboard routes with authentication
+ * Handles maintenance mode redirects
  */
 
 import { NextResponse } from 'next/server';
@@ -9,6 +10,12 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+/** Check if maintenance mode is enabled */
+const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
+
+/** Routes accessible during maintenance */
+const MAINTENANCE_ALLOWED_ROUTES = ['/', '/privacidade', '/termos'];
 
 /**
  * Get session from Supabase auth cookies
@@ -29,6 +36,20 @@ function getSessionFromCookies(request: NextRequest) {
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // === MAINTENANCE MODE ===
+  if (MAINTENANCE_MODE) {
+    const isAllowedDuringMaintenance = MAINTENANCE_ALLOWED_ROUTES.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`)
+    );
+
+    if (!isAllowedDuringMaintenance) {
+      // Redirect to landing page with maintenance flag
+      const url = new URL('/', request.url);
+      url.searchParams.set('maintenance', '1');
+      return NextResponse.redirect(url);
+    }
+  }
 
   // Public routes that don't need authentication
   const publicRoutes = [
