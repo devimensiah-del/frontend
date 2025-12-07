@@ -1,0 +1,387 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ============================================
+       COLORS - The Architectural Palette
+       ============================================ */
+
+    /* Deep Navy - Primary Brand */
+    --navy-900: #0A101D;
+    --navy-800: #162032;
+    --navy-700: #1F2937;
+
+    /* Muted Gold - Accent */
+    --gold-500: #B89E68;
+    --gold-600: #A18852;
+    --gold-light: #EBE5D9;
+
+    /* Surfaces - Paper & White */
+    --surface-paper: #F7F6F4;
+    --surface-white: #FFFFFF;
+    --line-color: #E5E0D6;
+
+    /* Text Hierarchy */
+    --text-primary: #111827;
+    --text-secondary: #52525B;
+    --text-tertiary: #71717A;
+
+    /* ============================================
+       TYPOGRAPHY - Scale & Weight
+       ============================================ */
+
+    /* Font Sizes */
+    --text-xs: 0.625rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+    --text-5xl: 3rem;
+    --text-6xl: 3.75rem;
+    --text-7xl: 4.5rem;
+
+    /* Letter Spacing */
+    --tracking-tight: -0.025em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.025em;
+    --tracking-wider: 0.05em;
+    --tracking-widest: 0.15em;
+    --tracking-ultra: 0.2em;
+
+    /* Line Heights */
+    --leading-none: 1;
+    --leading-tight: 1.1;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+
+    /* ============================================
+       LAYOUT & SPACING
+       ============================================ */
+
+    /* Border Radius - Sharp by default */
+    --radius-none: 0px;
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-full: 9999px;
+
+    /* Container */
+    --container-max: 1400px;
+
+    /* Grid */
+    --grid-gap: 1px;
+  }
+
+  /* ============================================
+     BASE STYLES
+     ============================================ */
+
+  body {
+    @apply bg-surface-paper text-text-primary antialiased relative;
+  }
+
+  /* Screen Reader Only */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  /* Focus Visible - Keyboard Navigation */
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--gold-500);
+  }
+
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* THE EXPENSIVE TOUCH: Paper Texture Overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  /* Typography Hierarchy */
+  h1 {
+    @apply font-heading tracking-tight text-navy-900 font-medium;
+    font-size: var(--text-7xl);
+    line-height: var(--leading-tight);
+  }
+
+  h2 {
+    @apply font-heading tracking-tight text-navy-900 font-medium;
+    font-size: var(--text-3xl);
+    line-height: var(--leading-tight);
+  }
+
+  h3 {
+    @apply font-heading tracking-tight text-navy-900 font-medium;
+    font-size: var(--text-xl);
+    line-height: var(--leading-snug);
+  }
+
+  h4 {
+    @apply font-heading tracking-tight text-navy-900 font-medium;
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+  }
+
+  p {
+    @apply text-text-primary font-body;
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+  }
+
+  /* Focus States */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+  }
+}
+
+@layer components {
+  /* ============================================
+     LAYOUT COMPONENTS
+     ============================================ */
+
+  .container-editorial {
+    max-width: var(--container-max);
+    @apply mx-auto px-6 md:px-12;
+  }
+
+  /* Grid System with Visible Borders */
+  .border-grid {
+    border-color: var(--line-color);
+  }
+
+  .grid-editorial {
+    @apply border-x border-line;
+    max-width: var(--container-max);
+    @apply mx-auto bg-surface-paper;
+  }
+
+  /* ============================================
+     BUTTON VARIANTS
+     ============================================ */
+
+  /* The "Architect" Button - Primary CTA */
+  .btn-architect {
+    @apply bg-navy-900 text-white;
+    @apply font-heading font-medium uppercase;
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-widest);
+    @apply px-8 py-4;
+    @apply transition-all duration-300;
+    @apply hover:bg-gold-500;
+    border-radius: var(--radius-none);
+  }
+
+  /* Outline Button */
+  .btn-outline {
+    @apply border border-line bg-transparent;
+    @apply font-heading font-medium uppercase;
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-widest);
+    @apply px-8 py-4;
+    @apply transition-all duration-300;
+    @apply hover:bg-white hover:text-gold-500;
+    border-radius: var(--radius-none);
+  }
+
+  /* ============================================
+     FORM ELEMENTS
+     ============================================ */
+
+  .input-editorial {
+    @apply w-full bg-surface-paper border border-line;
+    @apply h-12 px-4;
+    font-size: var(--text-sm);
+    @apply transition-colors;
+    @apply focus:border-navy-900;
+    border-radius: var(--radius-none);
+  }
+
+  .label-editorial {
+    font-size: var(--text-xs);
+    @apply font-bold uppercase text-text-secondary;
+    letter-spacing: var(--tracking-widest);
+  }
+
+  /* ============================================
+     NAVIGATION
+     ============================================ */
+
+  .nav-link {
+    @apply h-full flex items-center px-8;
+    font-size: var(--text-xs);
+    @apply font-medium uppercase;
+    letter-spacing: var(--tracking-widest);
+    @apply text-text-secondary;
+    @apply hover:bg-white hover:text-gold-500;
+    @apply transition-colors;
+  }
+
+  /* ============================================
+     BADGES & LABELS
+     ============================================ */
+
+  .badge-step {
+    font-size: var(--text-xs);
+    @apply font-bold text-gold-500;
+    @apply border border-gold-500;
+    @apply px-2 py-1;
+    border-radius: var(--radius-full);
+  }
+
+  /* ============================================
+     UTILITY CLASSES
+     ============================================ */
+
+  .serif-touch {
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+
+  .bg-noise {
+    position: relative;
+  }
+
+  .bg-noise::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  /* Additional utility classes */
+  .tracking-ultra {
+    letter-spacing: var(--tracking-ultra);
+  }
+
+  /* ============================================
+     MOBILE UTILITIES
+     ============================================ */
+
+  /* Mobile-first touch targets (44px minimum) */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Mobile text sizes */
+  .text-mobile-lg {
+    @apply text-lg md:text-xl;
+  }
+
+  .text-mobile-xl {
+    @apply text-xl md:text-2xl;
+  }
+
+  .text-mobile-2xl {
+    @apply text-2xl md:text-3xl;
+  }
+
+  /* Mobile spacing */
+  .px-mobile {
+    @apply px-4 md:px-6 lg:px-8;
+  }
+
+  .py-mobile {
+    @apply py-4 md:py-6 lg:py-8;
+  }
+
+  /* Mobile-friendly grid */
+  .grid-mobile {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6;
+  }
+
+  /* Hide on mobile / desktop */
+  .hide-mobile {
+    @apply hidden md:block;
+  }
+
+  .hide-desktop {
+    @apply block md:hidden;
+  }
+
+  /* Safe area insets for mobile browsers */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Prevent text selection on touch */
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Smooth scroll for mobile */
+  .scroll-smooth-mobile {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* ============================================
+     TEXT FORMATTING - Keep whole words together
+     ============================================ */
+
+  .text-wrap-nice,
+  p,
+  span,
+  li,
+  td,
+  th,
+  label,
+  .prose,
+  [class*="text-"] {
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    hyphens: none !important;
+    -webkit-hyphens: none !important;
+    -ms-hyphens: none !important;
+  }
+
+  .data-field-value {
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    hyphens: none !important;
+    white-space: pre-line;
+  }
+
+  .word-wrap-whole {
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    hyphens: none !important;
+  }
+}
