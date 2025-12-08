@@ -40,6 +40,8 @@ import {
   FileText,
   Play,
   Eye,
+  Sparkles,
+  ExternalLink,
 } from 'lucide-react'
 import type { EnrichmentStatus, Challenge, AnalysisStatus } from '@/lib/types'
 
@@ -482,7 +484,7 @@ export default function CompanyDetailPage({
   const [reAnalyzeOpen, setReAnalyzeOpen] = useState(false)
   const [analyzingChallengeId, setAnalyzingChallengeId] = useState<string | null>(null)
   const [generatingCodeForId, setGeneratingCodeForId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'dados' | 'desafios'>('dados')
+  const [activeTab, setActiveTab] = useState<'dados' | 'desafios' | 'enriquecimento'>('dados')
 
   // Reset form data when company loads or edit mode changes
   useEffect(() => {
@@ -592,8 +594,8 @@ export default function CompanyDetailPage({
             Voltar
           </Link>
 
-          {/* Edit Controls - Only show on Dados tab */}
-          {activeTab === 'dados' && (
+          {/* Edit Controls - Show on Dados and Enriquecimento tabs */}
+          {(activeTab === 'dados' || activeTab === 'enriquecimento') && (
             <div className="flex items-center gap-2">
               {editMode ? (
                 <>
@@ -668,12 +670,14 @@ export default function CompanyDetailPage({
       </div>
 
       {/* Enrichment Error Alert */}
-      {company.enrichment_error && (
-        <div className="bg-error/10 border border-error/30 p-4 rounded flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
+      {company.enrichment_status === 'failed' && (
+        <div className="bg-warning/10 border border-warning/30 p-4 rounded flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-error">Erro no Enriquecimento</p>
-            <p className="text-sm text-error/80 mt-1">{company.enrichment_error}</p>
+            <p className="text-sm font-medium text-warning-dark">Enriquecimento não concluído</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Os dados da empresa não puderam ser enriquecidos automaticamente. Você pode preencher manualmente na aba Enriquecimento.
+            </p>
           </div>
         </div>
       )}
@@ -691,6 +695,17 @@ export default function CompanyDetailPage({
           >
             <Building2 className="w-4 h-4 inline-block mr-2" />
             Dados
+          </button>
+          <button
+            onClick={() => { setActiveTab('enriquecimento'); setEditMode(false); }}
+            className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
+              activeTab === 'enriquecimento'
+                ? 'border-gold-500 text-navy-900'
+                : 'border-transparent text-muted-foreground hover:text-navy-700'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 inline-block mr-2" />
+            Enriquecimento
           </button>
           <button
             onClick={() => { setActiveTab('desafios'); setEditMode(false); }}
@@ -1025,6 +1040,88 @@ export default function CompanyDetailPage({
               </Button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Tab Content: Enriquecimento */}
+      {activeTab === 'enriquecimento' && (
+        <div className="space-y-6">
+          {/* Enrichment Status Header */}
+          <div className="flex items-center gap-4 p-4 bg-white border border-line rounded">
+            {getEnrichmentBadge(company.enrichment_status)}
+            {company.enrichment_completed_at && (
+              <span className="text-sm text-muted-foreground">
+                Concluído em: {new Date(company.enrichment_completed_at).toLocaleString('pt-BR')}
+              </span>
+            )}
+            {company.enrichment_error && (
+              <span className="text-sm text-error">
+                Erro: {company.enrichment_error}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {/* Contexto da Indústria */}
+            <Section title="Contexto da Indústria" icon={<TrendingUp className="w-4 h-4" />}>
+              <EditableField
+                label="Crescimento do Setor"
+                field="industry_growth_rate"
+                value={company.industry_growth_rate}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                placeholder="Ex: +12% CAGR"
+              />
+              <EditableField
+                label="Concentração de Mercado"
+                field="market_concentration"
+                value={company.market_concentration}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                placeholder="Ex: Fragmentado, Concentrado"
+              />
+            </Section>
+
+            {/* Contexto Regulatório */}
+            <Section title="Contexto Regulatório" icon={<Shield className="w-4 h-4" />}>
+              <EditableField
+                label="Contexto Regulatório"
+                field="regulatory_context"
+                value={company.regulatory_context}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                type="textarea"
+                placeholder="Informações regulatórias relevantes para o setor"
+              />
+            </Section>
+          </div>
+
+          {/* Tendências do Setor */}
+          <EditableList
+            title="Tendências do Setor"
+            icon={<TrendingUp className="w-4 h-4" />}
+            field="industry_trends"
+            items={company.industry_trends}
+            editMode={editMode}
+            formData={formData}
+            onChange={handleFieldChange}
+            emptyMessage="Nenhuma tendência identificada"
+          />
+
+          {/* Fontes do Enriquecimento */}
+          <EditableList
+            title="Fontes do Enriquecimento"
+            icon={<ExternalLink className="w-4 h-4" />}
+            field="enrichment_sources"
+            items={company.enrichment_sources}
+            editMode={editMode}
+            formData={formData}
+            onChange={handleFieldChange}
+            emptyMessage="Nenhuma fonte registrada para este enriquecimento"
+          />
         </div>
       )}
 

@@ -113,7 +113,7 @@ export const adminService = {
   },
 
   async updateCompany(id: string, data: Partial<Company>): Promise<Company> {
-    const response = await api.put<{ company: Company }>(`/admin/companies/${id}`, data)
+    const response = await api.put<{ company: Company }>(`/admin/companies/${id}`, { fields: data })
     return response.data.company
   },
 

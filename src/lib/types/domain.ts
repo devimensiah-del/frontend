@@ -102,6 +102,12 @@ export interface Company {
   competitors?: string[]
   strengths?: string[]
   weaknesses?: string[]
+  // Industry context (from enrichment)
+  industry_growth_rate?: string       // e.g., "+12% CAGR"
+  industry_trends?: string[]          // e.g., ["AI adoption", "Sustainability"]
+  regulatory_context?: string         // Key regulatory information
+  market_concentration?: string       // e.g., "Fragmentado", "Concentrado"
+  enrichment_sources?: string[]       // URLs of sources used
   // Social links
   linkedin_url?: string
   twitter_handle?: string
