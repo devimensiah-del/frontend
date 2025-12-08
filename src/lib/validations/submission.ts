@@ -12,24 +12,11 @@ export const challengeTypes = {
   transform: [
     { value: 'transform_digital', label: 'Transformação Digital' },
     { value: 'transform_model', label: 'Mudança de Modelo de Negócio' },
-    { value: 'transform_culture', label: 'Mudança Cultural' },
-    { value: 'transform_operational', label: 'Transformação Operacional' },
-  ],
-  transition: [
-    { value: 'transition_succession', label: 'Sucessão' },
-    { value: 'transition_exit', label: 'Preparação para Saída/Venda' },
-    { value: 'transition_merger', label: 'Fusão/Aquisição' },
-    { value: 'transition_turnaround', label: 'Recuperação/Turnaround' },
   ],
   compete: [
     { value: 'compete_differentiate', label: 'Diferenciação Competitiva' },
     { value: 'compete_defend', label: 'Defesa de Posicionamento' },
     { value: 'compete_reposition', label: 'Reposicionamento' },
-  ],
-  funding: [
-    { value: 'funding_raise', label: 'Captação de Investimento' },
-    { value: 'funding_debt', label: 'Financiamento/Dívida' },
-    { value: 'funding_ipo', label: 'Preparação para IPO' },
   ],
 } as const
 
@@ -56,7 +43,7 @@ export const submissionSchema = z.object({
     .email('E-mail inválido')
     .min(1, 'E-mail é obrigatório'),
 
-  challengeCategory: z.enum(['growth', 'transform', 'transition', 'compete', 'funding'], {
+  challengeCategory: z.enum(['growth', 'transform', 'compete'], {
     required_error: 'Selecione uma categoria de desafio',
   }),
 

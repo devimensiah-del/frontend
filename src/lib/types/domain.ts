@@ -45,7 +45,7 @@ export interface Submission {
   additionalNotes?: string
   linkedinUrl?: string
   twitterHandle?: string
-  challengeCategory?: 'growth' | 'transform' | 'transition' | 'compete' | 'funding'
+  challengeCategory?: 'growth' | 'transform' | 'compete'
   challengeType?: string
   businessChallenge?: string
   status: SubmissionStatus
@@ -123,7 +123,7 @@ export interface Company {
 // Challenge Types
 // ============================================================================
 
-export type ChallengeCategory = 'growth' | 'transform' | 'transition' | 'compete' | 'funding'
+export type ChallengeCategory = 'growth' | 'transform' | 'compete'
 
 export type ChallengeType =
   // Growth
@@ -135,21 +135,10 @@ export type ChallengeType =
   // Transform
   | 'transform_digital'
   | 'transform_model'
-  | 'transform_culture'
-  | 'transform_operational'
-  // Transition
-  | 'transition_succession'
-  | 'transition_exit'
-  | 'transition_merger'
-  | 'transition_turnaround'
   // Compete
   | 'compete_differentiate'
   | 'compete_defend'
   | 'compete_reposition'
-  // Funding
-  | 'funding_raise'
-  | 'funding_debt'
-  | 'funding_ipo'
 
 export interface Challenge {
   id: string

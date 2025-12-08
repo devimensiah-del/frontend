@@ -41,18 +41,6 @@ const categories: { value: ChallengeCategory; label: string; types: { value: Cha
     types: [
       { value: 'transform_digital', label: 'Digital' },
       { value: 'transform_model', label: 'Modelo de Negocio' },
-      { value: 'transform_culture', label: 'Cultura' },
-      { value: 'transform_operational', label: 'Operacional' },
-    ],
-  },
-  {
-    value: 'transition',
-    label: 'Transicao',
-    types: [
-      { value: 'transition_succession', label: 'Sucessao' },
-      { value: 'transition_exit', label: 'Saida' },
-      { value: 'transition_merger', label: 'Fusao/Aquisicao' },
-      { value: 'transition_turnaround', label: 'Turnaround' },
     ],
   },
   {
@@ -62,15 +50,6 @@ const categories: { value: ChallengeCategory; label: string; types: { value: Cha
       { value: 'compete_differentiate', label: 'Diferenciacao' },
       { value: 'compete_defend', label: 'Defesa' },
       { value: 'compete_reposition', label: 'Reposicionamento' },
-    ],
-  },
-  {
-    value: 'funding',
-    label: 'Financiamento',
-    types: [
-      { value: 'funding_raise', label: 'Captacao' },
-      { value: 'funding_debt', label: 'Divida' },
-      { value: 'funding_ipo', label: 'IPO' },
     ],
   },
 ]

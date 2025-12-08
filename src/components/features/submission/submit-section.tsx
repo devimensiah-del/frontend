@@ -31,9 +31,7 @@ import type { CreateSubmissionRequest } from '@/lib/types'
 const CHALLENGE_CATEGORIES = [
   { code: 'growth', label: 'Crescimento', description: 'Estratégias de expansão e crescimento' },
   { code: 'transform', label: 'Transformação', description: 'Mudanças estruturais e modernização' },
-  { code: 'transition', label: 'Transição', description: 'Sucessão, M&A e mudanças de controle' },
   { code: 'compete', label: 'Competitividade', description: 'Posicionamento e diferenciação' },
-  { code: 'funding', label: 'Funding', description: 'Captação e estrutura de capital' },
 ] as const
 
 type ChallengeCategory = typeof CHALLENGE_CATEGORIES[number]['code']
@@ -49,24 +47,11 @@ const CHALLENGE_TYPES: Record<ChallengeCategory, { code: string; label: string }
   transform: [
     { code: 'transform_digital', label: 'Transformação Digital' },
     { code: 'transform_model', label: 'Modelo de Negócio' },
-    { code: 'transform_culture', label: 'Cultura Organizacional' },
-    { code: 'transform_operational', label: 'Eficiência Operacional' },
-  ],
-  transition: [
-    { code: 'transition_succession', label: 'Sucessão' },
-    { code: 'transition_exit', label: 'Preparação para Venda' },
-    { code: 'transition_merger', label: 'Integração' },
-    { code: 'transition_turnaround', label: 'Turnaround' },
   ],
   compete: [
     { code: 'compete_differentiate', label: 'Diferenciação' },
     { code: 'compete_defend', label: 'Defender Posição' },
     { code: 'compete_reposition', label: 'Reposicionamento' },
-  ],
-  funding: [
-    { code: 'funding_raise', label: 'Captação' },
-    { code: 'funding_debt', label: 'Estruturação de Dívida' },
-    { code: 'funding_ipo', label: 'Abertura de Capital' },
   ],
 }
 
@@ -75,7 +60,7 @@ const formSchema = z.object({
   company_name: z.string().min(1, 'Nome da empresa é obrigatório'),
   contact_name: z.string().min(1, 'Seu nome é obrigatório'),
   contact_email: z.string().email('Email inválido'),
-  challenge_category: z.enum(['growth', 'transform', 'transition', 'compete', 'funding'], {
+  challenge_category: z.enum(['growth', 'transform', 'compete'], {
     required_error: 'Selecione uma categoria',
   }),
   challenge_type: z.string().min(1, 'Selecione o tipo'),
