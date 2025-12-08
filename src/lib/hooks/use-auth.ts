@@ -17,9 +17,9 @@ export function useLogin() {
       document.cookie = `sb-access-token=${data.access_token}; path=/; max-age=${data.expires_in}`
       queryClient.setQueryData(['auth', 'me'], { user: data.user })
       toast.success('Login realizado com sucesso')
-      // Redirect admins to admin dashboard, users to user dashboard
+      // Redirect admins to admin dashboard, users to home (dashboard not implemented yet)
       const isAdmin = data.user?.role === 'admin' || data.user?.role === 'super_admin'
-      router.push(isAdmin ? '/admin/submissions' : '/dashboard')
+      router.push(isAdmin ? '/admin' : '/')
     },
     onError: () => {
       toast.error('Falha no login. Verifique suas credenciais.')
@@ -39,7 +39,7 @@ export function useSignup() {
       document.cookie = `sb-access-token=${data.access_token}; path=/; max-age=${data.expires_in}`
       queryClient.setQueryData(['auth', 'me'], { user: data.user })
       toast.success('Conta criada com sucesso')
-      router.push('/dashboard')
+      router.push('/')
     },
     onError: () => {
       toast.error('Falha ao criar conta. Tente novamente.')

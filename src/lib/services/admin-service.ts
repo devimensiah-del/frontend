@@ -112,6 +112,11 @@ export const adminService = {
     return response.data
   },
 
+  async updateCompany(id: string, data: Partial<Company>): Promise<Company> {
+    const response = await api.put<{ company: Company }>(`/admin/companies/${id}`, data)
+    return response.data.company
+  },
+
   async reAnalyze(
     companyId: string,
     challenge: ChallengeData
@@ -123,6 +128,12 @@ export const adminService = {
     return response.data
   },
 
+  async analyzeChallenge(challengeId: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>(
+      `/admin/challenges/${challengeId}/analyze`
+    )
+    return response.data
+  },
   // ===== Framework Management =====
   async listFrameworks(): Promise<{ frameworks: Framework[] }> {
     const response = await api.get<{ frameworks: Framework[] }>('/admin/frameworks')

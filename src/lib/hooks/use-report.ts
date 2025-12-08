@@ -5,11 +5,13 @@ import { reportService } from '@/lib/services'
 
 /**
  * Hook for fetching public reports via access code
+ * @param code - Access code for the report
+ * @param preview - Optional preview mode ('admin' for admin preview)
  */
-export function usePublicReport(code: string) {
+export function usePublicReport(code: string, preview?: string) {
   return useQuery({
-    queryKey: ['report', 'public', code],
-    queryFn: () => reportService.getPublicReport(code),
+    queryKey: ['report', 'public', code, preview],
+    queryFn: () => reportService.getPublicReport(code, preview),
     enabled: !!code,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error) => {

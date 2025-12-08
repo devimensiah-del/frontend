@@ -351,21 +351,23 @@ export interface FrameworkResults {
   synthesis: Synthesis
 }
 
-// Full Analysis object
+// Full Analysis object (snake_case to match API response)
 export interface Analysis {
   id: string
-  submissionId: string
-  challengeId?: string
-  companyId?: string
+  submission_id: string
+  challenge_id?: string
+  company_id?: string
   status: AnalysisStatus
-  pdfUrl?: string
-  isVisibleToUser?: boolean
-  isPublic?: boolean
-  accessCode?: string
-  accessCodeCreatedAt?: string
-  analysis: FrameworkResults
-  createdAt: string
-  updatedAt: string
+  pdf_url?: string
+  is_visible_to_user?: boolean
+  is_public?: boolean
+  access_code?: string
+  access_code_created_at?: string
+  framework_results?: FrameworkResults
+  error_message?: string
+  created_at: string
+  updated_at: string
+  completed_at?: string
 }
 
 // ============================================================================
@@ -442,10 +444,11 @@ export interface Framework {
 
 export interface PublicReportData {
   id: string
-  submission_id: string
+  company_id?: string
+  challenge_id?: string
   status: AnalysisStatus
   // Company information for display
-  company_name: string
+  company_name?: string
   industry?: string
   business_challenge?: string
   // Framework results (using snake_case from API)

@@ -10,7 +10,14 @@ export function useChallenges(companyId: string) {
     queryKey: ['challenges', companyId],
     queryFn: () => companyService.getChallenges(companyId),
     enabled: !!companyId,
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 10 * 1000, // 10 seconds
+    // Auto-poll every 5 seconds to catch status changes during processing
+    refetchInterval: (query) => {
+      const hasProcessing = query.state.data?.some(
+        (ch) => ch.latest_analysis?.status === 'processing' || ch.latest_analysis?.status === 'pending'
+      )
+      return hasProcessing ? 5000 : false
+    },
   })
 }
 

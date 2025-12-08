@@ -20,42 +20,11 @@ import {
 } from '@/components/ui/select'
 import { useReAnalyze } from '@/lib/hooks/use-admin'
 import { Loader2 } from 'lucide-react'
-
-const challengeCategories = [
-  { value: 'growth', label: 'Crescimento' },
-  { value: 'transform', label: 'Transformação' },
-  { value: 'transition', label: 'Transição' },
-  { value: 'compete', label: 'Competição' },
-  { value: 'funding', label: 'Captação' },
-]
-
-const challengeTypes: Record<string, { value: string; label: string }[]> = {
-  growth: [
-    { value: 'scale_operations', label: 'Escalar Operações' },
-    { value: 'market_expansion', label: 'Expansão de Mercado' },
-    { value: 'revenue_growth', label: 'Crescimento de Receita' },
-  ],
-  transform: [
-    { value: 'digital_transformation', label: 'Transformação Digital' },
-    { value: 'business_model', label: 'Mudança de Modelo de Negócio' },
-    { value: 'culture_change', label: 'Mudança Cultural' },
-  ],
-  transition: [
-    { value: 'succession', label: 'Sucessão' },
-    { value: 'pivot', label: 'Pivô de Produto' },
-    { value: 'restructuring', label: 'Reestruturação' },
-  ],
-  compete: [
-    { value: 'differentiation', label: 'Diferenciação' },
-    { value: 'cost_leadership', label: 'Liderança em Custo' },
-    { value: 'market_share', label: 'Ganho de Market Share' },
-  ],
-  funding: [
-    { value: 'seed', label: 'Seed/Anjo' },
-    { value: 'series_a', label: 'Série A' },
-    { value: 'series_b_plus', label: 'Série B+' },
-  ],
-}
+import {
+  CHALLENGE_CATEGORIES,
+  CHALLENGE_TYPES,
+  type ChallengeCategory,
+} from '@/lib/config/challenges'
 
 interface ReAnalyzeDialogProps {
   companyId: string
@@ -70,7 +39,7 @@ export function ReAnalyzeDialog({
   open,
   onOpenChange,
 }: ReAnalyzeDialogProps) {
-  const [category, setCategory] = useState('')
+  const [category, setCategory] = useState<ChallengeCategory | ''>('')
   const [type, setType] = useState('')
   const [challenge, setChallenge] = useState('')
   const reAnalyze = useReAnalyze()
@@ -82,7 +51,7 @@ export function ReAnalyzeDialog({
       {
         companyId,
         challenge: {
-          challenge_category: category as 'growth' | 'transform' | 'transition' | 'compete' | 'funding',
+          challenge_category: category as ChallengeCategory,
           challenge_type: type,
           business_challenge: challenge,
         },
@@ -98,27 +67,37 @@ export function ReAnalyzeDialog({
     )
   }
 
+  const handleCategoryChange = (value: string) => {
+    setCategory(value as ChallengeCategory)
+    setType('')
+  }
+
+  const availableTypes = category ? CHALLENGE_TYPES[category] : []
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Re-analisar Empresa</DialogTitle>
+          <DialogTitle>Novo Desafio</DialogTitle>
           <DialogDescription>
-            Iniciar nova análise para <strong>{companyName}</strong> com um novo desafio.
+            Criar novo desafio e iniciar análise para <strong>{companyName}</strong>.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label>Categoria do Desafio</Label>
-            <Select value={category} onValueChange={(v) => { setCategory(v); setType(''); }}>
+            <Select value={category} onValueChange={handleCategoryChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent>
-                {challengeCategories.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
+                {CHALLENGE_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat.code} value={cat.code}>
+                    <span className="flex items-center gap-2">
+                      <span>{cat.emoji}</span>
+                      <span>{cat.label}</span>
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -133,9 +112,12 @@ export function ReAnalyzeDialog({
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {challengeTypes[category]?.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
+                  {availableTypes.map((t) => (
+                    <SelectItem key={t.code} value={t.code}>
+                      <span className="flex items-center gap-2">
+                        <span>{t.emoji}</span>
+                        <span>{t.label}</span>
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -163,7 +145,7 @@ export function ReAnalyzeDialog({
             disabled={!category || !type || !challenge || reAnalyze.isPending}
           >
             {reAnalyze.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Iniciar Análise
+            Criar e Analisar
           </Button>
         </div>
       </DialogContent>

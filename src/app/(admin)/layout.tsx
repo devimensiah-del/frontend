@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMe } from '@/lib/hooks'
 import { AdminSidebar } from '@/components/shared/admin-sidebar'
@@ -16,13 +16,14 @@ export default function AdminLayout({
 }) {
   const router = useRouter()
   const { data, isLoading, error } = useMe()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (!isLoading) {
       if (error || !data?.user) {
         router.push('/login')
       } else if (!ADMIN_ROLES.includes(data.user.role)) {
-        router.push('/dashboard')
+        router.push('/')
       }
     }
   }, [data, isLoading, error, router])
@@ -47,10 +48,15 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col">
-        <AdminHeader />
-        <main className="flex-1 p-6 bg-surface-paper">{children}</main>
+      <AdminSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <div className="flex-1 flex flex-col min-w-0">
+        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 p-4 lg:p-6 bg-surface-paper overflow-auto">
+          {children}
+        </main>
       </div>
     </div>
   )

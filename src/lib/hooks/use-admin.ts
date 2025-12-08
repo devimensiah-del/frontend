@@ -89,18 +89,6 @@ export function useTogglePublic() {
   })
 }
 
-export function useGenerateAccessCode() {
-  return useMutation({
-    mutationFn: (id: string) => adminService.generateAccessCode(id),
-    onSuccess: (data) => {
-      toast.success(`Código gerado: ${data.access_code}`)
-    },
-    onError: () => {
-      toast.error('Falha ao gerar código de acesso')
-    },
-  })
-}
-
 export function useRetryAnalysis() {
   const queryClient = useQueryClient()
 
@@ -139,6 +127,7 @@ export function useUpdateVisibility() {
       adminService.updateVisibility(analysisId, { [field]: value }),
     onSuccess: (_, { analysisId }) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'analysis', analysisId] })
+      queryClient.invalidateQueries({ queryKey: ['challenges'] }) // Refresh challenge cards
       toast.success('Visibilidade atualizada')
     },
     onError: () => {
@@ -181,18 +170,69 @@ export function useAdminCompany(id: string) {
   })
 }
 
+export function useUpdateAdminCompany() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
+      adminService.updateCompany(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'company', id] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'companies'] })
+      toast.success('Empresa atualizada com sucesso')
+    },
+    onError: () => {
+      toast.error('Erro ao atualizar empresa')
+    },
+  })
+}
+
 export function useReAnalyze() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: ({ companyId, challenge }: { companyId: string; challenge: ChallengeData }) =>
       adminService.reAnalyze(companyId, challenge),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'analyses'] })
-      toast.success('Re-análise iniciada')
+      queryClient.invalidateQueries({ queryKey: ['challenges', variables.companyId] })
+      toast.success('Desafio criado e análise iniciada')
     },
     onError: () => {
-      toast.error('Falha ao iniciar re-análise')
+      toast.error('Falha ao criar desafio')
+    },
+  })
+}
+
+export function useAnalyzeChallenge() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (challengeId: string) => adminService.analyzeChallenge(challengeId),
+    onSuccess: () => {
+      // Invalidate all challenge queries to refresh status badges
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'analyses'] })
+      toast.success('Análise iniciada')
+    },
+    onError: () => {
+      toast.error('Falha ao iniciar análise')
+    },
+  })
+}
+
+export function useGenerateAccessCode() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (analysisId: string) => adminService.generateAccessCode(analysisId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'analysis'] })
+      toast.success(`Código gerado: ${data.access_code}`)
+    },
+    onError: () => {
+      toast.error('Falha ao gerar código de acesso')
     },
   })
 }

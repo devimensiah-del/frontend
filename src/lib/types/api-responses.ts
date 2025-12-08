@@ -74,9 +74,8 @@ export interface CreateFrameworkRequest {
   is_active: boolean
 }
 
-export interface UpdateFrameworkRequest extends Partial<CreateFrameworkRequest> {
-  // id is passed separately in the hook
-}
+// id is passed separately in the hook
+export type UpdateFrameworkRequest = Partial<CreateFrameworkRequest>
 
 // Challenge data for re-analysis (matches backend ReAnalyzeRequest)
 export interface ChallengeData {
