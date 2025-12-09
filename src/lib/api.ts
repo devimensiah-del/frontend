@@ -131,9 +131,9 @@ export const companiesApi = {
   deleteCompany: (id: string) =>
     api.delete(`/companies/${id}`),
 
-  // Re-enrich company data
+  // Re-enrich company data (admin only)
   reEnrichCompany: (id: string) =>
-    api.post(`/companies/${id}/re-enrich`),
+    api.post(`/admin/companies/${id}/re-enrich`),
 
   // Get company with challenges included
   getWithChallenges: (id: string) =>

@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAdminCompany, useUpdateAdminCompany, useAnalyzeChallenge, useChallenges, useUpdateVisibility, useGenerateAccessCode } from '@/lib/hooks'
+import { useReEnrichCompany } from '@/lib/hooks/use-companies'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -42,6 +43,7 @@ import {
   Eye,
   Sparkles,
   ExternalLink,
+  RefreshCw,
 } from 'lucide-react'
 import type { EnrichmentStatus, Challenge, AnalysisStatus } from '@/lib/types'
 
@@ -478,6 +480,7 @@ export default function CompanyDetailPage({
   const analyzeChallenge = useAnalyzeChallenge()
   const updateVisibility = useUpdateVisibility()
   const generateAccessCode = useGenerateAccessCode()
+  const reEnrich = useReEnrichCompany()
 
   const [editMode, setEditMode] = useState(false)
   const [formData, setFormData] = useState<Record<string, unknown>>({})
@@ -1047,18 +1050,34 @@ export default function CompanyDetailPage({
       {activeTab === 'enriquecimento' && (
         <div className="space-y-6">
           {/* Enrichment Status Header */}
-          <div className="flex items-center gap-4 p-4 bg-white border border-line rounded">
-            {getEnrichmentBadge(company.enrichment_status)}
-            {company.enrichment_completed_at && (
-              <span className="text-sm text-muted-foreground">
-                Concluído em: {new Date(company.enrichment_completed_at).toLocaleString('pt-BR')}
-              </span>
-            )}
-            {company.enrichment_error && (
-              <span className="text-sm text-error">
-                Erro: {company.enrichment_error}
-              </span>
-            )}
+          <div className="flex items-center justify-between p-4 bg-white border border-line rounded">
+            <div className="flex items-center gap-4">
+              {getEnrichmentBadge(company.enrichment_status)}
+              {company.enrichment_completed_at && (
+                <span className="text-sm text-muted-foreground">
+                  Concluído em: {new Date(company.enrichment_completed_at).toLocaleString('pt-BR')}
+                </span>
+              )}
+              {company.enrichment_error && (
+                <span className="text-sm text-error">
+                  Erro: {company.enrichment_error}
+                </span>
+              )}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => reEnrich.mutate(company.id)}
+              disabled={reEnrich.isPending || company.enrichment_status === 'processing'}
+              className="gap-1.5"
+            >
+              {reEnrich.isPending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="w-3.5 h-3.5" />
+              )}
+              Re-enriquecer
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -1122,6 +1141,210 @@ export default function CompanyDetailPage({
             onChange={handleFieldChange}
             emptyMessage="Nenhuma fonte registrada para este enriquecimento"
           />
+
+          {/* Products & Services */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <div>
+              <EditableList
+                title="Principais Produtos"
+                icon={<Briefcase className="w-4 h-4" />}
+                field="main_products"
+                items={company.main_products}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                emptyMessage="Nenhum produto identificado"
+              />
+            </div>
+            <div>
+              <EditableList
+                title="Segmentos de Clientes"
+                icon={<Users className="w-4 h-4" />}
+                field="customer_segments"
+                items={company.customer_segments}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                emptyMessage="Nenhum segmento identificado"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <Section title="Modelo de Precificação" icon={<DollarSign className="w-4 h-4" />}>
+              <EditableField
+                label="Modelo de Precificação"
+                field="pricing_model"
+                value={company.pricing_model}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                type="textarea"
+                placeholder="Modelo de precificação da empresa"
+              />
+            </Section>
+
+            <div>
+              <EditableList
+                title="Diferenciais"
+                icon={<Sparkles className="w-4 h-4" />}
+                field="unique_selling_points"
+                items={company.unique_selling_points}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                emptyMessage="Nenhum diferencial identificado"
+              />
+            </div>
+          </div>
+
+          {/* Leadership & News */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <div>
+              <EditableList
+                title="Executivos-Chave"
+                icon={<Users className="w-4 h-4" />}
+                field="key_executives"
+                items={company.key_executives}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                emptyMessage="Nenhum executivo identificado"
+              />
+            </div>
+            <div>
+              <EditableList
+                title="Notícias Recentes"
+                icon={<FileText className="w-4 h-4" />}
+                field="recent_news"
+                items={company.recent_news}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                emptyMessage="Nenhuma notícia recente"
+              />
+            </div>
+          </div>
+
+          <Section title="História da Empresa" icon={<Calendar className="w-4 h-4" />}>
+            <EditableField
+              label="História da Empresa"
+              field="company_history"
+              value={company.company_history}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              type="textarea"
+              placeholder="História e marcos importantes da empresa"
+            />
+          </Section>
+
+          {/* SWOT Extended */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <EditableList
+              title="Oportunidades"
+              icon={<TrendingUp className="w-4 h-4" />}
+              field="opportunities"
+              items={company.opportunities}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              emptyMessage="Nenhuma oportunidade identificada"
+              variant="success"
+            />
+            <EditableList
+              title="Ameaças"
+              icon={<AlertTriangle className="w-4 h-4" />}
+              field="threats"
+              items={company.threats}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              emptyMessage="Nenhuma ameaça identificada"
+              variant="warning"
+            />
+            <EditableList
+              title="Desafios Estratégicos"
+              icon={<Target className="w-4 h-4" />}
+              field="strategic_challenges"
+              items={company.strategic_challenges}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              emptyMessage="Nenhum desafio identificado"
+            />
+          </div>
+
+          {/* Competitive Intelligence */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <div>
+              <EditableList
+                title="Detalhes dos Competidores"
+                icon={<Target className="w-4 h-4" />}
+                field="competitor_details"
+                items={company.competitor_details}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                emptyMessage="Nenhum detalhe de competidor"
+              />
+            </div>
+            <Section title="Vantagem Competitiva" icon={<Shield className="w-4 h-4" />}>
+              <EditableField
+                label="Vantagem Competitiva"
+                field="competitive_advantage"
+                value={company.competitive_advantage}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                type="textarea"
+                placeholder="Vantagem competitiva da empresa"
+              />
+              <EditableField
+                label="Market Share"
+                field="market_share"
+                value={company.market_share}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                placeholder="Participação de mercado"
+              />
+            </Section>
+          </div>
+
+          {/* Market Sizing */}
+          <Section title="Tamanho de Mercado" icon={<TrendingUp className="w-4 h-4" />}>
+            <EditableField
+              label="TAM (Total Addressable Market)"
+              field="tam_estimate"
+              value={company.tam_estimate}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              type="textarea"
+              placeholder="Estimativa do mercado total endereçável"
+            />
+            <EditableField
+              label="SAM (Serviceable Available Market)"
+              field="sam_estimate"
+              value={company.sam_estimate}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              type="textarea"
+              placeholder="Estimativa do mercado disponível"
+            />
+            <EditableField
+              label="SOM (Serviceable Obtainable Market)"
+              field="som_estimate"
+              value={company.som_estimate}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              type="textarea"
+              placeholder="Estimativa do mercado obtível"
+            />
+          </Section>
         </div>
       )}
 

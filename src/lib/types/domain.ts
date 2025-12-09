@@ -108,6 +108,23 @@ export interface Company {
   regulatory_context?: string         // Key regulatory information
   market_concentration?: string       // e.g., "Fragmentado", "Concentrado"
   enrichment_sources?: string[]       // URLs of sources used
+  // Enrichment v3 fields
+  main_products?: string[]
+  customer_segments?: string[]
+  pricing_model?: string
+  unique_selling_points?: string[]
+  recent_news?: string[]
+  key_executives?: string[]
+  company_history?: string
+  opportunities?: string[]
+  threats?: string[]
+  strategic_challenges?: string[]
+  competitor_details?: string[]
+  competitive_advantage?: string
+  market_share?: string
+  tam_estimate?: string
+  sam_estimate?: string
+  som_estimate?: string
   // Social links
   linkedin_url?: string
   twitter_handle?: string

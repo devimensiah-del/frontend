@@ -82,12 +82,20 @@ export function useReEnrichCompany() {
 
   return useMutation({
     mutationFn: companyService.reEnrich,
-    onSuccess: (_, id) => {
+    onSuccess: (data, id) => {
       queryClient.invalidateQueries({ queryKey: ['company', id] })
-      toast.success('Enriquecimento iniciado')
+      queryClient.invalidateQueries({ queryKey: ['companies'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'company', id] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'companies'] })
+      toast.success(data.data ? `Re-enriquecimento concluído. ${data.data.fields_updated} campos atualizados.` : 'Re-enriquecimento iniciado')
     },
-    onError: () => {
-      toast.error('Erro ao iniciar enriquecimento')
+    onError: (error: any) => {
+      if (error?.response?.status === 429) {
+        const retryAfter = error?.response?.data?.retry_after || 'algumas horas'
+        toast.error(`Limite de re-enriquecimento atingido. Tente novamente em ${retryAfter}.`)
+      } else {
+        toast.error('Erro ao iniciar enriquecimento')
+      }
     },
   })
 }

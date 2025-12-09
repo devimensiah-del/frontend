@@ -112,6 +112,13 @@ export const adminService = {
     return response.data
   },
 
+  async reEnrichCompany(companyId: string): Promise<{ message: string; data?: { company_id: string; status: string; fields_updated: number; remaining_today: number } }> {
+    const response = await api.post<{ message: string; data?: { company_id: string; status: string; fields_updated: number; remaining_today: number } }>(
+      `/admin/companies/${companyId}/re-enrich`
+    )
+    return response.data
+  },
+
   async updateCompany(id: string, data: Partial<Company>): Promise<Company> {
     const response = await api.put<{ company: Company }>(`/admin/companies/${id}`, { fields: data })
     return response.data.company

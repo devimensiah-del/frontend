@@ -26,8 +26,9 @@ export const companyService = {
     await api.delete(`/companies/${id}`)
   },
 
-  async reEnrich(id: string): Promise<void> {
-    await api.post(`/companies/${id}/re-enrich`)
+  async reEnrich(id: string): Promise<{ message: string; data?: { company_id: string; status: string; fields_updated: number; remaining_today: number } }> {
+    const response = await api.post<{ message: string; data?: { company_id: string; status: string; fields_updated: number; remaining_today: number } }>(`/admin/companies/${id}/re-enrich`)
+    return response.data
   },
 
   async getWithChallenges(id: string): Promise<Company & { challenges: Challenge[] }> {
