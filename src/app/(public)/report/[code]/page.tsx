@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { usePublicReport } from '@/lib/hooks'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
@@ -35,8 +36,119 @@ import {
   GraduationCap,
   Repeat,
   TrendingDown,
+  Search,
   Lock,
 } from 'lucide-react'
+
+// ============================================
+// ANIMATION VARIANTS
+// ============================================
+
+// Custom ease curve for smooth premium animations
+const easeOutExpo = [0.22, 1, 0.36, 1] as const
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: easeOutExpo }
+  }
+}
+
+const fadeInScale = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.7, ease: easeOutExpo }
+  }
+}
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1
+    }
+  }
+}
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: easeOutExpo }
+  }
+}
+
+const dividerReveal = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.8, ease: easeOutExpo }
+  }
+}
+
+const iconPulse = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.6,
+      ease: easeOutExpo,
+      scale: { type: "spring", stiffness: 200, damping: 15 }
+    }
+  }
+}
+
+// ============================================
+// STRATEGIC 4-PART CONFIGURATION
+// ============================================
+
+const STRATEGIC_PARTS = {
+  parte1: {
+    number: 'Parte I',
+    title: 'Onde Estamos?',
+    subtitle: 'Análise da Situação Atual',
+    description: 'PESTEL, Porter 7 Forças, SWOT',
+    icon: Search,
+    variant: 'light' as const,
+    frameworks: ['pestel', 'porter', 'swot'],
+  },
+  parte2: {
+    number: 'Parte II',
+    title: 'Onde Queremos Ir?',
+    subtitle: 'Posicionamento Estratégico',
+    description: 'TAM-SAM-SOM, Benchmarking, Blue Ocean',
+    icon: Target,
+    variant: 'dark' as const,
+    frameworks: ['tam-sam-som', 'benchmarking', 'blue-ocean'],
+  },
+  parte3: {
+    number: 'Parte III',
+    title: 'Como Chegar Lá?',
+    subtitle: 'Planejamento Estratégico',
+    description: 'OKRs, Growth Hacking, BSC',
+    icon: Rocket,
+    variant: 'light' as const,
+    frameworks: ['okrs', 'growth-hacking', 'bsc'],
+  },
+  parte4: {
+    number: 'Parte IV',
+    title: 'O Que Fazer Agora?',
+    subtitle: 'Decisão e Ação',
+    description: 'Cenários, Matriz de Decisão',
+    icon: Zap,
+    variant: 'dark' as const,
+    frameworks: ['scenarios', 'decision'],
+  },
+}
 
 export default function PublicReportPage() {
   const params = useParams()
@@ -162,11 +274,9 @@ export default function PublicReportPage() {
   const synthesis = normalizeSynthesis(rawAnalysis.synthesis || {})
   const analysis = normalizeAnalysis(rawAnalysis)
   const isAdminPreviewMode = report?.is_admin_preview || isAdminPreview
-  // Always show full content (blur feature removed)
-  const isBlurred = false
 
   // Build sections array based on available data
-  const sections = buildSections(synthesis, analysis, isBlurred)
+  const sections = buildSections(synthesis, analysis)
 
   return (
     <div className="min-h-screen bg-surface-paper">
@@ -235,19 +345,23 @@ export default function PublicReportPage() {
       </section>
 
       {/* Dynamic Sections */}
-      {sections.slice(1).map((section, index) => (
-        <section
-          key={section.id}
-          ref={(el) => { sectionsRef.current[index + 1] = el }}
-          id={section.id}
-          className={cn(
-            'min-h-screen relative',
-            section.variant === 'dark' ? 'bg-navy-900 text-white' : 'bg-surface-paper'
-          )}
-        >
-          {section.component}
-        </section>
-      ))}
+      {sections.slice(1).map((section, index) => {
+        const isDivider = section.id.startsWith('parte-')
+        return (
+          <section
+            key={section.id}
+            ref={(el) => { sectionsRef.current[index + 1] = el }}
+            id={section.id}
+            className={cn(
+              'relative',
+              !isDivider && 'min-h-screen',
+              section.variant === 'dark' ? 'bg-navy-900 text-white' : 'bg-surface-paper'
+            )}
+          >
+            {section.component}
+          </section>
+        )
+      })}
 
       {/* CTA Section */}
       <section className="bg-navy-900 py-24 lg:py-32">
@@ -379,73 +493,30 @@ function MetricBadge({ value, label, highlight = false }: { value: string; label
 }
 
 // ============================================
-// PREMIUM BLUR OVERLAY
-// ============================================
-
-function PremiumBlurOverlay({ children, isBlurred, isDark = false }: { children: React.ReactNode; isBlurred: boolean; isDark?: boolean }) {
-  if (!isBlurred) {
-    return <>{children}</>
-  }
-
-  return (
-    <div className="relative">
-      <div className="blur-sm opacity-40 pointer-events-none select-none">
-        {children}
-      </div>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className={cn(
-          'text-center max-w-md mx-auto px-6',
-          isDark ? 'text-white' : 'text-navy-900'
-        )}>
-          <div className={cn(
-            'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6',
-            isDark ? 'bg-gold-500/20' : 'bg-gold-500/10'
-          )}>
-            <Lock className="w-8 h-8 text-gold-500" />
-          </div>
-          <h3 className="text-xl lg:text-2xl font-medium mb-3 tracking-tight">
-            Conteúdo Premium
-          </h3>
-          <p className={cn(
-            'text-sm mb-6 leading-relaxed',
-            isDark ? 'text-gray-300' : 'text-gray-600'
-          )}>
-            Esta análise estratégica avançada está disponível no plano completo.
-          </p>
-          <Button
-            asChild
-            className="bg-gold-500 hover:bg-gold-600 text-navy-900 px-8 py-4 text-xs uppercase tracking-widest font-bold"
-          >
-            <Link href="/#diagnostico" className="inline-flex items-center gap-2">
-              Desbloquear Relatório
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ============================================
 // SECTION COMPONENTS
 // ============================================
 
 function SynthesisSection({ synthesis, sectionNumber }: { synthesis: any; sectionNumber: string }) {
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-16">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-16">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — Sumário Executivo
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-6">
             Visão Estratégica
           </h2>
-        </div>
+        </motion.div>
 
         {synthesis.executiveSummary && (
-          <div className="relative mb-12">
+          <motion.div variants={fadeInUp} className="relative mb-12">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold-500" />
             <div className="pl-8 pr-4 py-6 bg-navy-50 border border-navy-100">
               <div className="flex items-start gap-4">
@@ -455,12 +526,12 @@ function SynthesisSection({ synthesis, sectionNumber }: { synthesis: any; sectio
                 </p>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {synthesis.keyFindings?.length > 0 && (
-            <div className="bg-white border border-gray-200 p-8">
+            <motion.div variants={staggerItem} className="bg-white border border-gray-200 p-8">
               <div className="flex items-center gap-3 mb-6">
                 <Lightbulb className="w-5 h-5 text-gold-500" />
                 <h3 className="text-sm font-bold uppercase tracking-wider text-navy-900">
@@ -475,11 +546,11 @@ function SynthesisSection({ synthesis, sectionNumber }: { synthesis: any; sectio
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           )}
 
           {synthesis.strategicPriorities?.length > 0 && (
-            <div className="bg-white border border-gray-200 p-8">
+            <motion.div variants={staggerItem} className="bg-white border border-gray-200 p-8">
               <div className="flex items-center gap-3 mb-6">
                 <Target className="w-5 h-5 text-gold-500" />
                 <h3 className="text-sm font-bold uppercase tracking-wider text-navy-900">
@@ -496,12 +567,12 @@ function SynthesisSection({ synthesis, sectionNumber }: { synthesis: any; sectio
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
 
         {synthesis.overallRecommendation && (
-          <div className="bg-navy-900 text-white p-8 lg:p-12">
+          <motion.div variants={fadeInScale} className="bg-navy-900 text-white p-8 lg:p-12">
             <div className="flex items-center gap-3 mb-4">
               <Award className="w-5 h-5 text-gold-500" />
               <h3 className="text-sm font-bold uppercase tracking-wider text-gold-500">
@@ -511,9 +582,9 @@ function SynthesisSection({ synthesis, sectionNumber }: { synthesis: any; sectio
             <p className="text-lg lg:text-xl leading-relaxed text-gray-200">
               {synthesis.overallRecommendation}
             </p>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -547,8 +618,14 @@ function SWOTSection({ swot, sectionNumber }: { swot: any; sectionNumber: string
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24 bg-gray-50">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — Análise SWOT
           </div>
@@ -558,16 +635,21 @@ function SWOTSection({ swot, sectionNumber }: { swot: any; sectionNumber: string
           {swot.summary && (
             <p className="text-lg text-gray-600 max-w-3xl">{swot.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {quadrants.map((q) => {
+          {quadrants.map((q, qIndex) => {
             const styles = colorStyles[q.color]
             const items = normalizeSWOTItems(q.items)
             const Icon = q.icon
 
             return (
-              <div key={q.key} className={cn('border overflow-hidden', styles.border, styles.bg)}>
+              <motion.div
+                key={q.key}
+                variants={staggerItem}
+                custom={qIndex}
+                className={cn('border overflow-hidden', styles.border, styles.bg)}
+              >
                 <div className={cn('px-6 py-4 flex items-center gap-3', styles.header)}>
                   <Icon className="w-5 h-5 text-white" />
                   <h3 className="font-bold uppercase tracking-wider text-white text-sm">{q.title}</h3>
@@ -592,11 +674,11 @@ function SWOTSection({ swot, sectionNumber }: { swot: any; sectionNumber: string
                     </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
             )
           })}
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -613,8 +695,14 @@ function PESTELSection({ pestel, sectionNumber }: { pestel: any; sectionNumber: 
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — Análise PESTEL
           </div>
@@ -624,15 +712,20 @@ function PESTELSection({ pestel, sectionNumber }: { pestel: any; sectionNumber: 
           {pestel.summary && (
             <p className="text-lg text-gray-600 max-w-3xl">{pestel.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {factors.map((factor) => {
+          {factors.map((factor, fIndex) => {
             const items = normalizeToArray(factor.items)
             const Icon = factor.icon
 
             return (
-              <div key={factor.key} className="bg-white border border-gray-200 p-6">
+              <motion.div
+                key={factor.key}
+                variants={staggerItem}
+                custom={fIndex}
+                className="bg-white border border-gray-200 p-6"
+              >
                 <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
                   <div className="w-10 h-10 rounded-full bg-gold-500/10 flex items-center justify-center">
                     <Icon className="w-5 h-5 text-gold-600" />
@@ -649,11 +742,11 @@ function PESTELSection({ pestel, sectionNumber }: { pestel: any; sectionNumber: 
                     </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
             )
           })}
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -671,8 +764,14 @@ function PorterSection({ porter, sectionNumber }: { porter: any; sectionNumber: 
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24 bg-navy-900 text-white">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — 5 Forças de Porter+
           </div>
@@ -682,11 +781,16 @@ function PorterSection({ porter, sectionNumber }: { porter: any; sectionNumber: 
           {porter.summary && (
             <p className="text-lg text-gray-300 max-w-3xl">{porter.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {forces.map((force) => (
-            <div key={force.key} className="bg-white/5 border border-white/10 p-6">
+          {forces.map((force, fIndex) => (
+            <motion.div
+              key={force.key}
+              variants={staggerItem}
+              custom={fIndex}
+              className="bg-white/5 border border-white/10 p-6"
+            >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold uppercase tracking-wider text-white text-sm">
                   {force.title}
@@ -703,12 +807,12 @@ function PorterSection({ porter, sectionNumber }: { porter: any; sectionNumber: 
                 )}
               </div>
               <p className="text-gray-300 text-sm leading-relaxed">{force.content}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {porter.strategic_implications?.length > 0 && (
-          <div className="mt-12 bg-gold-500/10 border border-gold-500/20 p-8">
+          <motion.div variants={fadeInUp} className="mt-12 bg-gold-500/10 border border-gold-500/20 p-8">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gold-500 mb-6">
               Implicações Estratégicas
             </h3>
@@ -720,9 +824,9 @@ function PorterSection({ porter, sectionNumber }: { porter: any; sectionNumber: 
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -739,8 +843,14 @@ function TamSamSomSection({ tamSamSom, sectionNumber }: { tamSamSom: any; sectio
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — TAM SAM SOM
           </div>
@@ -750,12 +860,13 @@ function TamSamSomSection({ tamSamSom, sectionNumber }: { tamSamSom: any; sectio
           {tamSamSom.summary && (
             <p className="text-lg text-gray-600 max-w-3xl">{tamSamSom.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-6 mb-12">
           {marketSizes.map((market, index) => (
-            <div
+            <motion.div
               key={market.key}
+              variants={staggerItem}
               className={cn(
                 'relative p-8 border-2 transition-all',
                 market.color === 'navy' && 'bg-navy-900 border-navy-800 text-white',
@@ -789,11 +900,11 @@ function TamSamSomSection({ tamSamSom, sectionNumber }: { tamSamSom: any; sectio
               )}>
                 {index + 1}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
+        <motion.div variants={staggerItem} className="grid md:grid-cols-2 gap-6 mb-12">
           {tamSamSom.cagr && (
             <div className="bg-white border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -825,10 +936,10 @@ function TamSamSomSection({ tamSamSom, sectionNumber }: { tamSamSom: any; sectio
               </span>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {assumptions.length > 0 && (
-          <div className="bg-gray-50 border border-gray-200 p-8">
+          <motion.div variants={fadeInUp} className="bg-gray-50 border border-gray-200 p-8">
             <h3 className="text-sm font-bold uppercase tracking-wider text-navy-900 mb-6">
               Premissas & Metodologia
             </h3>
@@ -840,11 +951,11 @@ function TamSamSomSection({ tamSamSom, sectionNumber }: { tamSamSom: any; sectio
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         )}
 
         {nextSteps.length > 0 && (
-          <div className="mt-6 bg-amber-50 border border-amber-200 p-6">
+          <motion.div variants={fadeInUp} className="mt-6 bg-amber-50 border border-amber-200 p-6">
             <h3 className="text-sm font-bold uppercase tracking-wider text-amber-800 mb-4">
               Próximos Passos para Validação
             </h3>
@@ -856,9 +967,9 @@ function TamSamSomSection({ tamSamSom, sectionNumber }: { tamSamSom: any; sectio
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -870,8 +981,14 @@ function BenchmarkingSection({ benchmarking, sectionNumber }: { benchmarking: an
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24 bg-gray-50">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — Benchmarking
           </div>
@@ -881,29 +998,30 @@ function BenchmarkingSection({ benchmarking, sectionNumber }: { benchmarking: an
           {benchmarking.summary && (
             <p className="text-lg text-gray-600 max-w-3xl">{benchmarking.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         {competitors.length > 0 && (
-          <div className="mb-8">
+          <motion.div variants={staggerItem} className="mb-8">
             <h3 className="text-sm font-bold uppercase tracking-wider text-navy-900 mb-4">
               Concorrentes Analisados
             </h3>
             <div className="flex flex-wrap gap-3">
               {competitors.map((competitor: string, index: number) => (
-                <span
+                <motion.span
                   key={index}
+                  variants={staggerItem}
                   className="px-4 py-2 bg-navy-900 text-white text-sm font-medium rounded-full"
                 >
                   {competitor}
-                </span>
+                </motion.span>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         <div className="grid lg:grid-cols-2 gap-8">
           {gaps.length > 0 && (
-            <div className="bg-white border border-gray-200 p-8">
+            <motion.div variants={staggerItem} className="bg-white border border-gray-200 p-8">
               <div className="flex items-center gap-3 mb-6">
                 <TrendingDown className="w-5 h-5 text-red-500" />
                 <h3 className="text-sm font-bold uppercase tracking-wider text-navy-900">
@@ -920,11 +1038,11 @@ function BenchmarkingSection({ benchmarking, sectionNumber }: { benchmarking: an
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           )}
 
           {bestPractices.length > 0 && (
-            <div className="bg-white border border-gray-200 p-8">
+            <motion.div variants={staggerItem} className="bg-white border border-gray-200 p-8">
               <div className="flex items-center gap-3 mb-6">
                 <Award className="w-5 h-5 text-green-500" />
                 <h3 className="text-sm font-bold uppercase tracking-wider text-navy-900">
@@ -941,10 +1059,10 @@ function BenchmarkingSection({ benchmarking, sectionNumber }: { benchmarking: an
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -966,8 +1084,14 @@ function BlueOceanSection({ blueOcean, sectionNumber }: { blueOcean: any; sectio
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — Blue Ocean
           </div>
@@ -977,7 +1101,7 @@ function BlueOceanSection({ blueOcean, sectionNumber }: { blueOcean: any; sectio
           {blueOcean.summary && (
             <p className="text-lg text-gray-600 max-w-3xl">{blueOcean.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-12">
           {quadrants.map((q) => {
@@ -986,7 +1110,7 @@ function BlueOceanSection({ blueOcean, sectionNumber }: { blueOcean: any; sectio
             const Icon = q.icon
 
             return (
-              <div key={q.key} className={cn('border overflow-hidden', styles.border, styles.bg)}>
+              <motion.div key={q.key} variants={staggerItem} className={cn('border overflow-hidden', styles.border, styles.bg)}>
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-2">
                     <div className={cn('w-10 h-10 rounded-full flex items-center justify-center', styles.badge)}>
@@ -1004,13 +1128,13 @@ function BlueOceanSection({ blueOcean, sectionNumber }: { blueOcean: any; sectio
                     ))}
                   </ul>
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>
 
         {blueOcean.new_value_curve && (
-          <div className="bg-navy-900 text-white p-8 lg:p-12">
+          <motion.div variants={fadeInScale} className="bg-navy-900 text-white p-8 lg:p-12">
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="w-5 h-5 text-gold-500" />
               <h3 className="text-sm font-bold uppercase tracking-wider text-gold-500">
@@ -1020,9 +1144,9 @@ function BlueOceanSection({ blueOcean, sectionNumber }: { blueOcean: any; sectio
             <p className="text-lg lg:text-xl leading-relaxed text-gray-200">
               {blueOcean.new_value_curve}
             </p>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -1038,8 +1162,14 @@ function GrowthHackingSection({ growthHacking, sectionNumber }: { growthHacking:
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24 bg-navy-900 text-white">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — Growth Hacking
           </div>
@@ -1049,7 +1179,7 @@ function GrowthHackingSection({ growthHacking, sectionNumber }: { growthHacking:
           {growthHacking.summary && (
             <p className="text-lg text-gray-300 max-w-3xl">{growthHacking.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {loops.map((loop, loopIndex) => {
@@ -1057,7 +1187,7 @@ function GrowthHackingSection({ growthHacking, sectionNumber }: { growthHacking:
             const metrics = normalizeToArray(loop.data.metrics)
 
             return (
-              <div key={loopIndex} className="bg-white/5 border border-white/10 p-8">
+              <motion.div key={loopIndex} variants={staggerItem} className="bg-white/5 border border-white/10 p-8">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="font-bold text-white text-lg">{loop.data.name || loop.label}</h3>
@@ -1112,11 +1242,11 @@ function GrowthHackingSection({ growthHacking, sectionNumber }: { growthHacking:
                     <p className="text-gray-300 text-sm">{loop.data.bottleneck}</p>
                   </div>
                 )}
-              </div>
+              </motion.div>
             )
           })}
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -1136,8 +1266,14 @@ function ScenariosSection({ scenarios, sectionNumber }: { scenarios: any; sectio
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24 bg-gray-50">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — Cenários
           </div>
@@ -1147,7 +1283,7 @@ function ScenariosSection({ scenarios, sectionNumber }: { scenarios: any; sectio
           {scenarios.summary && (
             <p className="text-lg text-gray-600 max-w-3xl">{scenarios.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {scenarioList.map((scenario) => {
@@ -1155,7 +1291,7 @@ function ScenariosSection({ scenarios, sectionNumber }: { scenarios: any; sectio
             const actions = scenario.data.required_actions || scenario.data.requiredActions || []
 
             return (
-              <div key={scenario.key} className={cn('border overflow-hidden', styles.border, styles.bg)}>
+              <motion.div key={scenario.key} variants={staggerItem} className={cn('border overflow-hidden', styles.border, styles.bg)}>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className={cn('font-bold', styles.text)}>{scenario.label}</h3>
@@ -1183,11 +1319,11 @@ function ScenariosSection({ scenarios, sectionNumber }: { scenarios: any; sectio
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -1201,8 +1337,14 @@ function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — {useNewFormat ? 'Plano 90 Dias' : 'OKRs'}
           </div>
@@ -1212,12 +1354,12 @@ function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string
           {okrs.summary && (
             <p className="text-lg text-gray-600 max-w-3xl">{okrs.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         {useNewFormat && (
           <>
             {totalInvestment && (
-              <div className="mb-8 p-6 bg-gold-50 border border-gold-200">
+              <motion.div variants={fadeInScale} className="mb-8 p-6 bg-gold-50 border border-gold-200">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-gold-800 mb-1">
@@ -1227,12 +1369,12 @@ function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string
                   </div>
                   <DollarSign className="w-10 h-10 text-gold-500" />
                 </div>
-              </div>
+              </motion.div>
             )}
 
             <div className="space-y-8">
               {plan90Days.map((month: any, index: number) => (
-                <div key={index} className="relative">
+                <motion.div key={index} variants={staggerItem} className="relative">
                   {index < plan90Days.length - 1 && (
                     <div className="absolute left-6 top-16 bottom-0 w-0.5 bg-gray-200" />
                   )}
@@ -1285,12 +1427,12 @@ function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
 
             {successMetrics.length > 0 && (
-              <div className="mt-8 bg-navy-900 text-white p-8">
+              <motion.div variants={fadeInScale} className="mt-8 bg-navy-900 text-white p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <Target className="w-5 h-5 text-gold-500" />
                   <h3 className="text-sm font-bold uppercase tracking-wider text-gold-500">
@@ -1305,7 +1447,7 @@ function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string
                     </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
             )}
           </>
         )}
@@ -1313,7 +1455,7 @@ function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string
         {!useNewFormat && quarters.length > 0 && (
           <div className="space-y-8">
             {quarters.map((quarter: any, index: number) => (
-              <div key={index} className="relative">
+              <motion.div key={index} variants={staggerItem} className="relative">
                 {index < quarters.length - 1 && (
                   <div className="absolute left-6 top-16 bottom-0 w-0.5 bg-gray-200" />
                 )}
@@ -1359,11 +1501,11 @@ function OKRsSection({ okrs, sectionNumber }: { okrs: any; sectionNumber: string
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -1385,8 +1527,14 @@ function BSCSection({ bsc, sectionNumber }: { bsc: any; sectionNumber: string })
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24 bg-gray-50">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — BSC
           </div>
@@ -1396,7 +1544,7 @@ function BSCSection({ bsc, sectionNumber }: { bsc: any; sectionNumber: string })
           {bsc.summary && (
             <p className="text-lg text-gray-600 max-w-3xl">{bsc.summary}</p>
           )}
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 gap-6">
           {perspectives.map((p) => {
@@ -1405,7 +1553,7 @@ function BSCSection({ bsc, sectionNumber }: { bsc: any; sectionNumber: string })
             const Icon = p.icon
 
             return (
-              <div key={p.key} className={cn('border overflow-hidden', styles.border, styles.bg)}>
+              <motion.div key={p.key} variants={staggerItem} className={cn('border overflow-hidden', styles.border, styles.bg)}>
                 <div className={cn('px-6 py-4 flex items-center gap-3', styles.header)}>
                   <Icon className="w-5 h-5 text-white" />
                   <h3 className="font-bold uppercase tracking-wider text-white text-sm">{p.title}</h3>
@@ -1418,11 +1566,11 @@ function BSCSection({ bsc, sectionNumber }: { bsc: any; sectionNumber: string })
                     </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
             )
           })}
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -1432,26 +1580,32 @@ function DecisionMatrixSection({ matrix, sectionNumber }: { matrix: any; section
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 lg:px-24 py-24">
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-12">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+        className="max-w-6xl mx-auto w-full"
+      >
+        <motion.div variants={fadeInUp} className="mb-12">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-500 mb-4">
             {sectionNumber} — Matriz de Decisão
           </div>
           <h2 className="text-3xl lg:text-5xl font-medium text-navy-900 tracking-tight mb-4">
             Recomendações Prioritárias
           </h2>
-        </div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
-          <div className="lg:col-span-1 bg-navy-900 text-white p-8 flex flex-col justify-center">
+          <motion.div variants={fadeInScale} className="lg:col-span-1 bg-navy-900 text-white p-8 flex flex-col justify-center">
             <div className="text-[10px] font-bold uppercase tracking-widest text-gold-500 mb-2">
               Score Final
             </div>
             <div className="text-5xl font-light text-gold-500 mb-4">{matrix.score}</div>
             <div className="text-sm text-gray-400">{matrix.score_comparison}</div>
-          </div>
+          </motion.div>
 
-          <div className="lg:col-span-2 bg-gold-50 border border-gold-200 p-8">
+          <motion.div variants={fadeInScale} className="lg:col-span-2 bg-gold-50 border border-gold-200 p-8">
             <div className="flex items-center gap-3 mb-4">
               <Award className="w-5 h-5 text-gold-600" />
               <h3 className="text-sm font-bold uppercase tracking-wider text-gold-800">
@@ -1464,16 +1618,16 @@ function DecisionMatrixSection({ matrix, sectionNumber }: { matrix: any; section
             <p className="text-gray-600 leading-relaxed">
               {matrix.final_recommendation || matrix.finalRecommendation}
             </p>
-          </div>
+          </motion.div>
         </div>
 
         {recommendations.length > 0 && (
-          <div className="space-y-6">
+          <motion.div variants={staggerItem} className="space-y-6">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500">
               Plano de Ação
             </h3>
             {recommendations.map((rec: any, index: number) => (
-              <div key={index} className="bg-white border border-gray-200 p-6 flex gap-6">
+              <motion.div key={index} variants={staggerItem} className="bg-white border border-gray-200 p-6 flex gap-6">
                 <div className="flex-shrink-0 w-12 h-12 rounded-full bg-navy-900 text-white flex items-center justify-center font-bold">
                   {rec.priority}
                 </div>
@@ -1491,12 +1645,130 @@ function DecisionMatrixSection({ matrix, sectionNumber }: { matrix: any; section
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
+        )}
+      </motion.div>
+    </div>
+  )
+}
+
+// ============================================
+// STRATEGIC PART DIVIDER (4-Step Journey)
+// ============================================
+
+function StrategicPartDivider({
+  partNumber,
+  title,
+  subtitle,
+  narrative,
+  icon: Icon,
+  variant = 'light'
+}: {
+  partNumber: string
+  title: string
+  subtitle: string
+  narrative?: string
+  icon: React.ComponentType<{ className?: string }>
+  variant?: 'light' | 'dark'
+}) {
+  const isDark = variant === 'dark'
+
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.5 }}
+      variants={dividerReveal}
+      className={cn(
+        'flex flex-col justify-center relative overflow-hidden',
+        'px-6 md:px-12 lg:px-24 py-12 md:py-16',
+        isDark ? 'bg-navy-900' : 'bg-surface-paper'
+      )}
+    >
+      {/* Subtle gold accent bar - matches hero section */}
+      {isDark && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          whileInView={{ height: '8rem', opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute left-0 top-1/4 w-1 md:w-1.5 bg-gradient-to-b from-gold-500 to-gold-600"
+        />
+      )}
+
+      <div className="max-w-4xl mx-auto text-center w-full">
+        {/* Icon - responsive sizing */}
+        <motion.div
+          variants={iconPulse}
+          className={cn(
+            'inline-flex items-center justify-center rounded-full mb-4',
+            'w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16',
+            isDark ? 'bg-gold-500/20' : 'bg-gold-50 border border-gold-200'
+          )}
+        >
+          <Icon className={cn(
+            'w-5 h-5 md:w-6 md:h-6 lg:w-8 lg:h-8',
+            isDark ? 'text-gold-500' : 'text-gold-600'
+          )} />
+        </motion.div>
+
+        {/* Part label - matches existing section number style */}
+        <motion.div
+          variants={fadeInUp}
+          className={cn(
+            'text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] mb-2 md:mb-3',
+            isDark ? 'text-gold-500' : 'text-gold-600'
+          )}
+        >
+          {partNumber}
+        </motion.div>
+
+        {/* Main title - responsive typography matching hero */}
+        <motion.h2
+          variants={fadeInScale}
+          className={cn(
+            'text-2xl md:text-3xl lg:text-4xl font-medium tracking-tight mb-2 md:mb-3',
+            isDark ? 'text-white' : 'text-navy-900'
+          )}
+        >
+          {title}
+        </motion.h2>
+
+        {/* Subtitle - frameworks covered */}
+        <motion.p
+          variants={fadeInUp}
+          className={cn(
+            'text-base md:text-lg max-w-2xl mx-auto',
+            isDark ? 'text-gray-300' : 'text-gray-600',
+            narrative ? 'mb-4 md:mb-6' : ''
+          )}
+        >
+          {subtitle}
+        </motion.p>
+
+        {/* Narrative quote block - if available from AI */}
+        {narrative && (
+          <motion.div
+            variants={fadeInUp}
+            className={cn(
+              'max-w-2xl mx-auto p-3 md:p-4 border-l-4 text-left rounded-r-lg',
+              isDark
+                ? 'border-gold-500 bg-white/5 backdrop-blur-sm'
+                : 'border-gold-500 bg-gold-50/50'
+            )}
+          >
+            <p className={cn(
+              'text-sm leading-relaxed',
+              isDark ? 'text-gray-200' : 'text-navy-800'
+            )}>
+              &ldquo;{narrative}&rdquo;
+            </p>
+          </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -1514,6 +1786,8 @@ function normalizeSynthesis(raw: any) {
     centralChallenge: raw.centralChallenge || raw.central_challenge,
     mainFindings: raw.mainFindings || raw.main_findings,
     importantNotes: raw.importantNotes || raw.important_notes,
+    // NEW: Strategic narrative for 4-part structure (backward compatible)
+    strategicNarrative: raw.strategic_narrative || raw.strategicNarrative || null,
   }
 }
 
@@ -1555,14 +1829,17 @@ function normalizeAnalysis(raw: any) {
   }
 }
 
-function buildSections(synthesis: any, analysis: any, isBlurred: boolean = true) {
+function buildSections(synthesis: any, analysis: any) {
   const sections: { id: string; title: string; variant?: 'dark' | 'light'; component: React.ReactNode }[] = [
     { id: 'hero', title: 'Início', component: null },
   ]
 
   let sectionNum = 1
 
-  // 01 - Synthesis (FREE)
+  // Get strategic narratives if available (backward compatible)
+  const narratives = synthesis.strategicNarrative || {}
+
+  // 01 - Synthesis (Executive Summary - FREE) - Always first
   if (synthesis.executiveSummary || synthesis.keyFindings?.length > 0) {
     const num = String(sectionNum++).padStart(2, '0')
     sections.push({
@@ -1572,154 +1849,221 @@ function buildSections(synthesis: any, analysis: any, isBlurred: boolean = true)
     })
   }
 
-  // 02 - SWOT (FREE)
-  if (analysis.swot) {
-    const num = String(sectionNum++).padStart(2, '0')
+  // ============================================
+  // PARTE I: ONDE ESTAMOS? (Current Situation)
+  // Frameworks: PESTEL, Porter, SWOT
+  // ============================================
+  const hasParte1 = analysis.pestel || analysis.porter || analysis.swot
+  if (hasParte1) {
     sections.push({
-      id: 'swot',
-      title: 'SWOT',
-      component: <SWOTSection swot={analysis.swot} sectionNumber={num} />,
-    })
-  }
-
-  // 03 - PESTEL
-  if (analysis.pestel) {
-    const num = String(sectionNum++).padStart(2, '0')
-    sections.push({
-      id: 'pestel',
-      title: 'PESTEL',
+      id: 'parte-1',
+      title: 'Parte I',
+      variant: STRATEGIC_PARTS.parte1.variant,
       component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <PESTELSection pestel={analysis.pestel} sectionNumber={num} />
-        </PremiumBlurOverlay>
+        <StrategicPartDivider
+          partNumber={STRATEGIC_PARTS.parte1.number}
+          title={STRATEGIC_PARTS.parte1.title}
+          subtitle={STRATEGIC_PARTS.parte1.subtitle}
+          narrative={narratives.parte_1_onde_estamos}
+          icon={STRATEGIC_PARTS.parte1.icon}
+          variant={STRATEGIC_PARTS.parte1.variant}
+        />
       ),
     })
+
+    // PESTEL
+    if (analysis.pestel) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'pestel',
+        title: 'PESTEL',
+        component: <PESTELSection pestel={analysis.pestel} sectionNumber={num} />,
+      })
+    }
+
+    // Porter (dark)
+    if (analysis.porter) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'porter',
+        title: 'Porter',
+        variant: 'dark',
+        component: <PorterSection porter={analysis.porter} sectionNumber={num} />,
+      })
+    }
+
+    // SWOT (FREE)
+    if (analysis.swot) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'swot',
+        title: 'SWOT',
+        component: <SWOTSection swot={analysis.swot} sectionNumber={num} />,
+      })
+    }
   }
 
-  // 04 - Porter (dark)
-  if (analysis.porter) {
-    const num = String(sectionNum++).padStart(2, '0')
+  // ============================================
+  // PARTE II: ONDE QUEREMOS IR? (Strategic Positioning)
+  // Frameworks: TAM-SAM-SOM, Benchmarking, Blue Ocean
+  // ============================================
+  const hasTamSamSom = analysis.tamSamSom?.tam || analysis.tamSamSom?.sam || analysis.tamSamSom?.som
+  const hasBenchmarking = analysis.benchmarking?.competitors?.length > 0 || analysis.benchmarking?.performance_gaps?.length > 0
+  const hasBlueOcean = analysis.blueOcean?.eliminate?.length > 0 || analysis.blueOcean?.create?.length > 0
+  const hasParte2 = hasTamSamSom || hasBenchmarking || hasBlueOcean
+
+  if (hasParte2) {
     sections.push({
-      id: 'porter',
-      title: 'Porter',
-      variant: 'dark',
+      id: 'parte-2',
+      title: 'Parte II',
+      variant: STRATEGIC_PARTS.parte2.variant,
       component: (
-        <PremiumBlurOverlay isBlurred={isBlurred} isDark>
-          <PorterSection porter={analysis.porter} sectionNumber={num} />
-        </PremiumBlurOverlay>
+        <StrategicPartDivider
+          partNumber={STRATEGIC_PARTS.parte2.number}
+          title={STRATEGIC_PARTS.parte2.title}
+          subtitle={STRATEGIC_PARTS.parte2.subtitle}
+          narrative={narratives.parte_2_onde_queremos_ir}
+          icon={STRATEGIC_PARTS.parte2.icon}
+          variant={STRATEGIC_PARTS.parte2.variant}
+        />
       ),
     })
+
+    // TAM SAM SOM (FREE)
+    if (hasTamSamSom) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'tam-sam-som',
+        title: 'TAM SAM SOM',
+        component: <TamSamSomSection tamSamSom={analysis.tamSamSom} sectionNumber={num} />,
+      })
+    }
+
+    // Benchmarking
+    if (hasBenchmarking) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'benchmarking',
+        title: 'Benchmarking',
+        component: <BenchmarkingSection benchmarking={analysis.benchmarking} sectionNumber={num} />,
+      })
+    }
+
+    // Blue Ocean
+    if (hasBlueOcean) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'blue-ocean',
+        title: 'Blue Ocean',
+        component: <BlueOceanSection blueOcean={analysis.blueOcean} sectionNumber={num} />,
+      })
+    }
   }
 
-  // 05 - TAM SAM SOM (FREE)
-  if (analysis.tamSamSom?.tam || analysis.tamSamSom?.sam || analysis.tamSamSom?.som) {
-    const num = String(sectionNum++).padStart(2, '0')
-    sections.push({
-      id: 'tam-sam-som',
-      title: 'TAM SAM SOM',
-      component: <TamSamSomSection tamSamSom={analysis.tamSamSom} sectionNumber={num} />,
-    })
-  }
-
-  // 06 - Benchmarking
-  if (analysis.benchmarking?.competitors?.length > 0 || analysis.benchmarking?.performance_gaps?.length > 0) {
-    const num = String(sectionNum++).padStart(2, '0')
-    sections.push({
-      id: 'benchmarking',
-      title: 'Benchmarking',
-      component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <BenchmarkingSection benchmarking={analysis.benchmarking} sectionNumber={num} />
-        </PremiumBlurOverlay>
-      ),
-    })
-  }
-
-  // 07 - Blue Ocean
-  if (analysis.blueOcean?.eliminate?.length > 0 || analysis.blueOcean?.create?.length > 0) {
-    const num = String(sectionNum++).padStart(2, '0')
-    sections.push({
-      id: 'blue-ocean',
-      title: 'Blue Ocean',
-      component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <BlueOceanSection blueOcean={analysis.blueOcean} sectionNumber={num} />
-        </PremiumBlurOverlay>
-      ),
-    })
-  }
-
-  // 08 - Growth Hacking (dark)
-  if (analysis.growthHacking?.leap_loop || analysis.growthHacking?.scale_loop) {
-    const num = String(sectionNum++).padStart(2, '0')
-    sections.push({
-      id: 'growth-hacking',
-      title: 'Growth Hacking',
-      variant: 'dark',
-      component: (
-        <PremiumBlurOverlay isBlurred={isBlurred} isDark>
-          <GrowthHackingSection growthHacking={analysis.growthHacking} sectionNumber={num} />
-        </PremiumBlurOverlay>
-      ),
-    })
-  }
-
-  // 09 - Scenarios
-  if (analysis.scenarios) {
-    const num = String(sectionNum++).padStart(2, '0')
-    sections.push({
-      id: 'scenarios',
-      title: 'Cenários',
-      component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <ScenariosSection scenarios={analysis.scenarios} sectionNumber={num} />
-        </PremiumBlurOverlay>
-      ),
-    })
-  }
-
-  // 10 - OKRs
-  const hasPlan90Days = (analysis.okrs?.plan_90_days?.length > 0 || analysis.okrs?.plan90Days?.length > 0)
+  // ============================================
+  // PARTE III: COMO CHEGAR LA? (Execution Planning)
+  // Frameworks: OKRs, Growth Hacking, BSC
+  // ============================================
+  const hasPlan90Days = analysis.okrs?.plan_90_days?.length > 0 || analysis.okrs?.plan90Days?.length > 0
   const hasQuarters = analysis.okrs?.quarters?.length > 0
-  if (hasPlan90Days || hasQuarters) {
-    const num = String(sectionNum++).padStart(2, '0')
+  const hasOKRs = hasPlan90Days || hasQuarters
+  const hasGrowthHacking = analysis.growthHacking?.leap_loop || analysis.growthHacking?.scale_loop
+  const hasBSC = analysis.bsc?.financial?.length > 0 || analysis.bsc?.customer?.length > 0
+  const hasParte3 = hasOKRs || hasGrowthHacking || hasBSC
+
+  if (hasParte3) {
     sections.push({
-      id: 'okrs',
-      title: hasPlan90Days ? 'Plano 90 Dias' : 'OKRs',
+      id: 'parte-3',
+      title: 'Parte III',
+      variant: STRATEGIC_PARTS.parte3.variant,
       component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <OKRsSection okrs={analysis.okrs} sectionNumber={num} />
-        </PremiumBlurOverlay>
+        <StrategicPartDivider
+          partNumber={STRATEGIC_PARTS.parte3.number}
+          title={STRATEGIC_PARTS.parte3.title}
+          subtitle={STRATEGIC_PARTS.parte3.subtitle}
+          narrative={narratives.parte_3_como_chegar_la}
+          icon={STRATEGIC_PARTS.parte3.icon}
+          variant={STRATEGIC_PARTS.parte3.variant}
+        />
       ),
     })
+
+    // OKRs
+    if (hasOKRs) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'okrs',
+        title: hasPlan90Days ? 'Plano 90 Dias' : 'OKRs',
+        component: <OKRsSection okrs={analysis.okrs} sectionNumber={num} />,
+      })
+    }
+
+    // Growth Hacking (dark)
+    if (hasGrowthHacking) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'growth-hacking',
+        title: 'Growth Hacking',
+        variant: 'dark',
+        component: <GrowthHackingSection growthHacking={analysis.growthHacking} sectionNumber={num} />,
+      })
+    }
+
+    // BSC
+    if (hasBSC) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'bsc',
+        title: 'BSC',
+        component: <BSCSection bsc={analysis.bsc} sectionNumber={num} />,
+      })
+    }
   }
 
-  // 11 - BSC
-  if (analysis.bsc?.financial?.length > 0 || analysis.bsc?.customer?.length > 0) {
-    const num = String(sectionNum++).padStart(2, '0')
-    sections.push({
-      id: 'bsc',
-      title: 'BSC',
-      component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <BSCSection bsc={analysis.bsc} sectionNumber={num} />
-        </PremiumBlurOverlay>
-      ),
-    })
-  }
+  // ============================================
+  // PARTE IV: O QUE FAZER AGORA? (Immediate Actions)
+  // Frameworks: Scenarios, Decision Matrix
+  // ============================================
+  const hasScenarios = analysis.scenarios
+  const hasDecision = analysis.decisionMatrix
+  const hasParte4 = hasScenarios || hasDecision
 
-  // 12 - Decision Matrix
-  if (analysis.decisionMatrix) {
-    const num = String(sectionNum++).padStart(2, '0')
+  if (hasParte4) {
     sections.push({
-      id: 'decision',
-      title: 'Decisão',
+      id: 'parte-4',
+      title: 'Parte IV',
+      variant: STRATEGIC_PARTS.parte4.variant,
       component: (
-        <PremiumBlurOverlay isBlurred={isBlurred}>
-          <DecisionMatrixSection matrix={analysis.decisionMatrix} sectionNumber={num} />
-        </PremiumBlurOverlay>
+        <StrategicPartDivider
+          partNumber={STRATEGIC_PARTS.parte4.number}
+          title={STRATEGIC_PARTS.parte4.title}
+          subtitle={STRATEGIC_PARTS.parte4.subtitle}
+          narrative={narratives.parte_4_o_que_fazer_agora}
+          icon={STRATEGIC_PARTS.parte4.icon}
+          variant={STRATEGIC_PARTS.parte4.variant}
+        />
       ),
     })
+
+    // Scenarios
+    if (hasScenarios) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'scenarios',
+        title: 'Cenários',
+        component: <ScenariosSection scenarios={analysis.scenarios} sectionNumber={num} />,
+      })
+    }
+
+    // Decision Matrix
+    if (hasDecision) {
+      const num = String(sectionNum++).padStart(2, '0')
+      sections.push({
+        id: 'decision',
+        title: 'Decisão',
+        component: <DecisionMatrixSection matrix={analysis.decisionMatrix} sectionNumber={num} />,
+      })
+    }
   }
 
   return sections
