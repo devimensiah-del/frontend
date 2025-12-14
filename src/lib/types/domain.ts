@@ -360,56 +360,6 @@ export interface Analysis {
 }
 
 // ============================================================================
-// Wizard Types
-// ============================================================================
-
-export interface ClarifyingQuestion {
-  id: string
-  question: string
-}
-
-export interface FrameworkStep {
-  step: number
-  code: string
-  name: string
-  description: string
-  questions: ClarifyingQuestion[]
-}
-
-export interface WizardStepSummary {
-  step: number
-  framework_code: string
-  framework_name: string
-  status: string
-  approved_at?: string
-}
-
-export interface WizardState {
-  analysis_id: string
-  current_step: number
-  total_steps: number
-  framework: FrameworkStep | null
-  step_status: 'pending' | 'generating' | 'generated' | 'approved' | 'failed'
-  output?: Record<string, unknown>
-  human_context?: string
-  human_answers?: Record<string, string>
-  previous_steps: WizardStepSummary[]
-  iteration_count: number
-  error_message?: string
-}
-
-export interface WizardSummary {
-  analysis_id: string
-  total_steps: number
-  completed_steps: number
-  frameworks: Array<{
-    code: string
-    name: string
-    status: string
-  }>
-}
-
-// ============================================================================
 // Framework Configuration Types
 // ============================================================================
 
@@ -425,6 +375,13 @@ export interface Framework {
   is_active: boolean
   created_at: string
   updated_at: string
+}
+
+// Framework metadata for step-by-step analysis (IAH-2)
+export interface FrameworkMeta {
+  code: string
+  name: string
+  guidance_text: string
 }
 
 // ============================================================================

@@ -74,13 +74,6 @@ export const adminService = {
     return response.data
   },
 
-  async generateAllSteps(analysisId: string): Promise<{ message: string }> {
-    const response = await api.post<{ message: string }>(
-      `/admin/analysis/${analysisId}/wizard/generate-all`
-    )
-    return response.data
-  },
-
   async updateVisibility(
     analysisId: string,
     data: { is_public?: boolean; is_visible_to_user?: boolean }

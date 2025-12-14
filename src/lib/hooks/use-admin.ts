@@ -104,21 +104,6 @@ export function useRetryAnalysis() {
   })
 }
 
-export function useGenerateAll() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (analysisId: string) => adminService.generateAllSteps(analysisId),
-    onSuccess: (_, analysisId) => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'analysis', analysisId] })
-      toast.success('Geração iniciada. Acompanhe o progresso.')
-    },
-    onError: () => {
-      toast.error('Erro ao iniciar geração')
-    },
-  })
-}
-
 export function useUpdateVisibility() {
   const queryClient = useQueryClient()
 
