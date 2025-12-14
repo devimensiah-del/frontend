@@ -5,8 +5,6 @@ import type {
   ChallengeCategory,
   ChallengeType,
   Analysis,
-  WizardState,
-  WizardSummary,
   Submission,
   User,
 } from './types'
@@ -185,59 +183,6 @@ export const challengesApi = {
 }
 
 // ============================================================================
-// Wizard API
-// ============================================================================
-
-export interface StartWizardRequest {
-  company_id: string
-  challenge_id: string
-}
-
-export interface StartWizardResponse {
-  analysis_id: string
-  message: string
-}
-
-export interface GenerateStepRequest {
-  human_context?: string
-  human_answers?: Record<string, string>
-}
-
-export interface RefineStepRequest {
-  feedback: string
-}
-
-export const wizardApi = {
-  // Start a new wizard (creates analysis)
-  start: (data: StartWizardRequest) =>
-    api.post<StartWizardResponse>('/wizard/start', data),
-
-  // Get current wizard state
-  getState: (analysisId: string) =>
-    api.get<WizardState>(`/analyses/${analysisId}/wizard`),
-
-  // Generate current step
-  generate: (analysisId: string, data?: GenerateStepRequest) =>
-    api.post<WizardState>(`/analyses/${analysisId}/wizard/generate`, data || {}),
-
-  // Approve current step
-  approve: (analysisId: string) =>
-    api.post<WizardState>(`/analyses/${analysisId}/wizard/approve`),
-
-  // Refine current step with feedback
-  refine: (analysisId: string, data: RefineStepRequest) =>
-    api.post<WizardState>(`/analyses/${analysisId}/wizard/refine`, data),
-
-  // Get wizard summary (all steps status)
-  getSummary: (analysisId: string) =>
-    api.get<WizardSummary>(`/analyses/${analysisId}/wizard/summary`),
-
-  // Admin: Generate all frameworks at once
-  generateAll: (analysisId: string) =>
-    api.post(`/admin/analyses/${analysisId}/wizard/generate-all`),
-}
-
-// ============================================================================
 // Analysis API
 // ============================================================================
 
@@ -344,9 +289,6 @@ export const adminApi = {
 
   generateAccessCode: (id: string) =>
     api.post<{ access_code: string }>(`/admin/analysis/${id}/access-code`),
-
-  generateAllSteps: (id: string) =>
-    api.post(`/admin/analysis/${id}/wizard/generate-all`),
 
   // Metrics
   getMetrics: () =>
