@@ -6,6 +6,7 @@ export * from './use-challenges'
 export * from './use-frameworks'
 export * from './use-report'
 export * from './use-admin'
+export * from './use-analysis-by-steps'
 
 // Utility Hooks
 export * from './use-media-query'

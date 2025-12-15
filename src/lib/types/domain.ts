@@ -377,6 +377,7 @@ export interface Analysis {
   access_code_created_at?: string
   framework_results?: FrameworkResults
   error_message?: string
+  wizard_mode?: boolean // true if created via step-by-step flow
   created_at: string
   updated_at: string
   completed_at?: string
@@ -405,6 +406,70 @@ export interface FrameworkMeta {
   code: string
   name: string
   guidance_text: string
+}
+
+// ============================================================================
+// Step-by-Step Analysis Types (IAH-3)
+// ============================================================================
+
+export type StepStatus = 'pending' | 'generating' | 'generated' | 'approved' | 'failed'
+
+export type FrameworkCode =
+  | 'challenge_refinement'
+  | 'pestel'
+  | 'porter'
+  | 'benchmarking'
+  | 'swot'
+  | 'swotcross'
+  | 'tam_sam_som'
+  | 'blue_ocean'
+  | 'growth_hacking'
+  | 'scenarios'
+  | 'decision_matrix'
+  | 'okrs'
+  | 'bsc'
+  | 'synthesis'
+
+export interface AnalysisStep {
+  id: string
+  analysis_id: string
+  framework_code: FrameworkCode
+  step_number: number
+  ai_output?: string | null
+  human_edited?: string | null
+  visible: boolean
+  status: StepStatus
+  generated_at?: string | null
+  approved_at?: string | null
+  created_at: string
+  updated_at: string
+  effective_output?: string | null
+  is_edited: boolean
+}
+
+export interface StartAnalysisResponse {
+  analysis_id: string
+  challenge_id: string
+  total_steps: number
+  current_step: number
+  steps: AnalysisStep[]
+}
+
+export interface ApproveResponse {
+  approved_step: AnalysisStep
+  next_step: AnalysisStep | null
+  is_complete: boolean
+  current_step: number
+  access_code?: string
+}
+
+export interface StepStateResponse {
+  analysis_id: string
+  current_step: number
+  total_steps: number
+  current_step_data: AnalysisStep | null
+  previous_steps: AnalysisStep[]
+  framework_meta: FrameworkMeta | null
 }
 
 // ============================================================================
