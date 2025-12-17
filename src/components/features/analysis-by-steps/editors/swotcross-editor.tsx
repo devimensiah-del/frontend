@@ -31,27 +31,27 @@ const DEFAULT_DATA: SWOTCrossAnalysis = {
 const QUADRANTS = [
   {
     key: 'so_strategies',
-    label: 'SO Strategies',
+    label: 'Estratégias FO',
     color: 'border-l-green-500',
-    description: 'Use Strengths to capitalize on Opportunities'
+    description: 'Usar Forças para capitalizar Oportunidades'
   },
   {
     key: 'wo_strategies',
-    label: 'WO Strategies',
+    label: 'Estratégias frO',
     color: 'border-l-blue-500',
-    description: 'Overcome Weaknesses by taking advantage of Opportunities'
+    description: 'Superar Fraquezas aproveitando Oportunidades'
   },
   {
     key: 'st_strategies',
-    label: 'ST Strategies',
+    label: 'Estratégias FA',
     color: 'border-l-orange-500',
-    description: 'Use Strengths to avoid or mitigate Threats'
+    description: 'Usar Forças para evitar ou mitigar Ameaças'
   },
   {
     key: 'wt_strategies',
-    label: 'WT Strategies',
+    label: 'Estratégias frA',
     color: 'border-l-red-500',
-    description: 'Minimize Weaknesses and avoid Threats'
+    description: 'Minimizar Fraquezas e evitar Ameaças'
   },
 ] as const
 
@@ -121,7 +121,7 @@ export function SWOTCrossEditor({ data, onChange, disabled = false }: SWOTCrossE
                 disabled={disabled}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add
+                Adicionar
               </Button>
             </div>
 
@@ -131,7 +131,7 @@ export function SWOTCrossEditor({ data, onChange, disabled = false }: SWOTCrossE
                   <Input
                     value={strategy}
                     onChange={(e) => updateStrategy(key, index, e.target.value)}
-                    placeholder={`Enter ${label} strategy...`}
+                    placeholder={`Edite a estratégia ${label}...`}
                     disabled={disabled}
                   />
                   <Button
@@ -147,7 +147,7 @@ export function SWOTCrossEditor({ data, onChange, disabled = false }: SWOTCrossE
               ))}
               {formData[key].length === 0 && (
                 <p className="text-sm text-text-tertiary italic">
-                  No {label.toLowerCase()} added yet
+                  Nenhuma {label.toLowerCase()} adicionada ainda
                 </p>
               )}
             </div>
@@ -158,12 +158,12 @@ export function SWOTCrossEditor({ data, onChange, disabled = false }: SWOTCrossE
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter SWOT Cross analysis summary..."
+          placeholder="Edite o resumo da análise SWOT Cross..."
           disabled={disabled}
           className="min-h-[160px]"
         />

@@ -22,10 +22,10 @@ const DEFAULT_DATA: BSCAnalysis = {
 }
 
 const PERSPECTIVES = [
-  { key: 'financial', label: 'Financial Perspective', color: 'border-l-yellow-500' },
-  { key: 'customer', label: 'Customer Perspective', color: 'border-l-blue-500' },
-  { key: 'internal_processes', label: 'Internal Processes Perspective', color: 'border-l-green-500' },
-  { key: 'learning_growth', label: 'Learning & Growth Perspective', color: 'border-l-purple-500' },
+  { key: 'financial', label: 'Perspectiva Financeira', color: 'border-l-yellow-500' },
+  { key: 'customer', label: 'Perspectiva do Cliente', color: 'border-l-blue-500' },
+  { key: 'internal_processes', label: 'Perspectiva de Processos Internos', color: 'border-l-green-500' },
+  { key: 'learning_growth', label: 'Perspectiva de Aprendizado & Crescimento', color: 'border-l-purple-500' },
 ] as const
 
 export function BSCEditor({ data, onChange, disabled = false }: BSCEditorProps) {
@@ -91,7 +91,7 @@ export function BSCEditor({ data, onChange, disabled = false }: BSCEditorProps) 
                 disabled={disabled}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add
+                Adicionar
               </Button>
             </div>
 
@@ -101,7 +101,7 @@ export function BSCEditor({ data, onChange, disabled = false }: BSCEditorProps) 
                   <Input
                     value={item}
                     onChange={(e) => updateItem(key, index, e.target.value)}
-                    placeholder={`Enter ${label.toLowerCase()} metric...`}
+                    placeholder={`Edite a métrica de ${label.toLowerCase()}...`}
                     disabled={disabled}
                   />
                   <Button
@@ -117,7 +117,7 @@ export function BSCEditor({ data, onChange, disabled = false }: BSCEditorProps) 
               ))}
               {formData[key].length === 0 && (
                 <p className="text-sm text-text-tertiary italic">
-                  No {label.toLowerCase()} metrics added yet
+                  Nenhuma métrica de {label.toLowerCase()} adicionada ainda
                 </p>
               )}
             </div>
@@ -128,12 +128,12 @@ export function BSCEditor({ data, onChange, disabled = false }: BSCEditorProps) 
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter Balanced Scorecard summary..."
+          placeholder="Edite o resumo do Balanced Scorecard..."
           disabled={disabled}
           className="min-h-[160px]"
         />

@@ -406,6 +406,7 @@ export interface FrameworkMeta {
   code: string
   name: string
   guidance_text: string
+  reflection_questions: string[]
 }
 
 // ============================================================================
@@ -470,6 +471,9 @@ export interface StepStateResponse {
   current_step_data: AnalysisStep | null
   previous_steps: AnalysisStep[]
   framework_meta: FrameworkMeta | null
+  challenge_description: string
+  challenge_category: string
+  challenge_type: string
 }
 
 // ============================================================================

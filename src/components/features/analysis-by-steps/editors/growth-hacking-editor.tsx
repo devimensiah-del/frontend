@@ -67,20 +67,20 @@ function LoopEditor({ loop, onChange, title, color, disabled }: LoopEditorProps)
       {/* Name and Type */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Loop Name</label>
+          <label className="block text-sm font-medium mb-2">Nome do Loop</label>
           <Input
             value={loop.name}
             onChange={(e) => onChange({ ...loop, name: e.target.value })}
-            placeholder="Enter loop name..."
+            placeholder="Edite o nome do loop..."
             disabled={disabled}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Loop Type</label>
+          <label className="block text-sm font-medium mb-2">Tipo de Loop</label>
           <Input
             value={loop.type}
             onChange={(e) => onChange({ ...loop, type: e.target.value })}
-            placeholder="Enter loop type..."
+            placeholder="Edite o tipo de loop..."
             disabled={disabled}
           />
         </div>
@@ -89,7 +89,7 @@ function LoopEditor({ loop, onChange, title, color, disabled }: LoopEditorProps)
       {/* Steps */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <label className="block text-sm font-medium">Steps</label>
+          <label className="block text-sm font-medium">Etapas</label>
           <Button
             type="button"
             variant="outline"
@@ -98,7 +98,7 @@ function LoopEditor({ loop, onChange, title, color, disabled }: LoopEditorProps)
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Step
+            Adicionar Etapa
           </Button>
         </div>
         <div className="space-y-3">
@@ -107,7 +107,7 @@ function LoopEditor({ loop, onChange, title, color, disabled }: LoopEditorProps)
               <Input
                 value={step}
                 onChange={(e) => updateStep(index, e.target.value)}
-                placeholder={`Step ${index + 1}...`}
+                placeholder={`Etapa ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -122,7 +122,7 @@ function LoopEditor({ loop, onChange, title, color, disabled }: LoopEditorProps)
             </div>
           ))}
           {loop.steps.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No steps added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma etapa adicionada ainda</p>
           )}
         </div>
       </div>
@@ -130,7 +130,7 @@ function LoopEditor({ loop, onChange, title, color, disabled }: LoopEditorProps)
       {/* Metrics */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <label className="block text-sm font-medium">Metrics</label>
+          <label className="block text-sm font-medium">Métricas</label>
           <Button
             type="button"
             variant="outline"
@@ -139,7 +139,7 @@ function LoopEditor({ loop, onChange, title, color, disabled }: LoopEditorProps)
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Metric
+            Adicionar Métrica
           </Button>
         </div>
         <div className="space-y-3">
@@ -148,7 +148,7 @@ function LoopEditor({ loop, onChange, title, color, disabled }: LoopEditorProps)
               <Input
                 value={metric}
                 onChange={(e) => updateMetric(index, e.target.value)}
-                placeholder={`Metric ${index + 1}...`}
+                placeholder={`Métrica ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -163,18 +163,18 @@ function LoopEditor({ loop, onChange, title, color, disabled }: LoopEditorProps)
             </div>
           ))}
           {loop.metrics.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No metrics added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma métrica adicionada ainda</p>
           )}
         </div>
       </div>
 
       {/* Bottleneck */}
       <div>
-        <label className="block text-sm font-medium mb-2">Bottleneck</label>
+        <label className="block text-sm font-medium mb-2">Gargalo</label>
         <Textarea
           value={loop.bottleneck}
           onChange={(e) => onChange({ ...loop, bottleneck: e.target.value })}
-          placeholder="Describe the main bottleneck in this loop..."
+          placeholder="Edite o principal gargalo deste loop..."
           disabled={disabled}
           className="min-h-[80px]"
         />
@@ -220,12 +220,12 @@ export function GrowthHackingEditor({ data, onChange, disabled = false }: Growth
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter Growth Hacking analysis summary..."
+          placeholder="Edite o resumo da análise de Growth Hacking..."
           disabled={disabled}
           className="min-h-[160px]"
         />

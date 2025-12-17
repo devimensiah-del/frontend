@@ -23,21 +23,21 @@ const DEFAULT_DATA: BenchmarkingAnalysis = {
 const SECTIONS = [
   {
     key: 'competitorsAnalyzed',
-    label: 'Competitors Analyzed',
-    placeholder: 'Enter competitor name...',
-    emptyText: 'No competitors added yet',
+    label: 'Concorrentes Analisados',
+    placeholder: 'Edite o nome do concorrente...',
+    emptyText: 'Nenhum concorrente adicionado ainda',
   },
   {
     key: 'performanceGaps',
-    label: 'Performance Gaps',
-    placeholder: 'Enter performance gap...',
-    emptyText: 'No performance gaps added yet',
+    label: 'Lacunas de Desempenho',
+    placeholder: 'Edite a lacuna de desempenho...',
+    emptyText: 'Nenhuma lacuna de desempenho adicionada ainda',
   },
   {
     key: 'bestPractices',
-    label: 'Best Practices',
-    placeholder: 'Enter best practice...',
-    emptyText: 'No best practices added yet',
+    label: 'Melhores Práticas',
+    placeholder: 'Edite a melhor prática...',
+    emptyText: 'Nenhuma melhor prática adicionada ainda',
   },
 ] as const
 
@@ -104,7 +104,7 @@ export function BenchmarkingEditor({
               disabled={disabled}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add
+              Adicionar
             </Button>
           </div>
 
@@ -138,12 +138,12 @@ export function BenchmarkingEditor({
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter benchmarking analysis summary..."
+          placeholder="Edite o resumo da análise de benchmarking..."
           disabled={disabled}
           className="min-h-[160px]"
         />

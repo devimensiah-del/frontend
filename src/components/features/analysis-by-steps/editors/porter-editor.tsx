@@ -80,7 +80,7 @@ export function PorterEditor({ data, onChange, disabled = false }: PorterEditorP
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-heading text-lg font-bold uppercase tracking-widest">
-            Competitive Forces
+            Forças Competitivas
           </h3>
           <Button
             type="button"
@@ -90,7 +90,7 @@ export function PorterEditor({ data, onChange, disabled = false }: PorterEditorP
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Force
+            Adicionar Força
           </Button>
         </div>
 
@@ -101,7 +101,7 @@ export function PorterEditor({ data, onChange, disabled = false }: PorterEditorP
           >
             <div className="flex justify-between items-start">
               <h4 className="font-heading text-sm font-bold uppercase tracking-widest">
-                Force {index + 1}
+                Força {index + 1}
               </h4>
               <Button
                 type="button"
@@ -117,19 +117,19 @@ export function PorterEditor({ data, onChange, disabled = false }: PorterEditorP
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-2">
-                  Force Name
+                  Nome da Força
                 </label>
                 <Input
                   value={force.force}
                   onChange={(e) => updateForce(index, 'force', e.target.value)}
-                  placeholder="e.g., Threat of New Entrants"
+                  placeholder="Edite o nome da força competitiva..."
                   disabled={disabled}
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-2">
-                  Intensity
+                  Intensidade
                 </label>
                 <Select
                   value={force.intensity}
@@ -152,12 +152,12 @@ export function PorterEditor({ data, onChange, disabled = false }: PorterEditorP
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest mb-2">
-                Description
+                Descrição
               </label>
               <Textarea
                 value={force.description}
                 onChange={(e) => updateForce(index, 'description', e.target.value)}
-                placeholder="Describe this competitive force..."
+                placeholder="Edite a descrição desta força competitiva..."
                 disabled={disabled}
                 className="min-h-[100px]"
               />
@@ -168,7 +168,7 @@ export function PorterEditor({ data, onChange, disabled = false }: PorterEditorP
         {formData.forces.length === 0 && (
           <div className="bg-surface-paper border border-line p-8 text-center">
             <p className="text-sm text-text-tertiary italic">
-              No forces added yet. Click &quot;Add Force&quot; to begin.
+              Nenhuma força adicionada ainda. Clique em &quot;Adicionar Força&quot; para começar.
             </p>
           </div>
         )}
@@ -177,12 +177,12 @@ export function PorterEditor({ data, onChange, disabled = false }: PorterEditorP
       {/* Overall Attractiveness */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Overall Market Attractiveness
+          Atratividade Geral do Mercado
         </label>
         <Input
           value={formData.overallAttractiveness}
           onChange={(e) => handleChange({ ...formData, overallAttractiveness: e.target.value })}
-          placeholder="e.g., Moderately Attractive"
+          placeholder="Edite a atratividade geral do mercado..."
           disabled={disabled}
         />
       </div>
@@ -190,12 +190,12 @@ export function PorterEditor({ data, onChange, disabled = false }: PorterEditorP
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter Porter's analysis summary..."
+          placeholder="Edite o resumo da análise de Porter..."
           disabled={disabled}
           className="min-h-[160px]"
         />

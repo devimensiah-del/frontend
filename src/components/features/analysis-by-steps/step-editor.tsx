@@ -99,6 +99,8 @@ export function StepEditor({ step, onContentChange, disabled }: StepEditorProps)
   }
 
   const frameworkName = FRAMEWORK_NAMES[step.framework_code] || step.framework_code
+  const isGenerating = step.status === 'generating'
+  const isFailed = step.status === 'failed'
 
   return (
     <div className="bg-white border border-line p-4 lg:p-6">
@@ -114,17 +116,34 @@ export function StepEditor({ step, onContentChange, disabled }: StepEditorProps)
         </div>
         {step.is_edited && (
           <span className="px-2 py-0.5 text-xs font-medium bg-gold-100 text-gold-700 rounded">
-            Editado
+            Editado por humano
           </span>
         )}
       </div>
 
       {/* Editor Content */}
-      <Editor
-        data={data}
-        onChange={handleChange}
-        disabled={disabled}
-      />
+      {isGenerating ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-gray-200 border-t-gold-500 rounded-full animate-spin" />
+          </div>
+          <p className="mt-4 text-sm text-muted-foreground">Gerando análise com IA...</p>
+        </div>
+      ) : isFailed ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center mb-4">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <p className="text-sm text-error font-medium">Erro ao gerar análise</p>
+          <p className="text-xs text-muted-foreground mt-2">Use o botão "Tentar Novamente" abaixo</p>
+        </div>
+      ) : (
+        <Editor
+          data={data}
+          onChange={handleChange}
+          disabled={disabled}
+        />
+      )}
     </div>
   )
 }

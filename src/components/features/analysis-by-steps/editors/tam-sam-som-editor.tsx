@@ -23,9 +23,9 @@ const DEFAULT_DATA: TamSamSomAnalysis = {
 }
 
 const MARKET_SIZES = [
-  { key: 'tam', label: 'TAM (Total Addressable Market)', description: 'Total market demand' },
-  { key: 'sam', label: 'SAM (Serviceable Addressable Market)', description: 'Target market segment' },
-  { key: 'som', label: 'SOM (Serviceable Obtainable Market)', description: 'Realistic capture' },
+  { key: 'tam', label: 'TAM (Mercado Total Endereçável)', description: 'Demanda total do mercado' },
+  { key: 'sam', label: 'SAM (Mercado Endereçável Atendível)', description: 'Segmento de mercado alvo' },
+  { key: 'som', label: 'SOM (Mercado Obtenível Atendível)', description: 'Captura realista' },
 ] as const
 
 export function TamSamSomEditor({ data, onChange, disabled = false }: TamSamSomEditorProps) {
@@ -87,7 +87,7 @@ export function TamSamSomEditor({ data, onChange, disabled = false }: TamSamSomE
                   [key]: e.target.value,
                 })
               }
-              placeholder="e.g., $500M USD"
+              placeholder="Edite o valor do mercado..."
               disabled={disabled}
             />
           </div>
@@ -97,12 +97,12 @@ export function TamSamSomEditor({ data, onChange, disabled = false }: TamSamSomE
       {/* CAGR */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          CAGR (Compound Annual Growth Rate)
+          CAGR (Taxa de Crescimento Anual Composta)
         </label>
         <Input
           value={formData.cagr}
           onChange={(e) => handleChange({ ...formData, cagr: e.target.value })}
-          placeholder="e.g., 12.5%"
+          placeholder="Edite o CAGR..."
           disabled={disabled}
         />
       </div>
@@ -111,7 +111,7 @@ export function TamSamSomEditor({ data, onChange, disabled = false }: TamSamSomE
       <div className="bg-surface-paper border border-line p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-heading text-lg font-bold uppercase tracking-widest">
-            Assumptions
+            Premissas
           </h3>
           <Button
             type="button"
@@ -121,7 +121,7 @@ export function TamSamSomEditor({ data, onChange, disabled = false }: TamSamSomE
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add
+            Adicionar
           </Button>
         </div>
 
@@ -131,7 +131,7 @@ export function TamSamSomEditor({ data, onChange, disabled = false }: TamSamSomE
               <Input
                 value={assumption}
                 onChange={(e) => updateAssumption(index, e.target.value)}
-                placeholder="Enter assumption..."
+                placeholder="Edite a premissa..."
                 disabled={disabled}
               />
               <Button
@@ -146,7 +146,7 @@ export function TamSamSomEditor({ data, onChange, disabled = false }: TamSamSomE
             </div>
           ))}
           {formData.assumptions.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No assumptions added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma premissa adicionada ainda</p>
           )}
         </div>
       </div>
@@ -154,12 +154,12 @@ export function TamSamSomEditor({ data, onChange, disabled = false }: TamSamSomE
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter TAM-SAM-SOM analysis summary..."
+          placeholder="Edite o resumo da análise TAM-SAM-SOM..."
           disabled={disabled}
           className="min-h-[160px]"
         />

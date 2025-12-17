@@ -8,12 +8,13 @@ import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   StepProgress,
-  GuidanceText,
   StepVisibilityToggle,
   StepActions,
   PreviousSteps,
   StepEditor,
   EditWarningBanner,
+  ChallengeContextCard,
+  ReflectionQuestionsCard,
 } from '@/components/features/analysis-by-steps'
 import {
   useStepState,
@@ -54,12 +55,12 @@ export default function AnalysisByStepsPage() {
     }
   }, [currentStepNumber, selectedStepNumber])
 
-  // Auto-generate step 0 when starting new analysis
+  // Auto-generate step 0 when starting new analysis OR when landing on a pending step
   useEffect(() => {
-    if (currentStep && currentStep.step_number === 0 && currentStep.status === 'pending') {
-      generateStep.mutate({ analysisId, stepNumber: 0 })
+    if (currentStep && currentStep.status === 'pending' && !generateStep.isPending) {
+      generateStep.mutate({ analysisId, stepNumber: currentStep.step_number })
     }
-  }, [currentStep, analysisId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentStep?.id, currentStep?.status]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Determine which step to display
   const displayedStep = selectedStepNumber !== null && allSteps
@@ -216,21 +217,41 @@ export default function AnalysisByStepsPage() {
   }
 
   const hasContent = !!(displayedStep.ai_output || displayedStep.human_edited)
-  const canGenerate = displayedStep.step_number === 0 || previousSteps.every(s => s.status === 'approved')
   const isGenerating = displayedStep.status === 'generating' || generateStep.isPending
+  const isFailed = displayedStep.status === 'failed'
+
+  const progressPercentage = currentStepNumber > 0 ? Math.round((currentStepNumber / 14) * 100) : 0
 
   return (
-    <div className="container max-w-5xl py-6 space-y-6">
+    <div className="container max-w-7xl py-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => router.back()}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+          </Button>
+          <div>
+            <h1 className="text-2xl font-medium text-navy-900">Análise por Etapas</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Etapa {currentStepNumber} de 14 ({progressPercentage}%)
+            </p>
+          </div>
+        </div>
         <Link href={`/report/${analysisId}`} target="_blank">
           <Button variant="outline">
             <FileText className="mr-2 h-4 w-4" /> Ver Relatório
           </Button>
         </Link>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="bg-white border border-line p-4">
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-gold-500 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
       </div>
 
       {/* Progress with Pills Navigation */}
@@ -250,54 +271,80 @@ export default function AnalysisByStepsPage() {
         />
       )}
 
-      {/* Guidance Text */}
-      {frameworkMeta && (
-        <GuidanceText text={frameworkMeta.guidance_text} />
-      )}
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Context Cards */}
+        <div className="space-y-6">
+          {/* Challenge Context */}
+          {state?.challenge_description && (
+            <ChallengeContextCard
+              description={state.challenge_description}
+              category={state.challenge_category}
+              type={state.challenge_type}
+            />
+          )}
 
-      {/* Step Editor with Animation */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={displayedStep.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="space-y-3"
-        >
-          <StepEditor
-            step={displayedStep}
-            onContentChange={handleContentChange}
-            disabled={isGenerating}
-          />
+          {/* Reflection Questions */}
+          {frameworkMeta && frameworkMeta.reflection_questions?.length > 0 && (
+            <ReflectionQuestionsCard
+              guidanceText={frameworkMeta.guidance_text}
+              questions={frameworkMeta.reflection_questions}
+            />
+          )}
+
+          {/* Previous Steps Accordion */}
+          {previousSteps.length > 0 && (
+            <div className="bg-white border border-line p-4">
+              <h3 className="text-sm font-medium uppercase tracking-wide text-navy-900 mb-3">
+                Etapas Anteriores
+              </h3>
+              <PreviousSteps steps={previousSteps} />
+            </div>
+          )}
+        </div>
+
+        {/* Right Column - Editor and Actions */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Step Editor with Animation */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={displayedStep.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <StepEditor
+                step={displayedStep}
+                onContentChange={handleContentChange}
+                disabled={isGenerating}
+              />
+            </motion.div>
+          </AnimatePresence>
 
           {/* Visibility Toggle */}
-          <StepVisibilityToggle
-            visible={displayedStep.visible}
-            onChange={handleVisibilityChange}
-            disabled={toggleVisibility.isPending}
+          <div className="bg-white border border-line p-4">
+            <StepVisibilityToggle
+              visible={displayedStep.visible}
+              onChange={handleVisibilityChange}
+              disabled={toggleVisibility.isPending}
+            />
+          </div>
+
+          {/* Actions */}
+          <StepActions
+            hasContent={hasContent}
+            hasChanges={hasChanges}
+            isViewingPreviousStep={isViewingPreviousStep}
+            onRetry={handleGenerate}
+            onSave={handleSave}
+            onApprove={handleApprove}
+            isSaving={saveEdit.isPending}
+            isApproving={approveStep.isPending}
+            isFailed={isFailed}
           />
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Actions */}
-      <StepActions
-        hasContent={hasContent}
-        hasChanges={hasChanges}
-        canGenerate={canGenerate}
-        isViewingPreviousStep={isViewingPreviousStep}
-        onGenerate={handleGenerate}
-        onSave={handleSave}
-        onApprove={handleApprove}
-        isGenerating={isGenerating}
-        isSaving={saveEdit.isPending}
-        isApproving={approveStep.isPending}
-      />
-
-      {/* Previous Steps */}
-      {previousSteps.length > 0 && (
-        <PreviousSteps steps={previousSteps} />
-      )}
+        </div>
+      </div>
     </div>
   )
 }

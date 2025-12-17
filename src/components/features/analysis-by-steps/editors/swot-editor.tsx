@@ -35,10 +35,10 @@ const DEFAULT_DATA: SWOTAnalysis = {
 }
 
 const QUADRANTS = [
-  { key: 'strengths', label: 'Strengths', color: 'border-l-green-500' },
-  { key: 'weaknesses', label: 'Weaknesses', color: 'border-l-red-500' },
-  { key: 'opportunities', label: 'Opportunities', color: 'border-l-blue-500' },
-  { key: 'threats', label: 'Threats', color: 'border-l-orange-500' },
+  { key: 'strengths', label: 'Forças', color: 'border-l-green-500' },
+  { key: 'weaknesses', label: 'Fraquezas', color: 'border-l-red-500' },
+  { key: 'opportunities', label: 'Oportunidades', color: 'border-l-blue-500' },
+  { key: 'threats', label: 'Ameaças', color: 'border-l-orange-500' },
 ] as const
 
 const CONFIDENCE_OPTIONS = ['High', 'Medium', 'Low'] as const
@@ -109,7 +109,7 @@ export function SWOTEditor({ data, onChange, disabled = false }: SWOTEditorProps
                 disabled={disabled}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add
+                Adicionar
               </Button>
             </div>
 
@@ -130,12 +130,12 @@ export function SWOTEditor({ data, onChange, disabled = false }: SWOTEditorProps
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-widest mb-2">
-                      Content
+                      Conteúdo
                     </label>
                     <Textarea
                       value={item.content}
                       onChange={(e) => updateItem(key, index, 'content', e.target.value)}
-                      placeholder="Enter content..."
+                      placeholder="Edite o conteúdo..."
                       disabled={disabled}
                       className="min-h-[80px]"
                     />
@@ -144,7 +144,7 @@ export function SWOTEditor({ data, onChange, disabled = false }: SWOTEditorProps
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-widest mb-2">
-                        Confidence
+                        Confiança
                       </label>
                       <Select
                         value={item.confidence}
@@ -166,12 +166,12 @@ export function SWOTEditor({ data, onChange, disabled = false }: SWOTEditorProps
 
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-widest mb-2">
-                        Source
+                        Fonte
                       </label>
                       <Input
                         value={item.source}
                         onChange={(e) => updateItem(key, index, 'source', e.target.value)}
-                        placeholder="Source..."
+                        placeholder="Edite a fonte..."
                         disabled={disabled}
                       />
                     </div>
@@ -180,7 +180,7 @@ export function SWOTEditor({ data, onChange, disabled = false }: SWOTEditorProps
               ))}
               {formData[key].length === 0 && (
                 <p className="text-sm text-text-tertiary italic">
-                  No {label.toLowerCase()} items added yet
+                  Nenhum item de {label.toLowerCase()} adicionado ainda
                 </p>
               )}
             </div>
@@ -191,12 +191,12 @@ export function SWOTEditor({ data, onChange, disabled = false }: SWOTEditorProps
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter SWOT analysis summary..."
+          placeholder="Edite o resumo da análise SWOT..."
           disabled={disabled}
           className="min-h-[160px]"
         />

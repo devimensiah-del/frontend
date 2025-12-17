@@ -24,11 +24,11 @@ const DEFAULT_DATA: PESTELAnalysis = {
 }
 
 const CATEGORIES = [
-  { key: 'political', label: 'Political', color: 'border-l-purple-500' },
-  { key: 'economic', label: 'Economic', color: 'border-l-blue-500' },
+  { key: 'political', label: 'Político', color: 'border-l-purple-500' },
+  { key: 'economic', label: 'Econômico', color: 'border-l-blue-500' },
   { key: 'social', label: 'Social', color: 'border-l-green-500' },
-  { key: 'technological', label: 'Technological', color: 'border-l-orange-500' },
-  { key: 'environmental', label: 'Environmental', color: 'border-l-teal-500' },
+  { key: 'technological', label: 'Tecnológico', color: 'border-l-orange-500' },
+  { key: 'environmental', label: 'Ambiental', color: 'border-l-teal-500' },
   { key: 'legal', label: 'Legal', color: 'border-l-red-500' },
 ] as const
 
@@ -95,7 +95,7 @@ export function PESTELEditor({ data, onChange, disabled = false }: PESTELEditorP
                 disabled={disabled}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add
+                Adicionar
               </Button>
             </div>
 
@@ -105,7 +105,7 @@ export function PESTELEditor({ data, onChange, disabled = false }: PESTELEditorP
                   <Input
                     value={item}
                     onChange={(e) => updateItem(key, index, e.target.value)}
-                    placeholder={`Enter ${label.toLowerCase()} factor...`}
+                    placeholder={`Fator ${label.toLowerCase()}...`}
                     disabled={disabled}
                   />
                   <Button
@@ -121,7 +121,7 @@ export function PESTELEditor({ data, onChange, disabled = false }: PESTELEditorP
               ))}
               {formData[key].length === 0 && (
                 <p className="text-sm text-text-tertiary italic">
-                  No {label.toLowerCase()} factors added yet
+                  Nenhum fator {label.toLowerCase()} adicionado ainda
                 </p>
               )}
             </div>
@@ -132,12 +132,12 @@ export function PESTELEditor({ data, onChange, disabled = false }: PESTELEditorP
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter PESTEL analysis summary..."
+          placeholder="Edite o resumo da análise PESTEL..."
           disabled={disabled}
           className="min-h-[160px]"
         />

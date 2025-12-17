@@ -97,12 +97,12 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
       {/* Executive Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Executive Summary
+          Sumário Executivo
         </label>
         <Textarea
           value={formData.executiveSummary}
           onChange={(e) => handleChange({ ...formData, executiveSummary: e.target.value })}
-          placeholder="Enter comprehensive executive summary..."
+          placeholder="Edite o sumário executivo abrangente..."
           disabled={disabled}
           className="min-h-[200px]"
         />
@@ -112,7 +112,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Key Findings
+            Descobertas-Chave
           </label>
           <Button
             type="button"
@@ -122,7 +122,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Finding
+            Adicionar Descoberta
           </Button>
         </div>
         <div className="space-y-3">
@@ -131,7 +131,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
               <Input
                 value={finding}
                 onChange={(e) => updateKeyFinding(index, e.target.value)}
-                placeholder={`Key finding ${index + 1}...`}
+                placeholder={`Descoberta-chave ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -146,7 +146,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
             </div>
           ))}
           {formData.keyFindings.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No key findings added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma descoberta-chave adicionada ainda</p>
           )}
         </div>
       </div>
@@ -155,7 +155,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Strategic Priorities
+            Prioridades Estratégicas
           </label>
           <Button
             type="button"
@@ -165,7 +165,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Priority
+            Adicionar Prioridade
           </Button>
         </div>
         <div className="space-y-3">
@@ -174,7 +174,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
               <Input
                 value={priority}
                 onChange={(e) => updateStrategicPriority(index, e.target.value)}
-                placeholder={`Strategic priority ${index + 1}...`}
+                placeholder={`Prioridade estratégica ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -189,7 +189,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
             </div>
           ))}
           {formData.strategicPriorities.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No strategic priorities added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma prioridade estratégica adicionada ainda</p>
           )}
         </div>
       </div>
@@ -198,7 +198,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Roadmap
+            Roteiro
           </label>
           <Button
             type="button"
@@ -208,7 +208,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Item
+            Adicionar Item
           </Button>
         </div>
         <div className="space-y-3">
@@ -217,7 +217,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
               <Input
                 value={item}
                 onChange={(e) => updateRoadmapItem(index, e.target.value)}
-                placeholder={`Roadmap item ${index + 1}...`}
+                placeholder={`Item do roteiro ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -232,7 +232,7 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
             </div>
           ))}
           {formData.roadmap.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No roadmap items added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhum item do roteiro adicionado ainda</p>
           )}
         </div>
       </div>
@@ -240,12 +240,12 @@ export function SynthesisEditor({ data, onChange, disabled = false }: SynthesisE
       {/* Overall Recommendation */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Overall Recommendation
+          Recomendação Geral
         </label>
         <Textarea
           value={formData.overallRecommendation}
           onChange={(e) => handleChange({ ...formData, overallRecommendation: e.target.value })}
-          placeholder="Enter overall strategic recommendation..."
+          placeholder="Edite a recomendação estratégica geral..."
           disabled={disabled}
           className="min-h-[160px]"
         />

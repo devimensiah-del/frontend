@@ -63,16 +63,16 @@ function ScenarioCard({ scenario, onChange, title, color, disabled }: ScenarioCa
       {/* Name and Probability */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Name</label>
+          <label className="block text-sm font-medium mb-2">Nome</label>
           <Input
             value={scenario.name}
             onChange={(e) => onChange({ ...scenario, name: e.target.value })}
-            placeholder="Scenario name..."
+            placeholder="Edite o nome do cenário..."
             disabled={disabled}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Probability (%)</label>
+          <label className="block text-sm font-medium mb-2">Probabilidade (%)</label>
           <Input
             type="number"
             min="0"
@@ -87,11 +87,11 @@ function ScenarioCard({ scenario, onChange, title, color, disabled }: ScenarioCa
 
       {/* Description */}
       <div>
-        <label className="block text-sm font-medium mb-2">Description</label>
+        <label className="block text-sm font-medium mb-2">Descrição</label>
         <Textarea
           value={scenario.description}
           onChange={(e) => onChange({ ...scenario, description: e.target.value })}
-          placeholder="Describe this scenario..."
+          placeholder="Edite a descrição deste cenário..."
           disabled={disabled}
           className="min-h-[100px]"
         />
@@ -100,7 +100,7 @@ function ScenarioCard({ scenario, onChange, title, color, disabled }: ScenarioCa
       {/* Required Actions */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <label className="block text-sm font-medium">Required Actions</label>
+          <label className="block text-sm font-medium">Ações Requeridas</label>
           <Button
             type="button"
             variant="outline"
@@ -109,7 +109,7 @@ function ScenarioCard({ scenario, onChange, title, color, disabled }: ScenarioCa
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Action
+            Adicionar Ação
           </Button>
         </div>
         <div className="space-y-3">
@@ -118,7 +118,7 @@ function ScenarioCard({ scenario, onChange, title, color, disabled }: ScenarioCa
               <Input
                 value={action}
                 onChange={(e) => updateAction(index, e.target.value)}
-                placeholder={`Action ${index + 1}...`}
+                placeholder={`Ação ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -133,7 +133,7 @@ function ScenarioCard({ scenario, onChange, title, color, disabled }: ScenarioCa
             </div>
           ))}
           {scenario.required_actions.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No required actions added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma ação requerida adicionada ainda</p>
           )}
         </div>
       </div>
@@ -198,21 +198,21 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
         <ScenarioCard
           scenario={formData.optimistic}
           onChange={(optimistic) => handleChange({ ...formData, optimistic })}
-          title="Optimistic Scenario"
+          title="Cenário Otimista"
           color="border-l-green-500"
           disabled={disabled}
         />
         <ScenarioCard
           scenario={formData.realist}
           onChange={(realist) => handleChange({ ...formData, realist })}
-          title="Realist Scenario"
+          title="Cenário Realista"
           color="border-l-blue-500"
           disabled={disabled}
         />
         <ScenarioCard
           scenario={formData.pessimistic}
           onChange={(pessimistic) => handleChange({ ...formData, pessimistic })}
-          title="Pessimistic Scenario"
+          title="Cenário Pessimista"
           color="border-l-red-500"
           disabled={disabled}
         />
@@ -222,7 +222,7 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Mitigation Tactics
+            Táticas de Mitigação
           </label>
           <Button
             type="button"
@@ -232,7 +232,7 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Tactic
+            Adicionar Tática
           </Button>
         </div>
         <div className="space-y-3">
@@ -241,7 +241,7 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
               <Input
                 value={tactic}
                 onChange={(e) => updateMitigationTactic(index, e.target.value)}
-                placeholder={`Mitigation tactic ${index + 1}...`}
+                placeholder={`Tática de mitigação ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -256,7 +256,7 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
             </div>
           ))}
           {formData.mitigation_tactics.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No mitigation tactics added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma tática de mitigação adicionada ainda</p>
           )}
         </div>
       </div>
@@ -265,7 +265,7 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Early Warning Signals
+            Sinais de Alerta Precoce
           </label>
           <Button
             type="button"
@@ -275,7 +275,7 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Signal
+            Adicionar Sinal
           </Button>
         </div>
         <div className="space-y-3">
@@ -284,7 +284,7 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
               <Input
                 value={signal}
                 onChange={(e) => updateWarningSignal(index, e.target.value)}
-                placeholder={`Warning signal ${index + 1}...`}
+                placeholder={`Sinal de alerta ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -299,7 +299,7 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
             </div>
           ))}
           {formData.early_warning_signals.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No early warning signals added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhum sinal de alerta precoce adicionado ainda</p>
           )}
         </div>
       </div>
@@ -307,12 +307,12 @@ export function ScenariosEditor({ data, onChange, disabled = false }: ScenariosE
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter scenarios analysis summary..."
+          placeholder="Edite o resumo da análise de cenários..."
           disabled={disabled}
           className="min-h-[160px]"
         />

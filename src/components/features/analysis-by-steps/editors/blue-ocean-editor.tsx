@@ -23,10 +23,10 @@ const DEFAULT_DATA: BlueOceanAnalysis = {
 }
 
 const QUADRANTS = [
-  { key: 'eliminate', label: 'Eliminate', color: 'border-l-red-500', description: 'Factors to eliminate' },
-  { key: 'reduce', label: 'Reduce', color: 'border-l-orange-500', description: 'Factors to reduce below industry standard' },
-  { key: 'raise', label: 'Raise', color: 'border-l-green-500', description: 'Factors to raise above industry standard' },
-  { key: 'create', label: 'Create', color: 'border-l-blue-500', description: 'Factors to create that industry has never offered' },
+  { key: 'eliminate', label: 'Eliminar', color: 'border-l-red-500', description: 'Fatores a eliminar' },
+  { key: 'reduce', label: 'Reduzir', color: 'border-l-orange-500', description: 'Fatores a reduzir abaixo do padrão da indústria' },
+  { key: 'raise', label: 'Elevar', color: 'border-l-green-500', description: 'Fatores a elevar acima do padrão da indústria' },
+  { key: 'create', label: 'Criar', color: 'border-l-blue-500', description: 'Fatores a criar que a indústria nunca ofereceu' },
 ] as const
 
 export function BlueOceanEditor({ data, onChange, disabled = false }: BlueOceanEditorProps) {
@@ -95,7 +95,7 @@ export function BlueOceanEditor({ data, onChange, disabled = false }: BlueOceanE
                 disabled={disabled}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add
+                Adicionar
               </Button>
             </div>
 
@@ -105,7 +105,7 @@ export function BlueOceanEditor({ data, onChange, disabled = false }: BlueOceanE
                   <Input
                     value={item}
                     onChange={(e) => updateItem(key, index, e.target.value)}
-                    placeholder={`Enter factor to ${label.toLowerCase()}...`}
+                    placeholder={`Edite o fator a ${label.toLowerCase()}...`}
                     disabled={disabled}
                   />
                   <Button
@@ -121,7 +121,7 @@ export function BlueOceanEditor({ data, onChange, disabled = false }: BlueOceanE
               ))}
               {formData[key].length === 0 && (
                 <p className="text-sm text-text-tertiary italic">
-                  No factors to {label.toLowerCase()} added yet
+                  Nenhum fator a {label.toLowerCase()} adicionado ainda
                 </p>
               )}
             </div>
@@ -132,12 +132,12 @@ export function BlueOceanEditor({ data, onChange, disabled = false }: BlueOceanE
       {/* New Value Curve */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          New Value Curve
+          Nova Curva de Valor
         </label>
         <Textarea
           value={formData.newValueCurve}
           onChange={(e) => handleChange({ ...formData, newValueCurve: e.target.value })}
-          placeholder="Describe the new value curve and how it differs from competitors..."
+          placeholder="Edite a nova curva de valor e como ela difere dos concorrentes..."
           disabled={disabled}
           className="min-h-[120px]"
         />
@@ -146,12 +146,12 @@ export function BlueOceanEditor({ data, onChange, disabled = false }: BlueOceanE
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter Blue Ocean analysis summary..."
+          placeholder="Edite o resumo da análise Blue Ocean..."
           disabled={disabled}
           className="min-h-[160px]"
         />

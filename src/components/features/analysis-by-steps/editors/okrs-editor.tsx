@@ -129,7 +129,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            90-Day Plan (Monthly OKRs)
+            Plano de 90 Dias (OKRs Mensais)
           </label>
           <Button
             type="button"
@@ -139,7 +139,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Month
+            Adicionar Mês
           </Button>
         </div>
 
@@ -147,7 +147,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
           {plan.map((okr, okrIndex) => (
             <div key={okrIndex} className="border border-line p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-semibold text-lg">Month {okrIndex + 1}</h4>
+                <h4 className="font-semibold text-lg">Mês {okrIndex + 1}</h4>
                 <Button
                   type="button"
                   variant="ghost"
@@ -162,20 +162,20 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
               {/* Month and Focus */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Month</label>
+                  <label className="block text-sm font-medium mb-2">Mês</label>
                   <Input
                     value={okr.month}
                     onChange={(e) => updateOKR(okrIndex, 'month', e.target.value)}
-                    placeholder="e.g., Month 1, January 2024"
+                    placeholder="Edite o mês..."
                     disabled={disabled}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Focus</label>
+                  <label className="block text-sm font-medium mb-2">Foco</label>
                   <Input
                     value={okr.focus}
                     onChange={(e) => updateOKR(okrIndex, 'focus', e.target.value)}
-                    placeholder="e.g., Customer Acquisition"
+                    placeholder="Edite o foco..."
                     disabled={disabled}
                   />
                 </div>
@@ -183,11 +183,11 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
 
               {/* Objective */}
               <div>
-                <label className="block text-sm font-medium mb-2">Objective</label>
+                <label className="block text-sm font-medium mb-2">Objetivo</label>
                 <Input
                   value={okr.objective}
                   onChange={(e) => updateOKR(okrIndex, 'objective', e.target.value)}
-                  placeholder="What do we want to achieve this month?"
+                  placeholder="Edite o objetivo deste mês..."
                   disabled={disabled}
                 />
               </div>
@@ -195,7 +195,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
               {/* Key Results */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm font-medium">Key Results</label>
+                  <label className="block text-sm font-medium">Resultados-Chave</label>
                   <Button
                     type="button"
                     variant="outline"
@@ -204,7 +204,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
                     disabled={disabled}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add KR
+                    Adicionar RC
                   </Button>
                 </div>
                 <div className="space-y-3">
@@ -213,7 +213,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
                       <Input
                         value={kr}
                         onChange={(e) => updateKeyResult(okrIndex, krIndex, e.target.value)}
-                        placeholder={`Key Result ${krIndex + 1}...`}
+                        placeholder={`Resultado-Chave ${krIndex + 1}...`}
                         disabled={disabled}
                       />
                       <Button
@@ -228,29 +228,29 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
                     </div>
                   ))}
                   {okr.key_results.length === 0 && (
-                    <p className="text-sm text-text-tertiary italic">No key results added yet</p>
+                    <p className="text-sm text-text-tertiary italic">Nenhum resultado-chave adicionado ainda</p>
                   )}
                 </div>
               </div>
 
               {/* Investment */}
               <div>
-                <label className="block text-sm font-medium mb-2">Investment</label>
+                <label className="block text-sm font-medium mb-2">Investimento</label>
                 <Input
                   value={okr.investment}
                   onChange={(e) => updateOKR(okrIndex, 'investment', e.target.value)}
-                  placeholder="e.g., R$ 50k"
+                  placeholder="Edite o investimento..."
                   disabled={disabled}
                 />
               </div>
 
               {/* Aligned Recommendation */}
               <div>
-                <label className="block text-sm font-medium mb-2">Aligned Recommendation</label>
+                <label className="block text-sm font-medium mb-2">Recomendação Alinhada</label>
                 <Textarea
                   value={okr.aligned_recommendation}
                   onChange={(e) => updateOKR(okrIndex, 'aligned_recommendation', e.target.value)}
-                  placeholder="How does this align with overall strategy?"
+                  placeholder="Edite como isso se alinha com a estratégia geral..."
                   disabled={disabled}
                   className="min-h-[80px]"
                 />
@@ -258,7 +258,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
             </div>
           ))}
           {plan.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No monthly OKRs added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhum OKR mensal adicionado ainda</p>
           )}
         </div>
       </div>
@@ -266,12 +266,12 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
       {/* Total Investment */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Total Investment
+          Investimento Total
         </label>
         <Input
           value={formData.total_investment || ''}
           onChange={(e) => handleChange({ ...formData, total_investment: e.target.value })}
-          placeholder="e.g., R$ 150k total over 90 days"
+          placeholder="Edite o investimento total..."
           disabled={disabled}
         />
       </div>
@@ -280,7 +280,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Success Metrics
+            Métricas de Sucesso
           </label>
           <Button
             type="button"
@@ -290,7 +290,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Metric
+            Adicionar Métrica
           </Button>
         </div>
         <div className="space-y-3">
@@ -299,7 +299,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
               <Input
                 value={metric}
                 onChange={(e) => updateSuccessMetric(index, e.target.value)}
-                placeholder={`Success metric ${index + 1}...`}
+                placeholder={`Métrica de sucesso ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -314,7 +314,7 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
             </div>
           ))}
           {metrics.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No success metrics added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma métrica de sucesso adicionada ainda</p>
           )}
         </div>
       </div>
@@ -322,12 +322,12 @@ export function OKRsEditor({ data, onChange, disabled = false }: OKRsEditorProps
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter OKRs analysis summary..."
+          placeholder="Edite o resumo da análise de OKRs..."
           disabled={disabled}
           className="min-h-[160px]"
         />

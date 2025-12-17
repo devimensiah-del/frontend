@@ -35,17 +35,17 @@ export function ChallengeRefinementEditor({ data, onChange, disabled = false }: 
     <div className="space-y-6">
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Refined Challenge Context
+          Contexto do Desafio Refinado
         </label>
         <Textarea
           value={formData.refined_context}
           onChange={(e) => handleChange({ ...formData, refined_context: e.target.value })}
-          placeholder="Enter refined and clarified business challenge context..."
+          placeholder="Descreva o desafio de negócio de forma clara e específica. Qual é o problema real a ser resolvido?"
           disabled={disabled}
           className="min-h-[240px]"
         />
         <p className="text-sm text-text-tertiary mt-3">
-          This refined context will be used by all subsequent frameworks to ensure consistent and focused analysis.
+          Este contexto refinado será usado por todos os frameworks subsequentes para garantir uma análise consistente e focada.
         </p>
       </div>
     </div>

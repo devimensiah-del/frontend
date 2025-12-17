@@ -136,7 +136,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Alternatives
+            Alternativas
           </label>
           <Button
             type="button"
@@ -146,7 +146,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Alternative
+            Adicionar Alternativa
           </Button>
         </div>
         <div className="space-y-3">
@@ -155,7 +155,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
               <Input
                 value={alt}
                 onChange={(e) => updateAlternative(index, e.target.value)}
-                placeholder={`Alternative ${index + 1}...`}
+                placeholder={`Alternativa ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -170,7 +170,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
             </div>
           ))}
           {formData.alternatives.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No alternatives added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma alternativa adicionada ainda</p>
           )}
         </div>
       </div>
@@ -179,7 +179,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Decision Criteria
+            Critérios de Decisão
           </label>
           <Button
             type="button"
@@ -189,7 +189,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Criterion
+            Adicionar Critério
           </Button>
         </div>
         <div className="space-y-3">
@@ -198,7 +198,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
               <Input
                 value={crit}
                 onChange={(e) => updateCriterion(index, e.target.value)}
-                placeholder={`Criterion ${index + 1}...`}
+                placeholder={`Critério ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -213,7 +213,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
             </div>
           ))}
           {formData.criteria.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No criteria added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhum critério adicionado ainda</p>
           )}
         </div>
       </div>
@@ -221,12 +221,12 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
       {/* Recommended Option */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Recommended Option
+          Opção Recomendada
         </label>
         <Input
           value={formData.recommended_option}
           onChange={(e) => handleChange({ ...formData, recommended_option: e.target.value })}
-          placeholder="Enter the recommended option..."
+          placeholder="Edite a opção recomendada..."
           disabled={disabled}
         />
       </div>
@@ -234,12 +234,12 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
       {/* Final Recommendation */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Final Recommendation
+          Recomendação Final
         </label>
         <Textarea
           value={formData.final_recommendation}
           onChange={(e) => handleChange({ ...formData, final_recommendation: e.target.value })}
-          placeholder="Enter the final recommendation..."
+          placeholder="Edite a recomendação final..."
           disabled={disabled}
           className="min-h-[120px]"
         />
@@ -249,7 +249,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Priority Recommendations
+            Recomendações Prioritárias
           </label>
           <Button
             type="button"
@@ -259,14 +259,14 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Priority
+            Adicionar Prioridade
           </Button>
         </div>
         <div className="space-y-6">
           {formData.priority_recommendations.map((rec, index) => (
             <div key={index} className="border border-line p-4 space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-semibold">Priority {rec.priority}</h4>
+                <h4 className="font-semibold">Prioridade {rec.priority}</h4>
                 <Button
                   type="button"
                   variant="ghost"
@@ -279,7 +279,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Priority #</label>
+                  <label className="block text-sm font-medium mb-2">Prioridade #</label>
                   <Input
                     type="number"
                     value={rec.priority}
@@ -288,41 +288,41 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-2">Title</label>
+                  <label className="block text-sm font-medium mb-2">Título</label>
                   <Input
                     value={rec.title}
                     onChange={(e) => updatePriority(index, 'title', e.target.value)}
-                    placeholder="Recommendation title..."
+                    placeholder="Edite o título da recomendação..."
                     disabled={disabled}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
+                <label className="block text-sm font-medium mb-2">Descrição</label>
                 <Textarea
                   value={rec.description}
                   onChange={(e) => updatePriority(index, 'description', e.target.value)}
-                  placeholder="Description..."
+                  placeholder="Edite a descrição..."
                   disabled={disabled}
                   className="min-h-[80px]"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Timeline</label>
+                  <label className="block text-sm font-medium mb-2">Prazo</label>
                   <Input
                     value={rec.timeline}
                     onChange={(e) => updatePriority(index, 'timeline', e.target.value)}
-                    placeholder="e.g., Q1 2024"
+                    placeholder="Edite o prazo..."
                     disabled={disabled}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Budget</label>
+                  <label className="block text-sm font-medium mb-2">Orçamento</label>
                   <Input
                     value={rec.budget}
                     onChange={(e) => updatePriority(index, 'budget', e.target.value)}
-                    placeholder="e.g., R$ 100k"
+                    placeholder="Edite o orçamento..."
                     disabled={disabled}
                   />
                 </div>
@@ -330,7 +330,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
             </div>
           ))}
           {formData.priority_recommendations.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No priority recommendations added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma recomendação prioritária adicionada ainda</p>
           )}
         </div>
       </div>
@@ -339,7 +339,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
       <div className="bg-surface-paper border border-line p-6">
         <div className="flex items-center justify-between mb-4">
           <label className="block font-heading text-sm font-bold uppercase tracking-widest">
-            Monitoring Metrics
+            Métricas de Monitoramento
           </label>
           <Button
             type="button"
@@ -349,7 +349,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
             disabled={disabled}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Metric
+            Adicionar Métrica
           </Button>
         </div>
         <div className="space-y-3">
@@ -358,7 +358,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
               <Input
                 value={metric}
                 onChange={(e) => updateMetric(index, e.target.value)}
-                placeholder={`Metric ${index + 1}...`}
+                placeholder={`Métrica ${index + 1}...`}
                 disabled={disabled}
               />
               <Button
@@ -373,7 +373,7 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
             </div>
           ))}
           {formData.monitoring_metrics.length === 0 && (
-            <p className="text-sm text-text-tertiary italic">No monitoring metrics added yet</p>
+            <p className="text-sm text-text-tertiary italic">Nenhuma métrica de monitoramento adicionada ainda</p>
           )}
         </div>
       </div>
@@ -381,12 +381,12 @@ export function DecisionMatrixEditor({ data, onChange, disabled = false }: Decis
       {/* Summary */}
       <div className="bg-surface-paper border border-line p-6">
         <label className="block font-heading text-sm font-bold uppercase tracking-widest mb-4">
-          Summary
+          Resumo
         </label>
         <Textarea
           value={formData.summary}
           onChange={(e) => handleChange({ ...formData, summary: e.target.value })}
-          placeholder="Enter decision matrix summary..."
+          placeholder="Edite o resumo da matriz de decisão..."
           disabled={disabled}
           className="min-h-[160px]"
         />
