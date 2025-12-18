@@ -193,16 +193,32 @@ export interface PESTELAnalysis {
   summary: string
 }
 
-// Porter's 7 Forces
-export interface PorterForce {
-  force: string
-  intensity: string
-  description: string
-}
-
+// Porter's 7 Forces (matches backend structure)
 export interface PorterAnalysis {
-  forces: PorterForce[]
-  overallAttractiveness: string
+  // Traditional 5 Forces
+  competitive_rivalry: string
+  supplier_power: string
+  buyer_power: string
+  threat_new_entrants: string
+  threat_substitutes: string
+
+  // +2 Modern Forces (2025+)
+  power_partnerships_ecosystems: string
+  disruption_ai_data: string
+
+  // Intensity Ratings for each force
+  competitive_rivalry_intensity: string
+  supplier_power_intensity: string
+  buyer_power_intensity: string
+  threat_new_entrants_intensity: string
+  threat_substitutes_intensity: string
+  power_partnerships_ecosystems_intensity: string
+  disruption_ai_data_intensity: string
+
+  // Strategic Implications
+  strategic_implications: string[]
+
+  overall_attractiveness: string
   summary: string
 }
 

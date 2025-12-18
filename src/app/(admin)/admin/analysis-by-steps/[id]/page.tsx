@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, FileText, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ import {
   useApproveStep,
   useToggleStepVisibility,
 } from '@/lib/hooks/use-analysis-by-steps'
+import { useFrameworkOrder } from '@/lib/hooks/use-frameworks'
 
 export default function AnalysisByStepsPage() {
   const params = useParams()
@@ -38,6 +39,7 @@ export default function AnalysisByStepsPage() {
   // Queries and mutations
   const { data: state, isLoading, error } = useStepState(analysisId)
   const { data: allSteps } = useAllSteps(analysisId)
+  const { data: frameworkOrder } = useFrameworkOrder()
   const generateStep = useGenerateStep()
   const saveEdit = useSaveStepEdit()
   const approveStep = useApproveStep()
@@ -46,7 +48,12 @@ export default function AnalysisByStepsPage() {
   const currentStepNumber = state?.current_step ?? 0
   const currentStep = state?.current_step_data
   const previousSteps = state?.previous_steps || []
-  const frameworkMeta = state?.framework_meta
+
+  // Build lookup map for framework metadata by code
+  const frameworkMetaMap = useMemo(() => {
+    if (!frameworkOrder?.frameworks) return new Map()
+    return new Map(frameworkOrder.frameworks.map(f => [f.code, f]))
+  }, [frameworkOrder])
 
   // Initialize selectedStepNumber to current frontier
   useEffect(() => {
@@ -264,10 +271,10 @@ export default function AnalysisByStepsPage() {
       />
 
       {/* Warning Banner for Previous Steps */}
-      {isViewingPreviousStep && frameworkMeta && (
+      {isViewingPreviousStep && displayedStep && (
         <EditWarningBanner
           stepNumber={displayedStep.step_number}
-          frameworkName={frameworkMeta.name}
+          frameworkName={frameworkMetaMap.get(displayedStep.framework_code)?.name || displayedStep.framework_code}
         />
       )}
 
@@ -284,13 +291,17 @@ export default function AnalysisByStepsPage() {
             />
           )}
 
-          {/* Reflection Questions */}
-          {frameworkMeta && frameworkMeta.reflection_questions?.length > 0 && (
-            <ReflectionQuestionsCard
-              guidanceText={frameworkMeta.guidance_text}
-              questions={frameworkMeta.reflection_questions}
-            />
-          )}
+          {/* Reflection Questions - based on displayed step */}
+          {displayedStep && (() => {
+            const meta = frameworkMetaMap.get(displayedStep.framework_code)
+            if (!meta || !meta.reflection_questions?.length) return null
+            return (
+              <ReflectionQuestionsCard
+                guidanceText={meta.guidance_text}
+                questions={meta.reflection_questions}
+              />
+            )
+          })()}
 
           {/* Previous Steps Accordion */}
           {previousSteps.length > 0 && (

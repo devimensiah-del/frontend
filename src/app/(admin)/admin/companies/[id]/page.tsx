@@ -2,8 +2,12 @@
 
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useAdminCompany, useUpdateAdminCompany, useAnalyzeChallenge, useChallenges, useUpdateVisibility, useGenerateAccessCode } from '@/lib/hooks'
 import { useReEnrichCompany } from '@/lib/hooks/use-companies'
+import { useStartAnalysisBySteps } from '@/lib/hooks/use-analysis-by-steps'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -121,6 +125,29 @@ function getAnalysisStatusBadge(status: AnalysisStatus | undefined) {
   }
 }
 
+function ExpandableText({ text, maxLength = 200 }: { text: string; maxLength?: number }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const shouldTruncate = text.length > maxLength
+
+  if (!shouldTruncate) {
+    return <p className="text-sm text-navy-800">{text}</p>
+  }
+
+  return (
+    <div>
+      <p className="text-sm text-navy-800">
+        {isExpanded ? text : `${text.slice(0, maxLength)}...`}
+      </p>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="text-sm text-gold-600 hover:underline mt-1"
+      >
+        {isExpanded ? 'ver menos' : 'ver mais'}
+      </button>
+    </div>
+  )
+}
+
 interface ChallengeCardProps {
   challenge: Challenge
   onAnalyze: (challengeId: string) => void
@@ -133,6 +160,9 @@ interface ChallengeCardProps {
 }
 
 function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, onTogglePublic, onViewReport, isUpdating, isGeneratingCode }: ChallengeCardProps) {
+  const router = useRouter()
+  const startStepByStep = useStartAnalysisBySteps()
+
   const typeInfo = getChallengeType(challenge.challenge_type)
   const categoryInfo = getCategoryInfo(challenge.challenge_category)
   const analysis = challenge.latest_analysis
@@ -143,6 +173,15 @@ function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, 
 
   // Derive display status - include local "isAnalyzing" state
   const displayStatus = isAnalyzing ? 'processing' : analysis?.status
+
+  // Handle starting step-by-step analysis
+  const handleStartStepByStep = () => {
+    startStepByStep.mutate(challenge.id, {
+      onSuccess: (data) => {
+        router.push(`/admin/analysis-by-steps/${data.analysis_id}`)
+      },
+    })
+  }
 
   return (
     <div className={`bg-white border p-4 transition-colors ${
@@ -162,14 +201,17 @@ function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, 
             <span className="text-xs text-muted-foreground">
               {typeInfo?.label || challenge.challenge_type}
             </span>
+            {/* Created date */}
+            <span className="text-muted-foreground">•</span>
+            <span className="text-xs text-gray-500">
+              {format(new Date(challenge.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+            </span>
           </div>
           {getAnalysisStatusBadge(displayStatus as AnalysisStatus | undefined)}
         </div>
 
         {/* Challenge description */}
-        <p className="text-sm text-navy-800 line-clamp-3">
-          {challenge.business_challenge}
-        </p>
+        <ExpandableText text={challenge.business_challenge} />
 
         {/* Visibility Controls - Only show when analysis is completed */}
         {hasAnalysis && analysis && (
@@ -198,8 +240,55 @@ function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, 
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-2 pt-2 border-t border-line">
-          {hasAnalysis ? (
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-line">
+          {/* Batch analysis button */}
+          {!analysis && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => onAnalyze(challenge.id)}
+              disabled={isAnalyzing || isProcessing || startStepByStep.isPending}
+            >
+              {(isAnalyzing || isProcessing) ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Play className="w-3.5 h-3.5" />
+              )}
+              Analisar (Lote)
+            </Button>
+          )}
+
+          {/* Step-by-step button */}
+          {!analysis && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5"
+              onClick={handleStartStepByStep}
+              disabled={startStepByStep.isPending || isAnalyzing || isProcessing}
+            >
+              {startStepByStep.isPending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              Etapa por Etapa
+            </Button>
+          )}
+
+          {/* Continue step-by-step if in progress */}
+          {analysis?.wizard_mode && analysis.status !== 'completed' && (
+            <Link href={`/admin/analysis-by-steps/${analysis.id}`}>
+              <Button size="sm" variant="outline" className="gap-1.5 border-gold-300 bg-gold-50 text-gold-700 hover:bg-gold-100">
+                <Play className="w-3.5 h-3.5" />
+                Continuar Etapa
+              </Button>
+            </Link>
+          )}
+
+          {/* View report when completed */}
+          {hasAnalysis && (
             <Button
               size="sm"
               variant="outline"
@@ -212,22 +301,7 @@ function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, 
               ) : (
                 <FileText className="w-3.5 h-3.5" />
               )}
-              Ver Análise
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5"
-              onClick={() => onAnalyze(challenge.id)}
-              disabled={isAnalyzing || isProcessing}
-            >
-              {(isAnalyzing || isProcessing) ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Play className="w-3.5 h-3.5" />
-              )}
-              Analisar
+              Ver Relatório
             </Button>
           )}
 
