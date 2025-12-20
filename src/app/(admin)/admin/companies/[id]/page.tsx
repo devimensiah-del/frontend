@@ -312,8 +312,8 @@ function EditableField({
           />
         )
       ) : (
-        <div className="flex items-center gap-2">
-          {icon && <span className="text-muted-foreground">{icon}</span>}
+        <div className="flex items-start gap-2">
+          {icon && <span className="text-muted-foreground flex-shrink-0 mt-0.5">{icon}</span>}
           {type === 'url' && value ? (
             <a
               href={value.toString().startsWith('http') ? value.toString() : `https://${value}`}
@@ -731,7 +731,7 @@ export default function CompanyDetailPage({
             <Section title="Informações Básicas" icon={<Building2 className="w-4 h-4" />}>
               <div className="flex flex-col gap-1">
                 <span className="text-xs text-muted-foreground uppercase tracking-wide">CNPJ</span>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   {editMode ? (
                     <Input
                       value={(formData.cnpj as string) ?? company.cnpj ?? ''}
@@ -743,7 +743,7 @@ export default function CompanyDetailPage({
                     <>
                       <span className="text-navy-900">{company.cnpj}</span>
                       {company.cnpj_verified && (
-                        <span className="inline-flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-0.5 rounded">
+                        <span className="inline-flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-0.5 rounded whitespace-nowrap flex-shrink-0">
                           <BadgeCheck className="w-3 h-3" />
                           Verificado
                         </span>
@@ -761,16 +761,6 @@ export default function CompanyDetailPage({
                 onChange={handleFieldChange}
               />
               <EditableField
-                label="Website"
-                field="website"
-                value={company.website}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                icon={<Globe className="w-4 h-4" />}
-                type="url"
-              />
-              <EditableField
                 label="Ano de Fundação"
                 field="foundation_year"
                 value={company.foundation_year}
@@ -779,6 +769,18 @@ export default function CompanyDetailPage({
                 onChange={handleFieldChange}
                 icon={<Calendar className="w-4 h-4" />}
               />
+              <div className="col-span-full">
+                <EditableField
+                  label="Website"
+                  field="website"
+                  value={company.website}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  icon={<Globe className="w-4 h-4" />}
+                  type="url"
+                />
+              </div>
             </Section>
 
             {/* Localização & Tamanho */}
