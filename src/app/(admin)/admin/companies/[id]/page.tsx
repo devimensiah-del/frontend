@@ -816,15 +816,17 @@ export default function CompanyDetailPage({
                   onChange={handleFieldChange}
                   icon={<Phone className="w-4 h-4" />}
                 />
-                <EditableField
-                  label="Email"
-                  field="email"
-                  value={company.email}
-                  editMode={editMode}
-                  formData={formData}
-                  onChange={handleFieldChange}
-                  icon={<Mail className="w-4 h-4" />}
-                />
+                <div className="col-span-full">
+                  <EditableField
+                    label="Email"
+                    field="email"
+                    value={company.email}
+                    editMode={editMode}
+                    formData={formData}
+                    onChange={handleFieldChange}
+                    icon={<Mail className="w-4 h-4" />}
+                  />
+                </div>
               </Section>
             )}
 
