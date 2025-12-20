@@ -120,6 +120,7 @@ export interface Company {
   // Enriched data
   foundation_year?: string
   legal_name?: string
+  trade_name?: string                 // Nome fantasia
   headquarters?: string
   sector?: string
   target_audience?: string
@@ -132,6 +133,14 @@ export interface Company {
   competitors?: string[]
   strengths?: string[]
   weaknesses?: string[]
+  // CNPJ Registry data (from casadosdados.com.br)
+  phone?: string                      // Corporate phone
+  email?: string                      // Corporate email
+  cnae_primary?: string               // Primary CNAE (code + description)
+  cnae_codes?: string[]               // All CNAE codes
+  capital_social?: string             // Registered capital (e.g., "R$ 1.000,00")
+  partners?: string[]                 // Partners with roles
+  cnpj_verified?: boolean             // True if data from official CNPJ registry
   // Geographic context (from Step 2 enrichment)
   geographic_regions?: string[]       // e.g., ["Brasil", "LATAM"]
   service_areas?: string[]            // e.g., ["SP", "RJ", "MG"]
@@ -161,6 +170,8 @@ export interface Company {
   // Social links
   linkedin_url?: string
   twitter_handle?: string
+  instagram_url?: string
+  facebook_url?: string
   // Enrichment status
   enrichment_status: EnrichmentStatus
   enrichment_completed_at?: string

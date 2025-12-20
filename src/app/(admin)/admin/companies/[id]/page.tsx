@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ReAnalyzeDialog } from '@/components/features/admin/re-analyze-dialog'
-import { EnrichmentSteps } from '@/components/features/company'
+import { Step1Card, Step2Card, Step3Card } from '@/components/features/company'
 import {
   getChallengeType,
   getCategoryInfo,
@@ -28,6 +28,8 @@ import {
   Calendar,
   Linkedin,
   Twitter,
+  Instagram,
+  Facebook,
   Target,
   TrendingUp,
   Briefcase,
@@ -40,10 +42,13 @@ import {
   Zap,
   FileText,
   Play,
-  Eye,
   Sparkles,
   ExternalLink,
-  RefreshCw,
+  Phone,
+  Mail,
+  BadgeCheck,
+  Building,
+  Banknote,
 } from 'lucide-react'
 import type { EnrichmentStatus, Challenge, AnalysisStatus } from '@/lib/types'
 
@@ -140,8 +145,6 @@ function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, 
   const isProcessing = analysis?.status === 'processing' || analysis?.status === 'pending'
   const isFailed = analysis?.status === 'failed'
   const accessCode = analysis?.access_code
-
-  // Derive display status - include local "isAnalyzing" state
   const displayStatus = isAnalyzing ? 'processing' : analysis?.status
 
   return (
@@ -151,7 +154,6 @@ function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, 
       'border-line hover:border-gold-300'
     }`}>
       <div className="flex flex-col gap-3">
-        {/* Header with category and type */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-lg">{categoryInfo?.emoji || '📋'}</span>
@@ -166,12 +168,10 @@ function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, 
           {getAnalysisStatusBadge(displayStatus as AnalysisStatus | undefined)}
         </div>
 
-        {/* Challenge description */}
         <p className="text-sm text-navy-800 line-clamp-3">
           {challenge.business_challenge}
         </p>
 
-        {/* Visibility Controls - Only show when analysis is completed */}
         {hasAnalysis && analysis && (
           <div className="flex items-center gap-3 text-xs">
             <label className="flex items-center gap-1.5 cursor-pointer">
@@ -197,7 +197,6 @@ function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, 
           </div>
         )}
 
-        {/* Actions */}
         <div className="flex items-center gap-2 pt-2 border-t border-line">
           {hasAnalysis ? (
             <Button
@@ -231,7 +230,6 @@ function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onToggleVisibility, 
             </Button>
           )}
 
-          {/* Re-analyze button when completed */}
           {hasAnalysis && (
             <Button
               size="sm"
@@ -468,6 +466,8 @@ function PageSkeleton() {
   )
 }
 
+type TabType = 'empresa' | 'negocio' | 'mercado' | 'analises'
+
 export default function CompanyDetailPage({
   params,
 }: {
@@ -486,9 +486,8 @@ export default function CompanyDetailPage({
   const [reAnalyzeOpen, setReAnalyzeOpen] = useState(false)
   const [analyzingChallengeId, setAnalyzingChallengeId] = useState<string | null>(null)
   const [generatingCodeForId, setGeneratingCodeForId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'dados' | 'desafios' | 'enriquecimento'>('dados')
+  const [activeTab, setActiveTab] = useState<TabType>('empresa')
 
-  // Reset form data when company loads or edit mode changes
   useEffect(() => {
     if (!editMode) {
       setFormData({})
@@ -513,16 +512,11 @@ export default function CompanyDetailPage({
   }
 
   const handleViewReport = async (analysisId: string, accessCode?: string | null) => {
-    // Admin preview URL - bypasses visibility checks on backend
     const adminPreviewParam = '?preview=admin'
-
-    // If access code exists, navigate directly
     if (accessCode) {
       window.open(`/report/${accessCode}${adminPreviewParam}`, '_blank')
       return
     }
-
-    // Otherwise, generate an access code first
     setGeneratingCodeForId(analysisId)
     try {
       const response = await generateAccessCode.mutateAsync(analysisId)
@@ -543,7 +537,6 @@ export default function CompanyDetailPage({
       setEditMode(false)
       return
     }
-
     try {
       await updateCompany.mutateAsync({ id, data: formData })
       setEditMode(false)
@@ -596,8 +589,7 @@ export default function CompanyDetailPage({
             Voltar
           </Link>
 
-          {/* Edit Controls - Show on Dados and Enriquecimento tabs */}
-          {(activeTab === 'dados' || activeTab === 'enriquecimento') && (
+          {activeTab !== 'analises' && (
             <div className="flex items-center gap-2">
               {editMode ? (
                 <>
@@ -639,7 +631,7 @@ export default function CompanyDetailPage({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-3">
-              {editMode && activeTab === 'dados' ? (
+              {editMode && activeTab === 'empresa' ? (
                 <Input
                   value={(formData.name as string) ?? company.name}
                   onChange={(e) => handleFieldChange('name', e.target.value)}
@@ -653,8 +645,8 @@ export default function CompanyDetailPage({
               )}
               {getEnrichmentBadge(company.enrichment_status)}
             </div>
-            {(company.legal_name || (editMode && activeTab === 'dados')) && (
-              editMode && activeTab === 'dados' ? (
+            {(company.legal_name || (editMode && activeTab === 'empresa')) && (
+              editMode && activeTab === 'empresa' ? (
                 <Input
                   value={(formData.legal_name as string) ?? company.legal_name ?? ''}
                   onChange={(e) => handleFieldChange('legal_name', e.target.value || null)}
@@ -671,54 +663,52 @@ export default function CompanyDetailPage({
         </div>
       </div>
 
-      {/* Enrichment Error Alert */}
-      {company.enrichment_status === 'failed' && (
-        <div className="bg-warning/10 border border-warning/30 p-4 rounded flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-warning-dark">Enriquecimento não concluído</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Os dados da empresa não puderam ser enriquecidos automaticamente. Você pode preencher manualmente na aba Enriquecimento.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Tabs */}
       <div className="border-b border-line">
         <div className="flex gap-0">
           <button
-            onClick={() => { setActiveTab('dados'); setEditMode(false); }}
+            onClick={() => { setActiveTab('empresa'); setEditMode(false); }}
             className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
-              activeTab === 'dados'
+              activeTab === 'empresa'
                 ? 'border-gold-500 text-navy-900'
                 : 'border-transparent text-muted-foreground hover:text-navy-700'
             }`}
           >
             <Building2 className="w-4 h-4 inline-block mr-2" />
-            Dados
+            Empresa
           </button>
           <button
-            onClick={() => { setActiveTab('enriquecimento'); setEditMode(false); }}
+            onClick={() => { setActiveTab('negocio'); setEditMode(false); }}
             className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
-              activeTab === 'enriquecimento'
+              activeTab === 'negocio'
                 ? 'border-gold-500 text-navy-900'
                 : 'border-transparent text-muted-foreground hover:text-navy-700'
             }`}
           >
-            <Sparkles className="w-4 h-4 inline-block mr-2" />
-            Enriquecimento
+            <Briefcase className="w-4 h-4 inline-block mr-2" />
+            Negócio
           </button>
           <button
-            onClick={() => { setActiveTab('desafios'); setEditMode(false); }}
+            onClick={() => { setActiveTab('mercado'); setEditMode(false); }}
             className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
-              activeTab === 'desafios'
+              activeTab === 'mercado'
+                ? 'border-gold-500 text-navy-900'
+                : 'border-transparent text-muted-foreground hover:text-navy-700'
+            }`}
+          >
+            <TrendingUp className="w-4 h-4 inline-block mr-2" />
+            Mercado
+          </button>
+          <button
+            onClick={() => { setActiveTab('analises'); setEditMode(false); }}
+            className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
+              activeTab === 'analises'
                 ? 'border-gold-500 text-navy-900'
                 : 'border-transparent text-muted-foreground hover:text-navy-700'
             }`}
           >
             <Zap className="w-4 h-4 inline-block mr-2" />
-            Desafios
+            Análises
             {challenges.length > 0 && (
               <span className="ml-2 px-2 py-0.5 text-xs bg-navy-900/10 rounded-full">
                 {challenges.length}
@@ -728,265 +718,506 @@ export default function CompanyDetailPage({
         </div>
       </div>
 
-      {/* Tab Content: Dados */}
-      {activeTab === 'dados' && (
-        <>
+      {/* ========================================================================
+          TAB: EMPRESA (Step 1 - Basic Info)
+          ======================================================================== */}
+      {activeTab === 'empresa' && (
+        <div className="space-y-6">
+          {/* Step 1 Enrichment Status */}
+          <Step1Card companyId={company.id} legacyStatus={company.enrichment_status} />
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Informações Básicas */}
-        <Section title="Informações Básicas" icon={<Building2 className="w-4 h-4" />}>
-          <EditableField
-            label="CNPJ"
-            field="cnpj"
-            value={company.cnpj}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-          <EditableField
-            label="Website"
-            field="website"
-            value={company.website}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            icon={<Globe className="w-4 h-4" />}
-            type="url"
-          />
-          <EditableField
-            label="Ano de Fundação"
-            field="foundation_year"
-            value={company.foundation_year}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            icon={<Calendar className="w-4 h-4" />}
-          />
-        </Section>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {/* Informações Básicas */}
+            <Section title="Informações Básicas" icon={<Building2 className="w-4 h-4" />}>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-muted-foreground uppercase tracking-wide">CNPJ</span>
+                <div className="flex items-center gap-2">
+                  {editMode ? (
+                    <Input
+                      value={(formData.cnpj as string) ?? company.cnpj ?? ''}
+                      onChange={(e) => handleFieldChange('cnpj', e.target.value || null)}
+                      placeholder="CNPJ"
+                      className="text-sm"
+                    />
+                  ) : company.cnpj ? (
+                    <>
+                      <span className="text-navy-900">{company.cnpj}</span>
+                      {company.cnpj_verified && (
+                        <span className="inline-flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-0.5 rounded">
+                          <BadgeCheck className="w-3 h-3" />
+                          Verificado
+                        </span>
+                      )}
+                    </>
+                  ) : null}
+                </div>
+              </div>
+              <EditableField
+                label="Nome Fantasia"
+                field="trade_name"
+                value={company.trade_name}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+              />
+              <EditableField
+                label="Website"
+                field="website"
+                value={company.website}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                icon={<Globe className="w-4 h-4" />}
+                type="url"
+              />
+              <EditableField
+                label="Ano de Fundação"
+                field="foundation_year"
+                value={company.foundation_year}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                icon={<Calendar className="w-4 h-4" />}
+              />
+            </Section>
 
-        {/* Localização */}
-        <Section title="Localização" icon={<MapPin className="w-4 h-4" />} columns={2}>
-          <EditableField
-            label="Localização"
-            field="location"
-            value={company.location}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-          <EditableField
-            label="Sede"
-            field="headquarters"
-            value={company.headquarters}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-        </Section>
+            {/* Localização & Tamanho */}
+            <Section title="Localização & Tamanho" icon={<MapPin className="w-4 h-4" />} columns={2}>
+              <EditableField
+                label="Sede"
+                field="headquarters"
+                value={company.headquarters}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+              />
+              <EditableField
+                label="Faixa de Funcionários"
+                field="employees_range"
+                value={company.employees_range}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                icon={<Users className="w-4 h-4" />}
+              />
+            </Section>
 
-        {/* Setor e Mercado */}
-        <Section title="Setor e Mercado" icon={<Target className="w-4 h-4" />}>
-          <EditableField
-            label="Indústria"
-            field="industry"
-            value={company.industry}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-          <EditableField
-            label="Setor"
-            field="sector"
-            value={company.sector}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-          <EditableField
-            label="Mercado-Alvo"
-            field="target_market"
-            value={company.target_market}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-          <EditableField
-            label="Público-Alvo"
-            field="target_audience"
-            value={company.target_audience}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-        </Section>
+            {/* Contato Corporativo (from CNPJ registry) */}
+            {(company.phone || company.email || editMode) && (
+              <Section title="Contato Corporativo" icon={<Phone className="w-4 h-4" />} columns={2}>
+                <EditableField
+                  label="Telefone"
+                  field="phone"
+                  value={company.phone}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  icon={<Phone className="w-4 h-4" />}
+                />
+                <EditableField
+                  label="Email"
+                  field="email"
+                  value={company.email}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  icon={<Mail className="w-4 h-4" />}
+                />
+              </Section>
+            )}
 
-        {/* Tamanho e Receita */}
-        <Section title="Tamanho e Receita" icon={<DollarSign className="w-4 h-4" />}>
-          <EditableField
-            label="Porte"
-            field="company_size"
-            value={company.company_size}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            icon={<Users className="w-4 h-4" />}
-          />
-          <EditableField
-            label="Faixa de Funcionários"
-            field="employees_range"
-            value={company.employees_range}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-          <EditableField
-            label="Receita Mínima (R$)"
-            field="annual_revenue_min"
-            value={company.annual_revenue_min}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            type="number"
-          />
-          <EditableField
-            label="Receita Máxima (R$)"
-            field="annual_revenue_max"
-            value={company.annual_revenue_max}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            type="number"
-          />
-          <EditableField
-            label="Estimativa de Receita"
-            field="revenue_estimate"
-            value={company.revenue_estimate}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-          <EditableField
-            label="Estágio de Funding"
-            field="funding_stage"
-            value={company.funding_stage}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-        </Section>
+            {/* Dados Oficiais CNPJ (CNAE, Capital Social) */}
+            {(company.cnae_primary || company.capital_social || editMode) && (
+              <Section title="Dados Oficiais" icon={<Building className="w-4 h-4" />} columns={2}>
+                <EditableField
+                  label="Atividade Principal (CNAE)"
+                  field="cnae_primary"
+                  value={company.cnae_primary}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  type="textarea"
+                />
+                <EditableField
+                  label="Capital Social"
+                  field="capital_social"
+                  value={company.capital_social}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  icon={<Banknote className="w-4 h-4" />}
+                />
+              </Section>
+            )}
 
-        {/* Modelo de Negócio - Full Width */}
-        <div className="xl:col-span-2">
-          <Section title="Modelo de Negócio" icon={<Briefcase className="w-4 h-4" />} columns={2}>
-            <EditableField
-              label="Modelo de Negócio"
-              field="business_model"
-              value={company.business_model}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              type="textarea"
-            />
-            <EditableField
-              label="Proposta de Valor"
-              field="value_proposition"
-              value={company.value_proposition}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              type="textarea"
-            />
-          </Section>
+            {/* CNAE Codes */}
+            {(company.cnae_codes?.length || editMode) && (
+              <div>
+                <EditableList
+                  title="Códigos CNAE"
+                  icon={<Building className="w-4 h-4" />}
+                  field="cnae_codes"
+                  items={company.cnae_codes}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  emptyMessage="Nenhum código CNAE registrado"
+                />
+              </div>
+            )}
+
+            {/* Redes Sociais */}
+            <Section title="Redes Sociais" icon={<Globe className="w-4 h-4" />} columns={2}>
+              <EditableField
+                label="LinkedIn"
+                field="linkedin_url"
+                value={company.linkedin_url}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                icon={<Linkedin className="w-4 h-4" />}
+                type="url"
+              />
+              <EditableField
+                label="Twitter"
+                field="twitter_handle"
+                value={company.twitter_handle}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                icon={<Twitter className="w-4 h-4" />}
+              />
+              <EditableField
+                label="Instagram"
+                field="instagram_url"
+                value={company.instagram_url}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                icon={<Instagram className="w-4 h-4" />}
+                type="url"
+              />
+              <EditableField
+                label="Facebook"
+                field="facebook_url"
+                value={company.facebook_url}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                icon={<Facebook className="w-4 h-4" />}
+                type="url"
+              />
+            </Section>
+
+            {/* Sócios (from CNPJ registry) */}
+            {(company.partners?.length || editMode) && (
+              <div>
+                <EditableList
+                  title="Sócios / Administradores"
+                  icon={<Users className="w-4 h-4" />}
+                  field="partners"
+                  items={company.partners}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  emptyMessage="Nenhum sócio registrado"
+                />
+              </div>
+            )}
+
+            {/* Executivos */}
+            <div>
+              <EditableList
+                title="Executivos-Chave"
+                icon={<Users className="w-4 h-4" />}
+                field="key_executives"
+                items={company.key_executives}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                emptyMessage="Nenhum executivo identificado"
+              />
+            </div>
+          </div>
         </div>
-
-        {/* Posição no Mercado */}
-        <Section title="Posição no Mercado" icon={<TrendingUp className="w-4 h-4" />} columns={2}>
-          <EditableField
-            label="Status de Market Share"
-            field="market_share_status"
-            value={company.market_share_status}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-          />
-          <EditableField
-            label="Maturidade Digital (1-10)"
-            field="digital_maturity"
-            value={company.digital_maturity}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            type="number"
-          />
-        </Section>
-
-        {/* Redes Sociais */}
-        <Section title="Redes Sociais" icon={<Globe className="w-4 h-4" />} columns={2}>
-          <EditableField
-            label="LinkedIn"
-            field="linkedin_url"
-            value={company.linkedin_url}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            icon={<Linkedin className="w-4 h-4" />}
-            type="url"
-          />
-          <EditableField
-            label="Twitter"
-            field="twitter_handle"
-            value={company.twitter_handle}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            icon={<Twitter className="w-4 h-4" />}
-          />
-        </Section>
-      </div>
-
-      {/* Editable Lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        <EditableList
-          title="Concorrentes"
-          icon={<Target className="w-4 h-4" />}
-          field="competitors"
-          items={company.competitors}
-          editMode={editMode}
-          formData={formData}
-          onChange={handleFieldChange}
-          emptyMessage="Nenhum concorrente identificado"
-        />
-        <EditableList
-          title="Pontos Fortes"
-          icon={<CheckCircle2 className="w-4 h-4" />}
-          field="strengths"
-          items={company.strengths}
-          editMode={editMode}
-          formData={formData}
-          onChange={handleFieldChange}
-          emptyMessage="Nenhum ponto forte identificado"
-          variant="success"
-        />
-        <EditableList
-          title="Pontos Fracos"
-          icon={<AlertCircle className="w-4 h-4" />}
-          field="weaknesses"
-          items={company.weaknesses}
-          editMode={editMode}
-          formData={formData}
-          onChange={handleFieldChange}
-          emptyMessage="Nenhum ponto fraco identificado"
-          variant="warning"
-        />
-      </div>
-        </>
       )}
 
-      {/* Tab Content: Desafios */}
-      {activeTab === 'desafios' && (
+      {/* ========================================================================
+          TAB: NEGÓCIO (Step 2 - Business Model)
+          ======================================================================== */}
+      {activeTab === 'negocio' && (
         <div className="space-y-6">
-          {/* Header with New Challenge button */}
+          {/* Step 2 Enrichment Status */}
+          <Step2Card companyId={company.id} />
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {/* Modelo de Negócio */}
+            <Section title="Modelo de Negócio" icon={<Briefcase className="w-4 h-4" />} columns={2}>
+              <EditableField
+                label="Modelo de Negócio"
+                field="business_model"
+                value={company.business_model}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                type="textarea"
+              />
+              <EditableField
+                label="Modelo de Precificação"
+                field="pricing_model"
+                value={company.pricing_model}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                type="textarea"
+              />
+            </Section>
+
+            {/* Setor */}
+            <Section title="Setor" icon={<Target className="w-4 h-4" />} columns={2}>
+              <EditableField
+                label="Indústria"
+                field="industry"
+                value={company.industry}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+              />
+              <EditableField
+                label="Setor"
+                field="sector"
+                value={company.sector}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+              />
+            </Section>
+          </div>
+
+          {/* Produtos/Serviços */}
+          <EditableList
+            title="Principais Produtos/Serviços"
+            icon={<Briefcase className="w-4 h-4" />}
+            field="main_products"
+            items={company.main_products}
+            editMode={editMode}
+            formData={formData}
+            onChange={handleFieldChange}
+            emptyMessage="Nenhum produto identificado"
+          />
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {/* Público-Alvo */}
+            <Section title="Público-Alvo" icon={<Users className="w-4 h-4" />} columns={2}>
+              <EditableField
+                label="Mercado-Alvo"
+                field="target_market"
+                value={company.target_market}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                placeholder="B2B, B2C, B2B2C"
+              />
+              <EditableField
+                label="Público-Alvo"
+                field="target_audience"
+                value={company.target_audience}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                type="textarea"
+              />
+            </Section>
+
+            <div>
+              <EditableList
+                title="Segmentos de Clientes"
+                icon={<Users className="w-4 h-4" />}
+                field="customer_segments"
+                items={company.customer_segments}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                emptyMessage="Nenhum segmento identificado"
+              />
+            </div>
+          </div>
+
+          {/* Proposta de Valor */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <Section title="Proposta de Valor" icon={<Sparkles className="w-4 h-4" />}>
+              <EditableField
+                label="Proposta de Valor"
+                field="value_proposition"
+                value={company.value_proposition}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                type="textarea"
+              />
+            </Section>
+
+            <div>
+              <EditableList
+                title="Diferenciais (USPs)"
+                icon={<Sparkles className="w-4 h-4" />}
+                field="unique_selling_points"
+                items={company.unique_selling_points}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                emptyMessage="Nenhum diferencial identificado"
+              />
+            </div>
+          </div>
+
+          {/* Atuação Geográfica */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <EditableList
+              title="Regiões de Atuação"
+              icon={<MapPin className="w-4 h-4" />}
+              field="geographic_regions"
+              items={company.geographic_regions}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              emptyMessage="Nenhuma região identificada"
+            />
+            <EditableList
+              title="Áreas de Serviço"
+              icon={<MapPin className="w-4 h-4" />}
+              field="service_areas"
+              items={company.service_areas}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              emptyMessage="Nenhuma área identificada"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================
+          TAB: MERCADO (Step 3 - Competitive Intelligence)
+          ======================================================================== */}
+      {activeTab === 'mercado' && (
+        <div className="space-y-6">
+          {/* Step 3 Enrichment Status */}
+          <Step3Card companyId={company.id} />
+
+          {/* Concorrentes */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <EditableList
+              title="Concorrentes"
+              icon={<Target className="w-4 h-4" />}
+              field="competitors"
+              items={company.competitors}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              emptyMessage="Nenhum concorrente identificado"
+            />
+            <EditableList
+              title="Detalhes dos Concorrentes"
+              icon={<Target className="w-4 h-4" />}
+              field="competitor_details"
+              items={company.competitor_details}
+              editMode={editMode}
+              formData={formData}
+              onChange={handleFieldChange}
+              emptyMessage="Nenhum detalhe de concorrente"
+            />
+          </div>
+
+          {/* Contexto do Setor */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <Section title="Contexto do Setor" icon={<TrendingUp className="w-4 h-4" />}>
+              <EditableField
+                label="Crescimento do Setor"
+                field="industry_growth_rate"
+                value={company.industry_growth_rate}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                placeholder="Ex: +12% CAGR"
+              />
+              <EditableField
+                label="Concentração de Mercado"
+                field="market_concentration"
+                value={company.market_concentration}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                placeholder="Ex: Fragmentado, Concentrado"
+              />
+              <EditableField
+                label="Posição no Mercado"
+                field="market_share_status"
+                value={company.market_share_status}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                placeholder="Ex: Líder, Desafiador, Nicho"
+              />
+            </Section>
+
+            <Section title="Contexto Regulatório" icon={<Shield className="w-4 h-4" />}>
+              <EditableField
+                label="Contexto Regulatório"
+                field="regulatory_context"
+                value={company.regulatory_context}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFieldChange}
+                type="textarea"
+                placeholder="Marco regulatório relevante"
+              />
+            </Section>
+          </div>
+
+          {/* Tendências */}
+          <EditableList
+            title="Tendências do Setor"
+            icon={<TrendingUp className="w-4 h-4" />}
+            field="industry_trends"
+            items={company.industry_trends}
+            editMode={editMode}
+            formData={formData}
+            onChange={handleFieldChange}
+            emptyMessage="Nenhuma tendência identificada"
+          />
+
+          {/* Notícias Recentes */}
+          <EditableList
+            title="Notícias Recentes"
+            icon={<FileText className="w-4 h-4" />}
+            field="recent_news"
+            items={company.recent_news}
+            editMode={editMode}
+            formData={formData}
+            onChange={handleFieldChange}
+            emptyMessage="Nenhuma notícia recente"
+          />
+
+          {/* Fontes */}
+          <EditableList
+            title="Fontes do Enriquecimento"
+            icon={<ExternalLink className="w-4 h-4" />}
+            field="enrichment_sources"
+            items={company.enrichment_sources}
+            editMode={editMode}
+            formData={formData}
+            onChange={handleFieldChange}
+            emptyMessage="Nenhuma fonte registrada"
+          />
+        </div>
+      )}
+
+      {/* ========================================================================
+          TAB: ANÁLISES (Challenges)
+          ======================================================================== */}
+      {activeTab === 'analises' && (
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Gerencie os desafios de negócio e suas análises estratégicas.
@@ -1001,7 +1232,6 @@ export default function CompanyDetailPage({
             </Button>
           </div>
 
-          {/* Challenges Grid */}
           {challengesLoading ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {[1, 2].map((i) => (
@@ -1042,280 +1272,6 @@ export default function CompanyDetailPage({
               </Button>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Tab Content: Enriquecimento */}
-      {activeTab === 'enriquecimento' && (
-        <div className="space-y-6">
-          {/* 3-Step Enrichment Progress */}
-          <EnrichmentSteps companyId={company.id} legacyStatus={company.enrichment_status} />
-
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            {/* Contexto da Indústria */}
-            <Section title="Contexto da Indústria" icon={<TrendingUp className="w-4 h-4" />}>
-              <EditableField
-                label="Crescimento do Setor"
-                field="industry_growth_rate"
-                value={company.industry_growth_rate}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                placeholder="Ex: +12% CAGR"
-              />
-              <EditableField
-                label="Concentração de Mercado"
-                field="market_concentration"
-                value={company.market_concentration}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                placeholder="Ex: Fragmentado, Concentrado"
-              />
-            </Section>
-
-            {/* Contexto Regulatório */}
-            <Section title="Contexto Regulatório" icon={<Shield className="w-4 h-4" />}>
-              <EditableField
-                label="Contexto Regulatório"
-                field="regulatory_context"
-                value={company.regulatory_context}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                type="textarea"
-                placeholder="Informações regulatórias relevantes para o setor"
-              />
-            </Section>
-          </div>
-
-          {/* Tendências do Setor */}
-          <EditableList
-            title="Tendências do Setor"
-            icon={<TrendingUp className="w-4 h-4" />}
-            field="industry_trends"
-            items={company.industry_trends}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            emptyMessage="Nenhuma tendência identificada"
-          />
-
-          {/* Fontes do Enriquecimento */}
-          <EditableList
-            title="Fontes do Enriquecimento"
-            icon={<ExternalLink className="w-4 h-4" />}
-            field="enrichment_sources"
-            items={company.enrichment_sources}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            emptyMessage="Nenhuma fonte registrada para este enriquecimento"
-          />
-
-          {/* Products & Services */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <div>
-              <EditableList
-                title="Principais Produtos"
-                icon={<Briefcase className="w-4 h-4" />}
-                field="main_products"
-                items={company.main_products}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                emptyMessage="Nenhum produto identificado"
-              />
-            </div>
-            <div>
-              <EditableList
-                title="Segmentos de Clientes"
-                icon={<Users className="w-4 h-4" />}
-                field="customer_segments"
-                items={company.customer_segments}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                emptyMessage="Nenhum segmento identificado"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <Section title="Modelo de Precificação" icon={<DollarSign className="w-4 h-4" />}>
-              <EditableField
-                label="Modelo de Precificação"
-                field="pricing_model"
-                value={company.pricing_model}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                type="textarea"
-                placeholder="Modelo de precificação da empresa"
-              />
-            </Section>
-
-            <div>
-              <EditableList
-                title="Diferenciais"
-                icon={<Sparkles className="w-4 h-4" />}
-                field="unique_selling_points"
-                items={company.unique_selling_points}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                emptyMessage="Nenhum diferencial identificado"
-              />
-            </div>
-          </div>
-
-          {/* Leadership & News */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <div>
-              <EditableList
-                title="Executivos-Chave"
-                icon={<Users className="w-4 h-4" />}
-                field="key_executives"
-                items={company.key_executives}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                emptyMessage="Nenhum executivo identificado"
-              />
-            </div>
-            <div>
-              <EditableList
-                title="Notícias Recentes"
-                icon={<FileText className="w-4 h-4" />}
-                field="recent_news"
-                items={company.recent_news}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                emptyMessage="Nenhuma notícia recente"
-              />
-            </div>
-          </div>
-
-          <Section title="História da Empresa" icon={<Calendar className="w-4 h-4" />}>
-            <EditableField
-              label="História da Empresa"
-              field="company_history"
-              value={company.company_history}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              type="textarea"
-              placeholder="História e marcos importantes da empresa"
-            />
-          </Section>
-
-          {/* SWOT Extended */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            <EditableList
-              title="Oportunidades"
-              icon={<TrendingUp className="w-4 h-4" />}
-              field="opportunities"
-              items={company.opportunities}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              emptyMessage="Nenhuma oportunidade identificada"
-              variant="success"
-            />
-            <EditableList
-              title="Ameaças"
-              icon={<AlertTriangle className="w-4 h-4" />}
-              field="threats"
-              items={company.threats}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              emptyMessage="Nenhuma ameaça identificada"
-              variant="warning"
-            />
-            <EditableList
-              title="Desafios Estratégicos"
-              icon={<Target className="w-4 h-4" />}
-              field="strategic_challenges"
-              items={company.strategic_challenges}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              emptyMessage="Nenhum desafio identificado"
-            />
-          </div>
-
-          {/* Competitive Intelligence */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <div>
-              <EditableList
-                title="Detalhes dos Competidores"
-                icon={<Target className="w-4 h-4" />}
-                field="competitor_details"
-                items={company.competitor_details}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                emptyMessage="Nenhum detalhe de competidor"
-              />
-            </div>
-            <Section title="Vantagem Competitiva" icon={<Shield className="w-4 h-4" />}>
-              <EditableField
-                label="Vantagem Competitiva"
-                field="competitive_advantage"
-                value={company.competitive_advantage}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                type="textarea"
-                placeholder="Vantagem competitiva da empresa"
-              />
-              <EditableField
-                label="Market Share"
-                field="market_share"
-                value={company.market_share}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                placeholder="Participação de mercado"
-              />
-            </Section>
-          </div>
-
-          {/* Market Sizing */}
-          <Section title="Tamanho de Mercado" icon={<TrendingUp className="w-4 h-4" />}>
-            <EditableField
-              label="TAM (Total Addressable Market)"
-              field="tam_estimate"
-              value={company.tam_estimate}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              type="textarea"
-              placeholder="Estimativa do mercado total endereçável"
-            />
-            <EditableField
-              label="SAM (Serviceable Available Market)"
-              field="sam_estimate"
-              value={company.sam_estimate}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              type="textarea"
-              placeholder="Estimativa do mercado disponível"
-            />
-            <EditableField
-              label="SOM (Serviceable Obtainable Market)"
-              field="som_estimate"
-              value={company.som_estimate}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              type="textarea"
-              placeholder="Estimativa do mercado obtível"
-            />
-          </Section>
         </div>
       )}
 
