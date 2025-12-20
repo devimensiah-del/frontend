@@ -1,4 +1,5 @@
 export * from './enrichment-status'
+export * from './enrichment-steps'
 export * from './company-card'
 export * from './company-info'
 export * from './company-submissions'

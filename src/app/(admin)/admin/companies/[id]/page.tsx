@@ -3,13 +3,13 @@
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAdminCompany, useUpdateAdminCompany, useAnalyzeChallenge, useChallenges, useUpdateVisibility, useGenerateAccessCode } from '@/lib/hooks'
-import { useReEnrichCompany } from '@/lib/hooks/use-companies'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ReAnalyzeDialog } from '@/components/features/admin/re-analyze-dialog'
+import { EnrichmentSteps } from '@/components/features/company'
 import {
   getChallengeType,
   getCategoryInfo,
@@ -480,7 +480,6 @@ export default function CompanyDetailPage({
   const analyzeChallenge = useAnalyzeChallenge()
   const updateVisibility = useUpdateVisibility()
   const generateAccessCode = useGenerateAccessCode()
-  const reEnrich = useReEnrichCompany()
 
   const [editMode, setEditMode] = useState(false)
   const [formData, setFormData] = useState<Record<string, unknown>>({})
@@ -1049,36 +1048,8 @@ export default function CompanyDetailPage({
       {/* Tab Content: Enriquecimento */}
       {activeTab === 'enriquecimento' && (
         <div className="space-y-6">
-          {/* Enrichment Status Header */}
-          <div className="flex items-center justify-between p-4 bg-white border border-line rounded">
-            <div className="flex items-center gap-4">
-              {getEnrichmentBadge(company.enrichment_status)}
-              {company.enrichment_completed_at && (
-                <span className="text-sm text-muted-foreground">
-                  Concluído em: {new Date(company.enrichment_completed_at).toLocaleString('pt-BR')}
-                </span>
-              )}
-              {company.enrichment_error && (
-                <span className="text-sm text-error">
-                  Erro: {company.enrichment_error}
-                </span>
-              )}
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => reEnrich.mutate(company.id)}
-              disabled={reEnrich.isPending || company.enrichment_status === 'processing'}
-              className="gap-1.5"
-            >
-              {reEnrich.isPending ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <RefreshCw className="w-3.5 h-3.5" />
-              )}
-              Re-enriquecer
-            </Button>
-          </div>
+          {/* 3-Step Enrichment Progress */}
+          <EnrichmentSteps companyId={company.id} legacyStatus={company.enrichment_status} />
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {/* Contexto da Indústria */}

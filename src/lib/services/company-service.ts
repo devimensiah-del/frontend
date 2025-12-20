@@ -1,5 +1,5 @@
 import api from '@/lib/api'
-import type { Company, Challenge, CreateCompanyRequest } from '@/lib/types'
+import type { Company, Challenge, CreateCompanyRequest, CompanyEnrichmentStatus, TriggerEnrichmentResponse } from '@/lib/types'
 
 export const companyService = {
   async create(data: CreateCompanyRequest): Promise<Company> {
@@ -39,5 +39,21 @@ export const companyService = {
   async getChallenges(companyId: string): Promise<Challenge[]> {
     const response = await api.get<{ challenges: Challenge[] }>(`/companies/${companyId}/challenges`)
     return response.data.challenges
+  },
+
+  // 3-Step Enrichment
+  async getEnrichmentStatus(id: string): Promise<CompanyEnrichmentStatus> {
+    const response = await api.get<CompanyEnrichmentStatus>(`/companies/${id}/enrichment-status`)
+    return response.data
+  },
+
+  async triggerStep2(id: string): Promise<TriggerEnrichmentResponse> {
+    const response = await api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step2`)
+    return response.data
+  },
+
+  async triggerStep3(id: string): Promise<TriggerEnrichmentResponse> {
+    const response = await api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step3`)
+    return response.data
   },
 }

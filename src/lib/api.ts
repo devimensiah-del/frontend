@@ -1,6 +1,8 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import type {
   Company,
+  CompanyEnrichmentStatus,
+  TriggerEnrichmentResponse,
   Challenge,
   ChallengeCategory,
   ChallengeType,
@@ -136,6 +138,19 @@ export const companiesApi = {
   // Get company with challenges included
   getWithChallenges: (id: string) =>
     api.get<{ company: Company & { challenges: Challenge[] } }>(`/companies/${id}?include=challenges`),
+
+  // 3-Step Enrichment
+  // Get enrichment status for all steps
+  getEnrichmentStatus: (id: string) =>
+    api.get<CompanyEnrichmentStatus>(`/companies/${id}/enrichment-status`),
+
+  // Trigger Step 2 enrichment (business model)
+  triggerStep2: (id: string) =>
+    api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step2`),
+
+  // Trigger Step 3 enrichment (competitive intelligence)
+  triggerStep3: (id: string) =>
+    api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step3`),
 }
 
 // ============================================================================
