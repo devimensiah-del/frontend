@@ -266,7 +266,7 @@ interface EditableFieldProps {
   formData: Record<string, unknown>
   onChange: (field: string, value: string | number | null) => void
   icon?: React.ReactNode
-  type?: 'text' | 'number' | 'url' | 'textarea'
+  type?: 'text' | 'number' | 'url' | 'email' | 'textarea'
   placeholder?: string
 }
 
@@ -319,6 +319,13 @@ function EditableField({
               href={value.toString().startsWith('http') ? value.toString() : `https://${value}`}
               target="_blank"
               rel="noopener noreferrer"
+              className="text-gold-600 hover:underline break-all"
+            >
+              {value}
+            </a>
+          ) : type === 'email' && value ? (
+            <a
+              href={`mailto:${value}`}
               className="text-gold-600 hover:underline break-all"
             >
               {value}
@@ -825,6 +832,7 @@ export default function CompanyDetailPage({
                     formData={formData}
                     onChange={handleFieldChange}
                     icon={<Mail className="w-4 h-4" />}
+                    type="email"
                   />
                 </div>
               </Section>
