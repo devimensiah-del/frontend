@@ -10,6 +10,10 @@ import type {
   Submission,
   User,
 } from './types'
+import type {
+  CreateSubmissionRequest,
+  CreateSubmissionResponse,
+} from './types/api-responses'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
 
@@ -212,30 +216,11 @@ export const analysisApi = {
 }
 
 // ============================================================================
-// Submissions API (for legacy flows and admin)
+// Submissions API
 // ============================================================================
 
-export interface CreateSubmissionRequest {
-  companyName: string
-  challengeCategory: ChallengeCategory
-  challengeType: ChallengeType
-  businessChallenge: string
-  cnpj?: string
-  industry?: string
-  companySize?: string
-  website?: string
-  additionalInfo?: string
-}
-
-export interface CreateSubmissionResponse {
-  submission: {
-    id: string
-    companyId: string
-    challengeId: string
-    createdAt: string
-    updatedAt: string
-  }
-}
+// Types moved to lib/types/api-responses.ts for single source of truth
+export type { CreateSubmissionRequest, CreateSubmissionResponse } from './types/api-responses'
 
 export const submissionsApi = {
   // Create submission (public endpoint)

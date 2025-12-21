@@ -15,7 +15,7 @@ export default function LandingPage() {
       <ProblemsSection />
       <ProcessSection />
       <SolutionSection />
-      <PipelineSection />
+      {/* <PipelineSection /> */}
       <SubmitSection />
       {/* <RoadmapSection /> */}
       <TestimonialsSection />

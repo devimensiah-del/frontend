@@ -34,22 +34,24 @@ export interface ApiError {
 export interface CreateSubmissionRequest {
   // Required fields
   companyName: string
-  challengeCategory: 'growth' | 'transform' | 'transition' | 'compete' | 'funding'
-  challengeType: string
-  businessChallenge: string
-  // Optional company fields
-  cnpj?: string
-  industry?: string
-  companySize?: string
+  contactName: string
+  contactEmail: string
+  contactPhone: string
+  // Website: required unless hasNoWebsite is true
   website?: string
-  // Additional contact and business context (JSON string)
-  additionalInfo?: string
+  hasNoWebsite?: boolean
+  // Optional
+  cnpj?: string
 }
 
-// Create submission response
+// Create submission response - backend returns wrapped in "submission" key
 export interface CreateSubmissionResponse {
-  submission_id: string
-  message: string
+  submission: {
+    id: string
+    companyId: string
+    createdAt: string
+    updatedAt: string
+  }
 }
 
 // Create company request
