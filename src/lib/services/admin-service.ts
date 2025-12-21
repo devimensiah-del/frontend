@@ -190,4 +190,39 @@ export const adminService = {
     const response = await api.get<SystemMetrics>('/admin/metrics')
     return response.data
   },
+
+  // ===== CNPJ Duplicates Management =====
+  async listCNPJDuplicates(): Promise<{ duplicates: CNPJDuplicateReview[] }> {
+    const response = await api.get<{ duplicates: CNPJDuplicateReview[] }>('/admin/companies/duplicates')
+    return response.data
+  },
+
+  async mergeCompanies(targetId: string, sourceId: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>(`/admin/companies/${targetId}/merge`, {
+      source_id: sourceId,
+    })
+    return response.data
+  },
+}
+
+// Types for CNPJ duplicate review
+export interface CNPJDuplicateReview {
+  id: string
+  cnpj_normalized: string
+  older_company_id: string
+  newer_company_id: string
+  older_company?: CompanyBasicInfo
+  newer_company?: CompanyBasicInfo
+  created_at: string
+  reviewed_at?: string
+  reviewed_by?: string
+  action_taken?: 'merged' | 'kept_separate'
+  notes?: string
+}
+
+export interface CompanyBasicInfo {
+  id: string
+  name: string
+  cnpj?: string
+  created_at: string
 }

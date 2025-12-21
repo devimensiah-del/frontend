@@ -221,3 +221,29 @@ export function useGenerateAccessCode() {
     },
   })
 }
+
+// ===== CNPJ Duplicates Hooks =====
+export function useCNPJDuplicates() {
+  return useQuery({
+    queryKey: ['admin', 'cnpj-duplicates'],
+    queryFn: () => adminService.listCNPJDuplicates(),
+    staleTime: 60 * 1000, // 1 minute
+  })
+}
+
+export function useMergeCompanies() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ targetId, sourceId }: { targetId: string; sourceId: string }) =>
+      adminService.mergeCompanies(targetId, sourceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'cnpj-duplicates'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'companies'] })
+      toast.success('Empresas mescladas com sucesso')
+    },
+    onError: () => {
+      toast.error('Erro ao mesclar empresas')
+    },
+  })
+}

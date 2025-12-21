@@ -6,11 +6,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { AxiosError } from 'axios'
+import { ArrowRight, Loader2, AlertCircle, LogIn } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
   Select,
   SelectContent,
@@ -123,7 +126,16 @@ export function SubmitSection() {
 
   const challengeCategory = watch('challenge_category')
 
+  // State for duplicate company error
+  const [duplicateError, setDuplicateError] = useState<{
+    companyName?: string
+    message?: string
+  } | null>(null)
+
   const onSubmit = async (data: FormData) => {
+    // Clear previous duplicate error
+    setDuplicateError(null)
+
     try {
       // Build additionalInfo JSON string for contact details
       const additionalInfoData = {
@@ -154,7 +166,17 @@ export function SubmitSection() {
 
       await createSubmission.mutateAsync(requestData)
       router.push('/obrigado')
-    } catch {
+    } catch (error) {
+      // Check for duplicate submitter error
+      if (error instanceof AxiosError && error.response?.data?.code === 'DUPLICATE_SUBMITTER') {
+        const details = error.response.data.details
+        setDuplicateError({
+          companyName: details?.company_name,
+          message: error.response.data.error,
+        })
+        return
+      }
+
       toast.error('Erro ao enviar', {
         description: 'Ocorreu um erro ao processar sua solicitação. Tente novamente.',
       })
@@ -175,6 +197,31 @@ export function SubmitSection() {
               Preencha os dados abaixo para iniciar nossa análise híbrida (IA + IH).
             </p>
           </div>
+
+          {/* Duplicate company error alert */}
+          {duplicateError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Empresa já cadastrada</AlertTitle>
+              <AlertDescription className="space-y-3">
+                <p>
+                  {duplicateError.companyName
+                    ? `A empresa "${duplicateError.companyName}" já foi submetida com este email.`
+                    : duplicateError.message || 'Esta empresa já foi cadastrada com este email.'}
+                </p>
+                <p className="text-sm">
+                  Para acompanhar sua análise, faça login na sua conta.
+                </p>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-gold-600 hover:text-gold-700 hover:underline"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Fazer login
+                </Link>
+              </AlertDescription>
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Required Fields */}
