@@ -1,5 +1,6 @@
 export * from './enrichment-status'
 export * from './enrichment-steps'
+export { Step1Card, Step2Card, Step3Card, EnrichmentSteps } from './enrichment-steps'
 export * from './company-card'
 export * from './company-info'
 export * from './company-submissions'

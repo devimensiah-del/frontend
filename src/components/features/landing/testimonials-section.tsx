@@ -3,17 +3,45 @@ import { Quote } from 'lucide-react'
 const testimonials = [
   {
     quote:
-      'Renato alia expertise em conselhos com IA estratégica — impulsionando o futuro da governança das empresas com clareza e impacto. Recomendo.',
-    author: 'Felipe Figueira',
-    role: 'Coordenador Geral das Comissões Temáticas',
+      'Renato combina profunda experiência com IA aplicada à estratégia — transformando decisões da Associação Despertar. Clareza, ritmo e resultados. Recomendo com convicção.',
+    author: 'Rodolfo Villela Marino',
+    role: 'Co-CEO & Diretor Executivo, Itaúsa',
+    company: 'Presidente, Associação Comunitária Despertar',
+  },
+  {
+    quote:
+      'Com uma leitura precisa sobre o caos do ambiente de negócios atual e um domínio avançado do uso da Inteligência Artificial como alavanca de transformação, Renato tem a capacidade rara de transformar ameaças em oportunidades concretas. Sua presença acrescenta profundidade estratégica, clareza e provocação intelectual a qualquer conselho que busque inovação, resiliência e visão de longo prazo.',
+    author: 'Farias Souza',
+    role: 'CEO',
     company: 'Board Academy',
   },
   {
     quote:
-      'Renato combina profunda experiência com IA aplicada à estratégia — transformando decisões da Associação Despertar. Clareza, ritmo e resultados. Recomendo com convicção.',
-    author: 'Rodolfo Villela Marino',
-    role: 'Presidente',
-    company: 'Associação Despertar',
+      'O conceito de NeoGovernança que Renato propõe me motivou a convidá-lo para ser Diretor de Governança e implementar um conselho consultivo na Federação Assespro-SP. Juntos estamos trabalhando na visão de longo prazo com governança voltada para o futuro.',
+    author: 'Marco Carvalho',
+    role: 'Presidente do Conselho Consultivo',
+    company: 'Federação ASSESPRO-SP',
+  },
+  {
+    quote:
+      'Renato alia expertise em conselhos com IA estratégica — impulsionando o futuro da governança das empresas com clareza e impacto. Recomendo.',
+    author: 'Felipe Figueira',
+    role: 'Coordenador das Comissões Temáticas',
+    company: 'Board Academy',
+  },
+  {
+    quote:
+      'Renato está com a Vallen desde a construção de nosso planejamento estratégico 2025. Sua contribuição no conselho, para a manutenção do propósito e governança são sempre valiosas, baseadas em sua experiência e enriquecidas com o uso de inteligência artificial.',
+    author: 'Thalita Mendes',
+    role: 'Fundadora',
+    company: 'Vallen Clinic',
+  },
+  {
+    quote:
+      'O aconselhamento do Renato foi fundamental para expandir a Autonomia do Movimento no mercado fitness. Suas orientações sobre o uso estratégico de IA me ajudaram a estruturar soluções inovadoras trazendo clareza e direção para o crescimento do negócio.',
+    author: 'Gui Cintra',
+    role: 'Fundador',
+    company: 'Autonomia do Movimento',
   },
 ]
 

@@ -8,12 +8,6 @@ const founders = [
     bio: 'Com quase 30 anos de trajetória em conselhos, inovação e liderança com propósito, Renato combina uma visão estratégica rara com a capacidade de traduzir complexidade em ação. Cofundador da 10xMentorAI e da IMENSIAH, atua na intersecção entre governança e inteligência artificial, ajudando líderes a aplicarem tecnologia com sabedoria.',
   },
   {
-    name: 'Daniela de Luca Brandão',
-    role: 'Cofundadora da IMENSIAH',
-    image: '/images/landing/dlb.jpg',
-    bio: 'Especialista em estratégia, gestão, arquitetura de processos e finanças, Daniela é a força analítica e criativa por trás da IMENSIAH. Sua trajetória une raciocínio estruturado e pensamento crítico com uma abordagem humana e inovadora para resolver problemas complexos.',
-  },
-  {
     name: 'Renato DAP',
     role: 'Cofundador da IMENSIAH',
     image: '/images/landing/rdap.jpg',
