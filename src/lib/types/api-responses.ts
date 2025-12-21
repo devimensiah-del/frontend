@@ -60,6 +60,8 @@ export interface CreateCompanyRequest {
   industry?: string
   company_size?: string
   location?: string
+  target_market?: string
+  funding_stage?: string
 }
 
 // Framework CRUD types

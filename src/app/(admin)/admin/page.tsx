@@ -1,44 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { useAdminCompanies } from '@/lib/hooks'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Building2, AlertCircle, CheckCircle2, Clock, Loader2, ChevronRight } from 'lucide-react'
-import type { EnrichmentStatus } from '@/lib/types'
-
-function getEnrichmentBadge(status: EnrichmentStatus) {
-  switch (status) {
-    case 'completed':
-      return (
-        <Badge variant="outline" className="text-success border-success/30 bg-success/10">
-          <CheckCircle2 className="w-3 h-3 mr-1" />
-          Enriquecida
-        </Badge>
-      )
-    case 'processing':
-      return (
-        <Badge variant="outline" className="text-info border-info/30 bg-info/10">
-          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-          Processando
-        </Badge>
-      )
-    case 'failed':
-      return (
-        <Badge variant="outline" className="text-error border-error/30 bg-error/10">
-          <AlertCircle className="w-3 h-3 mr-1" />
-          Falhou
-        </Badge>
-      )
-    default:
-      return (
-        <Badge variant="outline" className="text-warning border-warning/30 bg-warning/10">
-          <Clock className="w-3 h-3 mr-1" />
-          Pendente
-        </Badge>
-      )
-  }
-}
+import { Button } from '@/components/ui/button'
+import { Building2, AlertCircle, ChevronRight, Plus } from 'lucide-react'
+import { CreateCompanyDialog } from '@/components/features/admin/create-company-dialog'
 
 function CompanyCardSkeleton() {
   return (
@@ -57,6 +25,7 @@ function CompanyCardSkeleton() {
 
 export default function AdminPage() {
   const { data, isLoading, error } = useAdminCompanies()
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
   if (error) {
     return (
@@ -84,11 +53,17 @@ export default function AdminPage() {
             Todas as Empresas
           </h1>
         </div>
-        {data?.companies && (
-          <div className="text-sm text-muted-foreground">
-            {data.companies.length} {data.companies.length === 1 ? 'empresa' : 'empresas'}
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {data?.companies && (
+            <div className="text-sm text-muted-foreground">
+              {data.companies.length} {data.companies.length === 1 ? 'empresa' : 'empresas'}
+            </div>
+          )}
+          <Button size="sm" className="gap-1.5" onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="w-3.5 h-3.5" />
+            Nova Empresa
+          </Button>
+        </div>
       </div>
 
       {/* Companies List */}
@@ -114,12 +89,9 @@ export default function AdminPage() {
 
                 {/* Company Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                    <h3 className="text-base lg:text-lg font-medium text-navy-900 truncate group-hover:text-gold-600 transition-colors">
-                      {company.name}
-                    </h3>
-                    {getEnrichmentBadge(company.enrichment_status)}
-                  </div>
+                  <h3 className="text-base lg:text-lg font-medium text-navy-900 truncate group-hover:text-gold-600 transition-colors mb-2">
+                    {company.name}
+                  </h3>
 
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                     {company.industry && (
@@ -168,6 +140,9 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* Create Company Dialog */}
+      <CreateCompanyDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
     </div>
   )
 }
