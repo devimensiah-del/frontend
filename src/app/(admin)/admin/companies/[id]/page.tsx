@@ -1,8 +1,11 @@
 'use client'
 
-import { use, useState, useEffect } from 'react'
+import { use, useState, useEffect, useCallback, useRef } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAdminCompany, useUpdateAdminCompany, useAnalyzeChallenge, useChallenges, useUpdateVisibility, useGenerateAccessCode } from '@/lib/hooks'
+import { useEnrichmentStatus } from '@/lib/hooks/use-companies'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -481,7 +484,12 @@ export default function CompanyDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
   const { data: company, isLoading, error } = useAdminCompany(id)
+  const { data: enrichmentStatus } = useEnrichmentStatus(id)
   const { data: challenges = [], isLoading: challengesLoading } = useChallenges(id)
   const updateCompany = useUpdateAdminCompany()
   const analyzeChallenge = useAnalyzeChallenge()
@@ -493,7 +501,58 @@ export default function CompanyDetailPage({
   const [reAnalyzeOpen, setReAnalyzeOpen] = useState(false)
   const [analyzingChallengeId, setAnalyzingChallengeId] = useState<string | null>(null)
   const [generatingCodeForId, setGeneratingCodeForId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<TabType>('empresa')
+
+  // Tab state from URL search params
+  const tabFromUrl = searchParams.get('tab') as TabType | null
+  const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || 'empresa')
+
+  // Track previous enrichment statuses to detect completion
+  const prevStatusRef = useRef<{
+    step1?: string
+    step2?: string
+    step3?: string
+  }>({})
+
+  // Update URL when tab changes
+  const handleTabChange = useCallback((tab: TabType) => {
+    setActiveTab(tab)
+    setEditMode(false)
+    const newParams = new URLSearchParams(searchParams.toString())
+    newParams.set('tab', tab)
+    router.replace(`?${newParams.toString()}`, { scroll: false })
+  }, [router, searchParams])
+
+  // Sync tab from URL on mount
+  useEffect(() => {
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl)
+    }
+  }, [tabFromUrl])
+
+  // Auto-refresh company data when enrichment step completes
+  useEffect(() => {
+    if (!enrichmentStatus) return
+
+    const prev = prevStatusRef.current
+    const { step1_status, step2_status, step3_status } = enrichmentStatus
+
+    // Check if any step just completed (was 'processing', now 'completed')
+    const step1JustCompleted = prev.step1 === 'processing' && step1_status === 'completed'
+    const step2JustCompleted = prev.step2 === 'processing' && step2_status === 'completed'
+    const step3JustCompleted = prev.step3 === 'processing' && step3_status === 'completed'
+
+    if (step1JustCompleted || step2JustCompleted || step3JustCompleted) {
+      // Refetch company data to get the new enriched fields
+      queryClient.invalidateQueries({ queryKey: ['admin', 'company', id] })
+    }
+
+    // Update previous status ref
+    prevStatusRef.current = {
+      step1: step1_status,
+      step2: step2_status,
+      step3: step3_status,
+    }
+  }, [enrichmentStatus, id, queryClient])
 
   useEffect(() => {
     if (!editMode) {
@@ -674,7 +733,7 @@ export default function CompanyDetailPage({
       <div className="border-b border-line">
         <div className="flex gap-0">
           <button
-            onClick={() => { setActiveTab('empresa'); setEditMode(false); }}
+            onClick={() => handleTabChange('empresa')}
             className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
               activeTab === 'empresa'
                 ? 'border-gold-500 text-navy-900'
@@ -685,7 +744,7 @@ export default function CompanyDetailPage({
             Empresa
           </button>
           <button
-            onClick={() => { setActiveTab('negocio'); setEditMode(false); }}
+            onClick={() => handleTabChange('negocio')}
             className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
               activeTab === 'negocio'
                 ? 'border-gold-500 text-navy-900'
@@ -696,7 +755,7 @@ export default function CompanyDetailPage({
             Negócio
           </button>
           <button
-            onClick={() => { setActiveTab('mercado'); setEditMode(false); }}
+            onClick={() => handleTabChange('mercado')}
             className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
               activeTab === 'mercado'
                 ? 'border-gold-500 text-navy-900'
@@ -707,7 +766,7 @@ export default function CompanyDetailPage({
             Mercado
           </button>
           <button
-            onClick={() => { setActiveTab('analises'); setEditMode(false); }}
+            onClick={() => handleTabChange('analises')}
             className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
               activeTab === 'analises'
                 ? 'border-gold-500 text-navy-900'
@@ -880,45 +939,53 @@ export default function CompanyDetailPage({
 
             {/* Redes Sociais */}
             <Section title="Redes Sociais" icon={<Globe className="w-4 h-4" />} columns={2}>
-              <EditableField
-                label="LinkedIn"
-                field="linkedin_url"
-                value={company.linkedin_url}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                icon={<Linkedin className="w-4 h-4" />}
-                type="url"
-              />
-              <EditableField
-                label="Twitter"
-                field="twitter_handle"
-                value={company.twitter_handle}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                icon={<Twitter className="w-4 h-4" />}
-              />
-              <EditableField
-                label="Instagram"
-                field="instagram_url"
-                value={company.instagram_url}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                icon={<Instagram className="w-4 h-4" />}
-                type="url"
-              />
-              <EditableField
-                label="Facebook"
-                field="facebook_url"
-                value={company.facebook_url}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                icon={<Facebook className="w-4 h-4" />}
-                type="url"
-              />
+              <div className="col-span-full">
+                <EditableField
+                  label="LinkedIn"
+                  field="linkedin_url"
+                  value={company.linkedin_url}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  icon={<Linkedin className="w-4 h-4" />}
+                  type="url"
+                />
+              </div>
+              <div className="col-span-full">
+                <EditableField
+                  label="Twitter"
+                  field="twitter_handle"
+                  value={company.twitter_handle}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  icon={<Twitter className="w-4 h-4" />}
+                />
+              </div>
+              <div className="col-span-full">
+                <EditableField
+                  label="Instagram"
+                  field="instagram_url"
+                  value={company.instagram_url}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  icon={<Instagram className="w-4 h-4" />}
+                  type="url"
+                />
+              </div>
+              <div className="col-span-full">
+                <EditableField
+                  label="Facebook"
+                  field="facebook_url"
+                  value={company.facebook_url}
+                  editMode={editMode}
+                  formData={formData}
+                  onChange={handleFieldChange}
+                  icon={<Facebook className="w-4 h-4" />}
+                  type="url"
+                />
+              </div>
             </Section>
 
             {/* Sócios (from CNPJ registry) */}
