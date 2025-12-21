@@ -74,6 +74,36 @@ export interface SubmissionListItem {
 
 export type EnrichmentStatus = 'pending' | 'processing' | 'completed' | 'failed'
 
+// 3-Step Enrichment Status Response
+// Step 1: Basic Info (automatic at company creation)
+// Step 2: Business Model (human-triggered)
+// Step 3: Competitive Intelligence (human-triggered)
+export interface CompanyEnrichmentStatus {
+  company_id: string
+  step1_status: EnrichmentStatus
+  step1_completed_at?: string
+  step1_error?: string
+  step2_status: EnrichmentStatus
+  step2_completed_at?: string
+  step2_error?: string
+  step3_status: EnrichmentStatus
+  step3_completed_at?: string
+  step3_error?: string
+  can_trigger_step2: boolean
+  can_trigger_step3: boolean
+}
+
+// Response from triggering enrichment step
+export interface TriggerEnrichmentResponse {
+  message: string
+  data: {
+    company_id: string
+    company_name: string
+    step: string
+    status: string
+  }
+}
+
 export interface Company {
   id: string
   name: string
@@ -90,6 +120,7 @@ export interface Company {
   // Enriched data
   foundation_year?: string
   legal_name?: string
+  trade_name?: string                 // Nome fantasia
   headquarters?: string
   sector?: string
   target_audience?: string
@@ -102,6 +133,17 @@ export interface Company {
   competitors?: string[]
   strengths?: string[]
   weaknesses?: string[]
+  // CNPJ Registry data (from casadosdados.com.br)
+  phone?: string                      // Corporate phone
+  email?: string                      // Corporate email
+  cnae_primary?: string               // Primary CNAE (code + description)
+  cnae_codes?: string[]               // All CNAE codes
+  capital_social?: string             // Registered capital (e.g., "R$ 1.000,00")
+  partners?: string[]                 // Partners with roles
+  cnpj_verified?: boolean             // True if data from official CNPJ registry
+  // Geographic context (from Step 2 enrichment)
+  geographic_regions?: string[]       // e.g., ["Brasil", "LATAM"]
+  service_areas?: string[]            // e.g., ["SP", "RJ", "MG"]
   // Industry context (from enrichment)
   industry_growth_rate?: string       // e.g., "+12% CAGR"
   industry_trends?: string[]          // e.g., ["AI adoption", "Sustainability"]
@@ -128,6 +170,8 @@ export interface Company {
   // Social links
   linkedin_url?: string
   twitter_handle?: string
+  instagram_url?: string
+  facebook_url?: string
   // Enrichment status
   enrichment_status: EnrichmentStatus
   enrichment_completed_at?: string

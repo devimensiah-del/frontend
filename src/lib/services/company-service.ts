@@ -1,5 +1,5 @@
 import api from '@/lib/api'
-import type { Company, Challenge, CreateCompanyRequest } from '@/lib/types'
+import type { Company, Challenge, CreateCompanyRequest, CompanyEnrichmentStatus, TriggerEnrichmentResponse } from '@/lib/types'
 
 export const companyService = {
   async create(data: CreateCompanyRequest): Promise<Company> {
@@ -26,8 +26,14 @@ export const companyService = {
     await api.delete(`/companies/${id}`)
   },
 
-  async reEnrich(id: string): Promise<{ message: string; data?: { company_id: string; status: string; fields_updated: number; remaining_today: number } }> {
-    const response = await api.post<{ message: string; data?: { company_id: string; status: string; fields_updated: number; remaining_today: number } }>(`/admin/companies/${id}/re-enrich`)
+  async reEnrich(id: string): Promise<TriggerEnrichmentResponse> {
+    // Now uses non-admin endpoint with rate limiting (10/day per company)
+    const response = await api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step1/retry`)
+    return response.data
+  },
+
+  async retryStep1(id: string): Promise<TriggerEnrichmentResponse> {
+    const response = await api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step1/retry`)
     return response.data
   },
 
@@ -39,5 +45,31 @@ export const companyService = {
   async getChallenges(companyId: string): Promise<Challenge[]> {
     const response = await api.get<{ challenges: Challenge[] }>(`/companies/${companyId}/challenges`)
     return response.data.challenges
+  },
+
+  // 3-Step Enrichment
+  async getEnrichmentStatus(id: string): Promise<CompanyEnrichmentStatus> {
+    const response = await api.get<CompanyEnrichmentStatus>(`/companies/${id}/enrichment-status`)
+    return response.data
+  },
+
+  async triggerStep2(id: string): Promise<TriggerEnrichmentResponse> {
+    const response = await api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step2`)
+    return response.data
+  },
+
+  async triggerStep3(id: string): Promise<TriggerEnrichmentResponse> {
+    const response = await api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step3`)
+    return response.data
+  },
+
+  async retryStep2(id: string): Promise<TriggerEnrichmentResponse> {
+    const response = await api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step2/retry`)
+    return response.data
+  },
+
+  async retryStep3(id: string): Promise<TriggerEnrichmentResponse> {
+    const response = await api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step3/retry`)
+    return response.data
   },
 }
