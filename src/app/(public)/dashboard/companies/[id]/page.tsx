@@ -115,9 +115,17 @@ export default function CompanyDetailPage() {
     }
   }, [isUserError, router])
 
-  // Redirect to set-password if needed
+  // Redirect admins to admin dashboard
   useEffect(() => {
-    if (userData?.user && !userData.user.passwordSet) {
+    const role = userData?.user?.role
+    if (role === 'admin' || role === 'super_admin') {
+      router.push('/admin')
+    }
+  }, [userData, router])
+
+  // Redirect to set-password if needed (only if passwordSet is explicitly false)
+  useEffect(() => {
+    if (userData?.user && userData.user.passwordSet === false) {
       router.push('/set-password')
     }
   }, [userData, router])

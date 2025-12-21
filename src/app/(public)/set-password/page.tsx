@@ -48,10 +48,15 @@ export default function SetPasswordPage() {
     }
   }, [userData])
 
-  // If user is fully authenticated (has password), redirect to dashboard
+  // If user is fully authenticated (has password), redirect appropriately
   useEffect(() => {
-    if (userData?.user?.passwordSet) {
-      router.push('/dashboard')
+    if (userData?.user?.passwordSet === true) {
+      const role = userData.user.role
+      if (role === 'admin' || role === 'super_admin') {
+        router.push('/admin')
+      } else {
+        router.push('/dashboard')
+      }
     }
   }, [userData, router])
 

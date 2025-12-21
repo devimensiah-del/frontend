@@ -19,7 +19,8 @@ export function useLogin() {
       toast.success('Login realizado com sucesso')
 
       // Check if user needs to set password (auto-created users)
-      if (!data.user?.passwordSet) {
+      // Only redirect if passwordSet is explicitly false
+      if (data.user?.passwordSet === false) {
         router.push('/set-password')
         return
       }

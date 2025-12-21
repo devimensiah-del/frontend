@@ -96,9 +96,17 @@ export default function DashboardPage() {
     }
   }, [isUserError, router])
 
-  // Check if user needs to set password
+  // Redirect admins to admin dashboard
   useEffect(() => {
-    if (userData?.user && !userData.user.passwordSet) {
+    const role = userData?.user?.role
+    if (role === 'admin' || role === 'super_admin') {
+      router.push('/admin')
+    }
+  }, [userData, router])
+
+  // Check if user needs to set password (only for non-admin users with passwordSet explicitly false)
+  useEffect(() => {
+    if (userData?.user && userData.user.passwordSet === false) {
       router.push('/set-password')
     }
   }, [userData, router])
