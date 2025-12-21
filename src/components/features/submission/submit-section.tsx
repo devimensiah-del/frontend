@@ -26,7 +26,6 @@ const formSchema = z.object({
   company_name: z.string().min(1, 'Nome da empresa é obrigatório'),
   contact_name: z.string().min(1, 'Seu nome é obrigatório'),
   contact_email: z.string().email('Email inválido'),
-  contact_phone: z.string().min(1, 'Celular é obrigatório'),
   // Website: required unless has_no_website is true
   website: z.string().optional(),
   has_no_website: z.boolean().default(false),
@@ -64,7 +63,6 @@ export function SubmitSection() {
       company_name: '',
       contact_name: '',
       contact_email: '',
-      contact_phone: '',
       website: '',
       has_no_website: false,
       cnpj: '',
@@ -89,14 +87,21 @@ export function SubmitSection() {
         companyName: data.company_name,
         contactName: data.contact_name,
         contactEmail: data.contact_email,
-        contactPhone: data.contact_phone,
         website: data.has_no_website ? undefined : (data.website || undefined),
         hasNoWebsite: data.has_no_website,
         cnpj: data.cnpj || undefined,
       }
 
-      await createSubmission.mutateAsync(requestData)
-      router.push('/obrigado')
+      const response = await createSubmission.mutateAsync(requestData)
+
+      // If auth is provided, user was auto-created - save token and go to dashboard
+      if (response.auth) {
+        localStorage.setItem('auth_token', response.auth.access_token)
+        router.push('/dashboard')
+      } else {
+        // Already authenticated user - go to dashboard
+        router.push('/dashboard')
+      }
     } catch (error) {
       // Check for duplicate submitter error
       if (error instanceof AxiosError && error.response?.data?.code === 'DUPLICATE_SUBMITTER') {
@@ -104,6 +109,14 @@ export function SubmitSection() {
         setDuplicateError({
           companyName: details?.company_name,
           message: error.response.data.error,
+        })
+        return
+      }
+
+      // Check for user already exists error
+      if (error instanceof AxiosError && error.response?.data?.code === 'USER_EXISTS') {
+        setDuplicateError({
+          message: error.response.data.message || 'Este email já está cadastrado. Faça login para continuar.',
         })
         return
       }
@@ -122,10 +135,10 @@ export function SubmitSection() {
 
           <div className="text-center mb-10">
             <h2 className="text-2xl lg:text-3xl font-medium text-navy-900 mb-2">
-              Solicitar Diagnóstico Estratégico
+              Experimente Agora
             </h2>
             <p className="text-muted-foreground">
-              Preencha os dados para iniciar a análise da sua empresa.
+              Comece a usar nossa plataforma em minutos com dados mínimos.
             </p>
           </div>
 
@@ -204,26 +217,6 @@ export function SubmitSection() {
               )}
             </div>
 
-            {/* Contact Phone */}
-            <div>
-              <Label htmlFor="contact_phone">Celular *</Label>
-              <Input
-                id="contact_phone"
-                type="tel"
-                placeholder="(11) 98765-4321"
-                {...register('contact_phone')}
-                className="mt-1"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Recomendamos WhatsApp para contato mais rápido
-              </p>
-              {errors.contact_phone && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.contact_phone.message}
-                </p>
-              )}
-            </div>
-
             {/* Website */}
             <div>
               <Label htmlFor="website">Website da Empresa {!hasNoWebsite && '*'}</Label>
@@ -288,14 +281,11 @@ export function SubmitSection() {
                   </>
                 ) : (
                   <>
-                    Enviar Solicitação
+                    Iniciar
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </>
                 )}
               </Button>
-              <p className="text-xs text-center text-muted-foreground mt-4">
-                Seus dados são tratados com estrita confidencialidade.
-              </p>
             </div>
           </form>
         </div>

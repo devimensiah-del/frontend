@@ -14,6 +14,7 @@ export interface User {
   email: string
   fullName: string
   role: UserRole
+  passwordSet: boolean // false for auto-created users who need to set password
   createdAt: string
   updatedAt: string
 }

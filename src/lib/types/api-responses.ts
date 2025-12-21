@@ -36,7 +36,8 @@ export interface CreateSubmissionRequest {
   companyName: string
   contactName: string
   contactEmail: string
-  contactPhone: string
+  // Optional contact phone (removed from required for simpler landing page)
+  contactPhone?: string
   // Website: required unless hasNoWebsite is true
   website?: string
   hasNoWebsite?: boolean
@@ -44,7 +45,19 @@ export interface CreateSubmissionRequest {
   cnpj?: string
 }
 
+// Temporary auth for auto-created users (1-hour session)
+export interface TemporaryAuth {
+  access_token: string
+  expires_in: number // 3600 seconds (1 hour)
+  user: {
+    id: string
+    email: string
+    role: string
+  }
+}
+
 // Create submission response - backend returns wrapped in "submission" key
+// May include auth if user was auto-created during submission
 export interface CreateSubmissionResponse {
   submission: {
     id: string
@@ -52,6 +65,7 @@ export interface CreateSubmissionResponse {
     createdAt: string
     updatedAt: string
   }
+  auth?: TemporaryAuth // Present when user was auto-created
 }
 
 // Create company request

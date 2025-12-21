@@ -17,11 +17,29 @@ export function useLogin() {
       document.cookie = `sb-access-token=${data.access_token}; path=/; max-age=${data.expires_in}`
       queryClient.setQueryData(['auth', 'me'], { user: data.user })
       toast.success('Login realizado com sucesso')
-      // Redirect admins to admin dashboard, users to home (dashboard not implemented yet)
+
+      // Check if user needs to set password (auto-created users)
+      if (!data.user?.passwordSet) {
+        router.push('/set-password')
+        return
+      }
+
+      // Redirect admins to admin dashboard, users to dashboard
       const isAdmin = data.user?.role === 'admin' || data.user?.role === 'super_admin'
-      router.push(isAdmin ? '/admin' : '/')
+      router.push(isAdmin ? '/admin' : '/dashboard')
     },
-    onError: () => {
+    onError: (error: any) => {
+      // Handle PASSWORD_NOT_SET error - redirect to set-password with email
+      if (error?.response?.data?.code === 'PASSWORD_NOT_SET') {
+        const email = error?.response?.data?.email
+        if (email) {
+          // Store email for set-password page
+          sessionStorage.setItem('set_password_email', email)
+        }
+        toast.info('Configure sua senha para continuar')
+        router.push('/set-password')
+        return
+      }
       toast.error('Falha no login. Verifique suas credenciais.')
     },
   })
@@ -135,6 +153,32 @@ export function useUpdateProfile() {
     },
     onError: () => {
       toast.error('Falha ao atualizar perfil')
+    },
+  })
+}
+
+/**
+ * Hook to set password for auto-created users
+ * Used when users return after their temporary session expires
+ */
+export function useSetPassword() {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (newPassword: string) => authService.setPassword(newPassword),
+    onSuccess: (data) => {
+      localStorage.setItem('auth_token', data.access_token)
+      document.cookie = `sb-access-token=${data.access_token}; path=/; max-age=${data.expires_in}`
+      queryClient.setQueryData(['auth', 'me'], { user: data.user })
+      // Clear stored email
+      sessionStorage.removeItem('set_password_email')
+      toast.success('Senha configurada com sucesso!')
+      // Redirect to dashboard
+      router.push('/dashboard')
+    },
+    onError: () => {
+      toast.error('Falha ao configurar senha. Tente novamente.')
     },
   })
 }

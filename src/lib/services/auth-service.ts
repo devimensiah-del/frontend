@@ -55,4 +55,15 @@ export const authService = {
     })
     return response.data
   },
+
+  /**
+   * Set password for auto-created users (passwordSet: false)
+   * This is used when users return after the temporary session expires
+   */
+  async setPassword(newPassword: string): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/set-password', {
+      new_password: newPassword,
+    })
+    return response.data
+  },
 }
