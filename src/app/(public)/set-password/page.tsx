@@ -60,6 +60,13 @@ export default function SetPasswordPage() {
     }
   }, [userData, router])
 
+  // If no email available and not loading, redirect to home
+  useEffect(() => {
+    if (!isLoadingUser && !email && !userData?.user) {
+      router.push('/')
+    }
+  }, [isLoadingUser, email, userData, router])
+
   const onSubmit = async (data: SetPasswordFormData) => {
     await setPassword.mutateAsync(data.password)
   }
@@ -83,20 +90,24 @@ export default function SetPasswordPage() {
             Configure sua Senha
           </h1>
           <p className="text-muted-foreground">
-            {email ? (
-              <>
-                Configure uma senha para acessar sua conta
-                <br />
-                <span className="text-navy-900 font-medium">{email}</span>
-              </>
-            ) : (
-              'Configure uma senha para acessar sua conta'
-            )}
+            Crie uma senha para acessar sua conta no futuro
           </p>
         </div>
 
         <div className="bg-white p-8 border border-line shadow-sm">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Email field - read only */}
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email || ''}
+                disabled
+                className="mt-1 bg-muted"
+              />
+            </div>
+
             <div>
               <Label htmlFor="password">Nova Senha</Label>
               <div className="relative mt-1">

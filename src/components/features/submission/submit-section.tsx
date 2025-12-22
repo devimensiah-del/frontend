@@ -94,10 +94,12 @@ export function SubmitSection() {
 
       const response = await createSubmission.mutateAsync(requestData)
 
-      // If auth is provided, user was auto-created - save token and go to dashboard
+      // If auth is provided, user was auto-created - save token and go to set-password
       if (response.auth) {
         localStorage.setItem('auth_token', response.auth.access_token)
-        router.push('/dashboard')
+        // Store email for set-password page (read-only display)
+        sessionStorage.setItem('set_password_email', response.auth.user.email)
+        router.push('/set-password')
       } else {
         // Already authenticated user - go to dashboard
         router.push('/dashboard')
