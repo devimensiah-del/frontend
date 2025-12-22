@@ -453,6 +453,70 @@ export interface FrameworkMeta {
 }
 
 // ============================================================================
+// Framework V2 Types (Database-driven frameworks)
+// ============================================================================
+
+export type FrameworkResultStatus = 'pending' | 'processing' | 'completed' | 'failed'
+
+export interface ModelConfig {
+  model: string
+  temperature: number
+  max_tokens: number
+  fallback_model: string
+}
+
+// Framework V2 - database-driven framework configuration
+export interface FrameworkV2 {
+  id: string
+  code: string
+  name: string
+  description?: string
+  layer: number
+  is_base: boolean
+  is_active: boolean
+  prompt_system?: string
+  prompt_user: string
+  prompt_json_template?: string
+  model_config: ModelConfig
+  created_at: string
+  updated_at: string
+}
+
+// Framework result for a company
+export interface FrameworkResult {
+  id: string
+  company_id: string
+  framework_id: string
+  challenge_id?: string
+  result?: Record<string, unknown>
+  status: FrameworkResultStatus
+  error_message?: string
+  version: number
+  is_current: boolean
+  context_hash?: string
+  generated_at?: string
+  created_at: string
+  updated_at: string
+}
+
+// Framework result with framework details
+export interface FrameworkResultWithDetails {
+  result: FrameworkResult
+  framework: FrameworkV2
+}
+
+// Execution plan layer
+export interface ExecutionLayer {
+  layer_number: number
+  frameworks: FrameworkV2[]
+}
+
+// Execution plan for frameworks
+export interface ExecutionPlan {
+  layers: ExecutionLayer[]
+}
+
+// ============================================================================
 // Public Report Types
 // ============================================================================
 
