@@ -100,6 +100,8 @@ export function SubmitSection() {
       // If auth is provided, user was auto-created - save token and go to set-password
       if (response.auth) {
         localStorage.setItem('auth_token', response.auth.access_token)
+        // Set cookie for Next.js middleware auth check
+        document.cookie = `sb-access-token=${response.auth.access_token}; path=/; max-age=${response.auth.expires_in}`
         // Store email for set-password page (read-only display)
         sessionStorage.setItem('set_password_email', response.auth.user.email)
         router.push('/set-password')
