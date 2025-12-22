@@ -62,7 +62,7 @@ export const authService = {
    */
   async setPassword(newPassword: string): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/auth/set-password', {
-      new_password: newPassword,
+      password: newPassword,
     })
     return response.data
   },
