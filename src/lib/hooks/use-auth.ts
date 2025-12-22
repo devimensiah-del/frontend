@@ -169,8 +169,11 @@ export function useSetPassword() {
   return useMutation({
     mutationFn: (newPassword: string) => authService.setPassword(newPassword),
     onSuccess: (data) => {
-      localStorage.setItem('auth_token', data.access_token)
-      document.cookie = `sb-access-token=${data.access_token}; path=/; max-age=${data.expires_in}`
+      const token = data.access_token || (data as any).token
+      const expiresIn = data.expires_in || 86400 // Default 24 hours
+
+      localStorage.setItem('auth_token', token)
+      document.cookie = `sb-access-token=${token}; path=/; max-age=${expiresIn}`
       queryClient.setQueryData(['auth', 'me'], { user: data.user })
       // Clear stored email
       sessionStorage.removeItem('set_password_email')
