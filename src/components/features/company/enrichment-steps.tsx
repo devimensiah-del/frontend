@@ -286,8 +286,8 @@ export function Step2Card({ companyId }: Step2CardProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Show trigger button for pending/failed */}
-          {enrichmentStatus.can_trigger_step2 && !isCompleted && status !== 'processing' && (
+          {/* Show trigger button for pending only */}
+          {enrichmentStatus.can_trigger_step2 && status === 'pending' && (
             <Button
               size="sm"
               variant="architect"
@@ -303,8 +303,8 @@ export function Step2Card({ companyId }: Step2CardProps) {
               Iniciar Enriquecimento
             </Button>
           )}
-          {/* Show re-enrich button for completed */}
-          {isCompleted && (
+          {/* Show re-enrich button for completed or failed */}
+          {(isCompleted || status === 'failed') && (
             <Button
               size="sm"
               variant="outline"
@@ -397,8 +397,8 @@ export function Step3Card({ companyId }: Step3CardProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Show trigger button for pending/failed */}
-          {enrichmentStatus.can_trigger_step3 && !isCompleted && status !== 'processing' && (
+          {/* Show trigger button for pending only */}
+          {enrichmentStatus.can_trigger_step3 && status === 'pending' && (
             <Button
               size="sm"
               variant="architect"
@@ -414,8 +414,8 @@ export function Step3Card({ companyId }: Step3CardProps) {
               Iniciar Enriquecimento
             </Button>
           )}
-          {/* Show re-enrich button for completed */}
-          {isCompleted && (
+          {/* Show re-enrich button for completed or failed */}
+          {(isCompleted || status === 'failed') && (
             <Button
               size="sm"
               variant="outline"
