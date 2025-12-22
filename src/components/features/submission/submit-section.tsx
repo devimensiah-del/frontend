@@ -92,6 +92,9 @@ export function SubmitSection() {
         cnpj: data.cnpj || undefined,
       }
 
+      // Clear any existing auth before submission (fresh start for new user)
+      localStorage.removeItem('auth_token')
+
       const response = await createSubmission.mutateAsync(requestData)
 
       // If auth is provided, user was auto-created - save token and go to set-password
@@ -101,8 +104,9 @@ export function SubmitSection() {
         sessionStorage.setItem('set_password_email', response.auth.user.email)
         router.push('/set-password')
       } else {
-        // Already authenticated user - go to dashboard
-        router.push('/dashboard')
+        // No auth returned - this shouldn't happen for new submissions
+        // Redirect to login as fallback
+        router.push('/login')
       }
     } catch (error) {
       // Check for duplicate submitter error

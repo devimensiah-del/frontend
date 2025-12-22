@@ -90,7 +90,7 @@ export default function SetPasswordPage() {
             Configure sua Senha
           </h1>
           <p className="text-muted-foreground">
-            Crie uma senha para acessar sua conta no futuro
+            Crie uma senha para acessar sua conta
           </p>
         </div>
 
