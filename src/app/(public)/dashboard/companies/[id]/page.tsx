@@ -12,9 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Step1Card, Step2Card, Step3Card } from '@/components/features/company'
-import { FrameworkSteps } from '@/components/features/company/framework-steps'
-import { EditFrameworkResultModal } from '@/components/features/company/edit-framework-result-modal'
-import type { FrameworkResultWithDetails } from '@/lib/types'
+import { StrategicAnalysisPanel } from '@/components/features/company/strategic-analysis-panel'
 import {
   getChallengeType,
   getCategoryInfo,
@@ -439,7 +437,6 @@ export default function CompanyDetailPage({
   const [editMode, setEditMode] = useState(false)
   const [formData, setFormData] = useState<Record<string, unknown>>({})
   const [generatingCodeForId, setGeneratingCodeForId] = useState<string | null>(null)
-  const [editingResult, setEditingResult] = useState<FrameworkResultWithDetails | null>(null)
 
   // Tab state from URL search params
   const tabFromUrl = searchParams.get('tab') as TabType | null
@@ -1288,27 +1285,13 @@ export default function CompanyDetailPage({
           </div>
         )}
 
-        {/* TAB: ESTRATEGIA (Framework V2) */}
+        {/* TAB: ESTRATEGIA (Strategic Analysis) */}
         {activeTab === 'estrategia' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Execute frameworks estrategicos para gerar insights sobre sua empresa.
-              </p>
-            </div>
-
-            <FrameworkSteps
-              companyId={id}
-              onEditResult={setEditingResult}
-            />
-
-            <EditFrameworkResultModal
-              result={editingResult}
-              companyId={id}
-              open={!!editingResult}
-              onOpenChange={(open) => !open && setEditingResult(null)}
-            />
-          </div>
+          <StrategicAnalysisPanel
+            companyId={id}
+            company={company}
+            isAdmin={false}
+          />
         )}
       </div>
     </div>

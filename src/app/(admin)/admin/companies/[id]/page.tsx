@@ -13,9 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ReAnalyzeDialog } from '@/components/features/admin/re-analyze-dialog'
 import { Step1Card, Step2Card, Step3Card } from '@/components/features/company'
-import { FrameworkSteps } from '@/components/features/company/framework-steps'
-import { EditFrameworkResultModal } from '@/components/features/company/edit-framework-result-modal'
-import type { FrameworkResultWithDetails } from '@/lib/types'
+import { StrategicAnalysisPanel } from '@/components/features/company/strategic-analysis-panel'
 import {
   getChallengeType,
   getCategoryInfo,
@@ -504,7 +502,6 @@ export default function CompanyDetailPage({
   const [reAnalyzeOpen, setReAnalyzeOpen] = useState(false)
   const [analyzingChallengeId, setAnalyzingChallengeId] = useState<string | null>(null)
   const [generatingCodeForId, setGeneratingCodeForId] = useState<string | null>(null)
-  const [editingResult, setEditingResult] = useState<FrameworkResultWithDetails | null>(null)
 
   // Tab state from URL search params
   const tabFromUrl = searchParams.get('tab') as TabType | null
@@ -1370,28 +1367,14 @@ export default function CompanyDetailPage({
       )}
 
       {/* ========================================================================
-          TAB: ESTRATÉGIA (Framework V2)
+          TAB: ESTRATÉGIA (Strategic Analysis)
           ======================================================================== */}
       {activeTab === 'estrategia' && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Execute frameworks estratégicos para gerar insights sobre a empresa.
-            </p>
-          </div>
-
-          <FrameworkSteps
-            companyId={id}
-            onEditResult={setEditingResult}
-          />
-
-          <EditFrameworkResultModal
-            result={editingResult}
-            companyId={id}
-            open={!!editingResult}
-            onOpenChange={(open) => !open && setEditingResult(null)}
-          />
-        </div>
+        <StrategicAnalysisPanel
+          companyId={id}
+          company={company}
+          isAdmin={true}
+        />
       )}
 
       {/* Re-Analyze Dialog */}
