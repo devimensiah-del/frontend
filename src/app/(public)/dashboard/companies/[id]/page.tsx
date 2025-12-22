@@ -12,6 +12,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Step1Card, Step2Card, Step3Card } from '@/components/features/company'
+import { FrameworkSteps } from '@/components/features/company/framework-steps'
+import { EditFrameworkResultModal } from '@/components/features/company/edit-framework-result-modal'
+import type { FrameworkResultWithDetails } from '@/lib/types'
 import {
   getChallengeType,
   getCategoryInfo,
@@ -414,7 +417,7 @@ function PageSkeleton() {
   )
 }
 
-type TabType = 'empresa' | 'negocio' | 'mercado' | 'analises'
+type TabType = 'empresa' | 'negocio' | 'mercado' | 'analises' | 'estrategia'
 
 export default function CompanyDetailPage({
   params,
@@ -436,6 +439,7 @@ export default function CompanyDetailPage({
   const [editMode, setEditMode] = useState(false)
   const [formData, setFormData] = useState<Record<string, unknown>>({})
   const [generatingCodeForId, setGeneratingCodeForId] = useState<string | null>(null)
+  const [editingResult, setEditingResult] = useState<FrameworkResultWithDetails | null>(null)
 
   // Tab state from URL search params
   const tabFromUrl = searchParams.get('tab') as TabType | null
@@ -604,7 +608,7 @@ export default function CompanyDetailPage({
               Voltar
             </Link>
 
-            {activeTab !== 'analises' && (
+            {activeTab !== 'analises' && activeTab !== 'estrategia' && (
               <div className="flex items-center gap-2">
                 {editMode ? (
                   <>
@@ -729,6 +733,17 @@ export default function CompanyDetailPage({
                   {visibleChallenges.length}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => handleTabChange('estrategia')}
+              className={`px-4 sm:px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors whitespace-nowrap ${
+                activeTab === 'estrategia'
+                  ? 'border-gold-500 text-navy-900'
+                  : 'border-transparent text-muted-foreground hover:text-navy-700'
+              }`}
+            >
+              <Target className="w-4 h-4 inline-block mr-2" />
+              Estrategia
             </button>
           </div>
         </div>
@@ -1270,6 +1285,29 @@ export default function CompanyDetailPage({
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB: ESTRATEGIA (Framework V2) */}
+        {activeTab === 'estrategia' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Execute frameworks estrategicos para gerar insights sobre sua empresa.
+              </p>
+            </div>
+
+            <FrameworkSteps
+              companyId={id}
+              onEditResult={setEditingResult}
+            />
+
+            <EditFrameworkResultModal
+              result={editingResult}
+              companyId={id}
+              open={!!editingResult}
+              onOpenChange={(open) => !open && setEditingResult(null)}
+            />
           </div>
         )}
       </div>

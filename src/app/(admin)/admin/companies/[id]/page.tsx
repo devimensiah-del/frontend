@@ -13,6 +13,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ReAnalyzeDialog } from '@/components/features/admin/re-analyze-dialog'
 import { Step1Card, Step2Card, Step3Card } from '@/components/features/company'
+import { FrameworkSteps } from '@/components/features/company/framework-steps'
+import { EditFrameworkResultModal } from '@/components/features/company/edit-framework-result-modal'
+import type { FrameworkResultWithDetails } from '@/lib/types'
 import {
   getChallengeType,
   getCategoryInfo,
@@ -476,7 +479,7 @@ function PageSkeleton() {
   )
 }
 
-type TabType = 'empresa' | 'negocio' | 'mercado' | 'analises'
+type TabType = 'empresa' | 'negocio' | 'mercado' | 'analises' | 'estrategia'
 
 export default function CompanyDetailPage({
   params,
@@ -501,6 +504,7 @@ export default function CompanyDetailPage({
   const [reAnalyzeOpen, setReAnalyzeOpen] = useState(false)
   const [analyzingChallengeId, setAnalyzingChallengeId] = useState<string | null>(null)
   const [generatingCodeForId, setGeneratingCodeForId] = useState<string | null>(null)
+  const [editingResult, setEditingResult] = useState<FrameworkResultWithDetails | null>(null)
 
   // Tab state from URL search params
   const tabFromUrl = searchParams.get('tab') as TabType | null
@@ -655,7 +659,7 @@ export default function CompanyDetailPage({
             Voltar
           </Link>
 
-          {activeTab !== 'analises' && (
+          {activeTab !== 'analises' && activeTab !== 'estrategia' && (
             <div className="flex items-center gap-2">
               {editMode ? (
                 <>
@@ -780,6 +784,17 @@ export default function CompanyDetailPage({
                 {challenges.length}
               </span>
             )}
+          </button>
+          <button
+            onClick={() => handleTabChange('estrategia')}
+            className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
+              activeTab === 'estrategia'
+                ? 'border-gold-500 text-navy-900'
+                : 'border-transparent text-muted-foreground hover:text-navy-700'
+            }`}
+          >
+            <Target className="w-4 h-4 inline-block mr-2" />
+            Estratégia
           </button>
         </div>
       </div>
@@ -1351,6 +1366,31 @@ export default function CompanyDetailPage({
               </Button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ========================================================================
+          TAB: ESTRATÉGIA (Framework V2)
+          ======================================================================== */}
+      {activeTab === 'estrategia' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Execute frameworks estratégicos para gerar insights sobre a empresa.
+            </p>
+          </div>
+
+          <FrameworkSteps
+            companyId={id}
+            onEditResult={setEditingResult}
+          />
+
+          <EditFrameworkResultModal
+            result={editingResult}
+            companyId={id}
+            open={!!editingResult}
+            onOpenChange={(open) => !open && setEditingResult(null)}
+          />
         </div>
       )}
 
