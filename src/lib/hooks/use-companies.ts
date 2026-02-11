@@ -266,6 +266,23 @@ export function useReAnalyzeCompany() {
 }
 
 /**
+ * Hook to generate access code for a user's own analysis (non-admin)
+ */
+export function useGenerateAccessCodeUser() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (analysisId: string) => companyService.generateAccessCode(analysisId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+    },
+    onError: () => {
+      toast.error('Falha ao gerar codigo de acesso')
+    },
+  })
+}
+
+/**
  * Hook to trigger analysis for an existing challenge (user-facing)
  */
 export function useAnalyzeChallengeUser() {

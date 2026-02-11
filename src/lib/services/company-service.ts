@@ -85,4 +85,11 @@ export const companyService = {
     const response = await api.post<{ message: string }>(`/challenges/${challengeId}/analyze`)
     return response.data
   },
+
+  async generateAccessCode(analysisId: string): Promise<{ access_code: string; shareable_url: string }> {
+    const response = await api.post<{ access_code: string; shareable_url: string }>(
+      `/analyses/${analysisId}/access-code`
+    )
+    return response.data
+  },
 }

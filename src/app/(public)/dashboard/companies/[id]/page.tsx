@@ -4,8 +4,8 @@ import { use, useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
-import { useCompany, useMe, useChallenges, useGenerateAccessCode, useUpdateCompany } from '@/lib/hooks'
-import { useEnrichmentStatus, useReAnalyzeCompany, useAnalyzeChallengeUser } from '@/lib/hooks/use-companies'
+import { useCompany, useMe, useChallenges, useUpdateCompany } from '@/lib/hooks'
+import { useEnrichmentStatus, useReAnalyzeCompany, useAnalyzeChallengeUser, useGenerateAccessCodeUser } from '@/lib/hooks/use-companies'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -459,7 +459,7 @@ export default function CompanyDetailPage({
   const { data: enrichmentStatus } = useEnrichmentStatus(id)
   const { data: challenges = [], isLoading: challengesLoading } = useChallenges(id)
   const updateCompany = useUpdateCompany()
-  const generateAccessCode = useGenerateAccessCode()
+  const generateAccessCode = useGenerateAccessCodeUser()
   const analyzeChallenge = useAnalyzeChallengeUser()
   const reAnalyzeCompany = useReAnalyzeCompany()
 
