@@ -1213,6 +1213,7 @@ export default function CompanyDetailPage({
           formData={formData}
           onFieldChange={handleFieldChange}
           onListChange={handleFieldChange}
+          isAdmin={true}
         />
       )}
 

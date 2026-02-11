@@ -31,6 +31,7 @@ interface AmbienteTabProps {
   formData: Record<string, unknown>
   onFieldChange: (field: string, value: unknown) => void
   onListChange: (field: string, value: string[]) => void
+  isAdmin?: boolean
 }
 
 // =============================================================================
@@ -355,17 +356,32 @@ export function AmbienteTab({
   formData,
   onFieldChange,
   onListChange,
+  isAdmin,
 }: AmbienteTabProps) {
   const [activeSubtab, setActiveSubtab] = useState('mercado')
 
-  // Fetch framework results
+  // Fetch framework results (only needed for admin)
   const { data: frameworkResults, isLoading } = useFrameworkResults(companyId)
 
   // Find specific framework results
   const pestelResult = frameworkResults?.results?.find(r => r.framework.code === 'pestel')
   const porterResult = frameworkResults?.results?.find(r => r.framework.code === 'porter')
 
-  // Build subtab items with status
+  // Non-admin: show Mercado content directly, no subtabs
+  if (!isAdmin) {
+    return (
+      <MercadoContent
+        companyId={companyId}
+        company={company}
+        editMode={editMode}
+        formData={formData}
+        onFieldChange={onFieldChange}
+        onListChange={onListChange}
+      />
+    )
+  }
+
+  // Build subtab items with status (admin only)
   const subtabs: SubtabItem[] = [
     {
       code: 'mercado',
