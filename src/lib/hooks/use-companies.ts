@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { companyService } from '@/lib/services'
-import type { CreateCompanyRequest, Company, CompanyEnrichmentStatus } from '@/lib/types'
+import type { CreateCompanyRequest, Company, CompanyEnrichmentStatus, ChallengeData } from '@/lib/types'
 
 export function useCompanies() {
   return useQuery({
@@ -237,6 +237,48 @@ export function useRetryStep3() {
     onError: (error: any) => {
       const message = error?.response?.data?.message || 'Erro ao re-enriquecer Etapa 3'
       toast.error(message)
+    },
+  })
+}
+
+// ============================================================================
+// Analysis Triggering Hooks (User-facing)
+// ============================================================================
+
+/**
+ * Hook to create a new challenge and trigger analysis (user-facing)
+ */
+export function useReAnalyzeCompany() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ companyId, challenge }: { companyId: string; challenge: ChallengeData }) =>
+      companyService.reAnalyze(companyId, challenge),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['challenges', variables.companyId] })
+      queryClient.invalidateQueries({ queryKey: ['company', variables.companyId] })
+      toast.success('Desafio criado e análise iniciada')
+    },
+    onError: () => {
+      toast.error('Falha ao criar desafio')
+    },
+  })
+}
+
+/**
+ * Hook to trigger analysis for an existing challenge (user-facing)
+ */
+export function useAnalyzeChallengeUser() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (challengeId: string) => companyService.analyzeChallenge(challengeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      toast.success('Análise iniciada')
+    },
+    onError: () => {
+      toast.error('Falha ao iniciar análise')
     },
   })
 }

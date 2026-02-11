@@ -12,7 +12,10 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ReAnalyzeDialog } from '@/components/features/admin/re-analyze-dialog'
-import { Step1Card, Step2Card, Step3Card } from '@/components/features/company'
+import { Step1Card, Step2Card } from '@/components/features/company'
+import { AmbienteTab } from '@/components/features/company/ambiente-tab'
+import { DiagnosticoTab } from '@/components/features/company/diagnostico-tab'
+import { DesafiosTabV2 } from '@/components/features/company/desafios-tab-v2'
 import {
   getChallengeType,
   getCategoryInfo,
@@ -52,6 +55,7 @@ import {
   BadgeCheck,
   Building,
   Banknote,
+  Lightbulb,
 } from 'lucide-react'
 import type { EnrichmentStatus, Challenge, AnalysisStatus } from '@/lib/types'
 
@@ -476,7 +480,7 @@ function PageSkeleton() {
   )
 }
 
-type TabType = 'empresa' | 'negocio' | 'mercado' | 'analises'
+type TabType = 'empresa' | 'negocio' | 'ambiente' | 'diagnostico' | 'desafios' | 'analises'
 
 export default function CompanyDetailPage({
   params,
@@ -502,7 +506,7 @@ export default function CompanyDetailPage({
   const [analyzingChallengeId, setAnalyzingChallengeId] = useState<string | null>(null)
   const [generatingCodeForId, setGeneratingCodeForId] = useState<string | null>(null)
 
-  // Tab state from URL search params
+  // Tab state from URL search params - default to 'empresa'
   const tabFromUrl = searchParams.get('tab') as TabType | null
   const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || 'empresa')
 
@@ -655,7 +659,7 @@ export default function CompanyDetailPage({
             Voltar
           </Link>
 
-          {activeTab !== 'analises' && (
+          {activeTab !== 'analises' && activeTab !== 'ambiente' && activeTab !== 'diagnostico' && activeTab !== 'desafios' && (
             <div className="flex items-center gap-2">
               {editMode ? (
                 <>
@@ -755,15 +759,37 @@ export default function CompanyDetailPage({
             Negócio
           </button>
           <button
-            onClick={() => handleTabChange('mercado')}
+            onClick={() => handleTabChange('ambiente')}
             className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
-              activeTab === 'mercado'
+              activeTab === 'ambiente'
                 ? 'border-gold-500 text-navy-900'
                 : 'border-transparent text-muted-foreground hover:text-navy-700'
             }`}
           >
             <TrendingUp className="w-4 h-4 inline-block mr-2" />
-            Mercado
+            Ambiente
+          </button>
+          <button
+            onClick={() => handleTabChange('diagnostico')}
+            className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
+              activeTab === 'diagnostico'
+                ? 'border-gold-500 text-navy-900'
+                : 'border-transparent text-muted-foreground hover:text-navy-700'
+            }`}
+          >
+            <Target className="w-4 h-4 inline-block mr-2" />
+            Diagnóstico
+          </button>
+          <button
+            onClick={() => handleTabChange('desafios')}
+            className={`px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors ${
+              activeTab === 'desafios'
+                ? 'border-gold-500 text-navy-900'
+                : 'border-transparent text-muted-foreground hover:text-navy-700'
+            }`}
+          >
+            <Lightbulb className="w-4 h-4 inline-block mr-2" />
+            Desafios
           </button>
           <button
             onClick={() => handleTabChange('analises')}
@@ -1177,119 +1203,36 @@ export default function CompanyDetailPage({
       )}
 
       {/* ========================================================================
-          TAB: MERCADO (Step 3 - Competitive Intelligence)
+          TAB: AMBIENTE (Environmental Analysis - Mercado, PESTEL, Porter)
           ======================================================================== */}
-      {activeTab === 'mercado' && (
-        <div className="space-y-6">
-          {/* Step 3 Enrichment Status */}
-          <Step3Card companyId={company.id} />
+      {activeTab === 'ambiente' && (
+        <AmbienteTab
+          companyId={company.id}
+          company={company}
+          editMode={editMode}
+          formData={formData}
+          onFieldChange={handleFieldChange}
+          onListChange={handleFieldChange}
+        />
+      )}
 
-          {/* Concorrentes */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <EditableList
-              title="Concorrentes"
-              icon={<Target className="w-4 h-4" />}
-              field="competitors"
-              items={company.competitors}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              emptyMessage="Nenhum concorrente identificado"
-            />
-            <EditableList
-              title="Detalhes dos Concorrentes"
-              icon={<Target className="w-4 h-4" />}
-              field="competitor_details"
-              items={company.competitor_details}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              emptyMessage="Nenhum detalhe de concorrente"
-            />
-          </div>
+      {/* ========================================================================
+          TAB: DIAGNÓSTICO (Internal Diagnosis - SWOT, SWOT Cross)
+          ======================================================================== */}
+      {activeTab === 'diagnostico' && (
+        <DiagnosticoTab
+          companyId={company.id}
+          editMode={editMode}
+        />
+      )}
 
-          {/* Contexto do Setor */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <Section title="Contexto do Setor" icon={<TrendingUp className="w-4 h-4" />}>
-              <EditableField
-                label="Crescimento do Setor"
-                field="industry_growth_rate"
-                value={company.industry_growth_rate}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                placeholder="Ex: +12% CAGR"
-              />
-              <EditableField
-                label="Concentração de Mercado"
-                field="market_concentration"
-                value={company.market_concentration}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                placeholder="Ex: Fragmentado, Concentrado"
-              />
-              <EditableField
-                label="Posição no Mercado"
-                field="market_share_status"
-                value={company.market_share_status}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                placeholder="Ex: Líder, Desafiador, Nicho"
-              />
-            </Section>
-
-            <Section title="Contexto Regulatório" icon={<Shield className="w-4 h-4" />}>
-              <EditableField
-                label="Contexto Regulatório"
-                field="regulatory_context"
-                value={company.regulatory_context}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                type="textarea"
-                placeholder="Marco regulatório relevante"
-              />
-            </Section>
-          </div>
-
-          {/* Tendências */}
-          <EditableList
-            title="Tendências do Setor"
-            icon={<TrendingUp className="w-4 h-4" />}
-            field="industry_trends"
-            items={company.industry_trends}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            emptyMessage="Nenhuma tendência identificada"
-          />
-
-          {/* Notícias Recentes */}
-          <EditableList
-            title="Notícias Recentes"
-            icon={<FileText className="w-4 h-4" />}
-            field="recent_news"
-            items={company.recent_news}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            emptyMessage="Nenhuma notícia recente"
-          />
-
-          {/* Fontes */}
-          <EditableList
-            title="Fontes do Enriquecimento"
-            icon={<ExternalLink className="w-4 h-4" />}
-            field="enrichment_sources"
-            items={company.enrichment_sources}
-            editMode={editMode}
-            formData={formData}
-            onChange={handleFieldChange}
-            emptyMessage="Nenhuma fonte registrada"
-          />
-        </div>
+      {/* ========================================================================
+          TAB: DESAFIOS (AI-Suggested Challenges)
+          ======================================================================== */}
+      {activeTab === 'desafios' && (
+        <DesafiosTabV2
+          companyId={company.id}
+        />
       )}
 
       {/* ========================================================================

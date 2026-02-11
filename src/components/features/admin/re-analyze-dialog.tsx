@@ -25,12 +25,15 @@ import {
   CHALLENGE_TYPES,
   type ChallengeCategory,
 } from '@/lib/config/challenges'
+import type { ChallengeData } from '@/lib/types'
 
 interface ReAnalyzeDialogProps {
   companyId: string
   companyName: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Optional callback for non-admin usage. If provided, uses this instead of admin hook. */
+  onReAnalyze?: (params: { companyId: string; challenge: ChallengeData }) => Promise<unknown>
 }
 
 export function ReAnalyzeDialog({
@@ -38,33 +41,43 @@ export function ReAnalyzeDialog({
   companyName,
   open,
   onOpenChange,
+  onReAnalyze,
 }: ReAnalyzeDialogProps) {
   const [category, setCategory] = useState<ChallengeCategory | ''>('')
   const [type, setType] = useState('')
   const [challenge, setChallenge] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const reAnalyze = useReAnalyze()
+
+  const isPending = onReAnalyze ? isSubmitting : reAnalyze.isPending
 
   const handleSubmit = () => {
     if (!category || !type || !challenge) return
 
-    reAnalyze.mutate(
-      {
-        companyId,
-        challenge: {
-          challenge_category: category as ChallengeCategory,
-          challenge_type: type,
-          business_challenge: challenge,
-        },
-      },
-      {
-        onSuccess: () => {
-          onOpenChange(false)
-          setCategory('')
-          setType('')
-          setChallenge('')
-        },
-      }
-    )
+    const challengeData: ChallengeData = {
+      challenge_category: category as ChallengeCategory,
+      challenge_type: type,
+      business_challenge: challenge,
+    }
+
+    const onSuccess = () => {
+      onOpenChange(false)
+      setCategory('')
+      setType('')
+      setChallenge('')
+    }
+
+    if (onReAnalyze) {
+      setIsSubmitting(true)
+      onReAnalyze({ companyId, challenge: challengeData })
+        .then(onSuccess)
+        .finally(() => setIsSubmitting(false))
+    } else {
+      reAnalyze.mutate(
+        { companyId, challenge: challengeData },
+        { onSuccess }
+      )
+    }
   }
 
   const handleCategoryChange = (value: string) => {
@@ -142,9 +155,9 @@ export function ReAnalyzeDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!category || !type || !challenge || reAnalyze.isPending}
+            disabled={!category || !type || !challenge || isPending}
           >
-            {reAnalyze.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Criar e Analisar
           </Button>
         </div>
