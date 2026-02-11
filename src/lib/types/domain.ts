@@ -495,6 +495,8 @@ export interface FrameworkResult {
   is_current: boolean
   context_hash?: string
   generated_at?: string
+  is_stale?: boolean
+  stale_reason?: string
   created_at: string
   updated_at: string
 }
@@ -535,4 +537,229 @@ export interface PublicReportData {
   is_admin_preview?: boolean
   is_public?: boolean
   created_at: string
+}
+
+// ============================================================================
+// 5-Step Analysis Types (Dependency Chain with Stale Tracking)
+// ============================================================================
+
+/**
+ * Step definitions for the 5-step strategic analysis flow
+ * Each step can have subtabs (e.g., Ambiente has Mercado/PESTEL/Porter)
+ */
+export interface AnalysisStepDefinition {
+  number: number
+  code: string
+  name: string
+  description: string
+  frameworks: string[] // Framework codes in this step
+  subtabs?: SubtabDefinition[]
+}
+
+export interface SubtabDefinition {
+  code: string
+  name: string
+  frameworks: string[] // Framework codes for this subtab
+}
+
+// 5-Step structure with Portuguese labels
+export const ANALYSIS_STEPS: AnalysisStepDefinition[] = [
+  {
+    number: 1,
+    code: 'empresa',
+    name: 'Empresa',
+    description: 'Dados da empresa e contexto do negócio',
+    frameworks: ['EMPRESA'],
+  },
+  {
+    number: 2,
+    code: 'negocio',
+    name: 'Negócio',
+    description: 'Modelo de negócios e proposta de valor',
+    frameworks: ['NEGOCIO'],
+  },
+  {
+    number: 3,
+    code: 'ambiente',
+    name: 'Ambiente',
+    description: 'Análise do ambiente externo e competitivo',
+    frameworks: ['MERCADO', 'PESTEL', 'PORTER'],
+    subtabs: [
+      { code: 'mercado', name: 'Mercado', frameworks: ['MERCADO'] },
+      { code: 'pestel', name: 'PESTEL', frameworks: ['PESTEL'] },
+      { code: 'porter', name: 'Porter', frameworks: ['PORTER'] },
+    ],
+  },
+  {
+    number: 4,
+    code: 'diagnostico',
+    name: 'Diagnóstico',
+    description: 'Análise interna e cruzamento estratégico',
+    frameworks: ['SWOT', 'SWOTCROSS'],
+    subtabs: [
+      { code: 'swot', name: 'SWOT', frameworks: ['SWOT'] },
+      { code: 'swotcross', name: 'SWOT Cross', frameworks: ['SWOTCROSS'] },
+    ],
+  },
+  {
+    number: 5,
+    code: 'desafios',
+    name: 'Desafios',
+    description: 'Definição de desafios estratégicos e prioridades',
+    frameworks: ['DESAFIOS'],
+  },
+]
+
+/**
+ * Analysis state for a company - returned by GET /companies/:id/analysis-state
+ */
+export interface AnalysisState {
+  company_id: string
+  challenge_id?: string
+  steps: StepState[]
+  overall_progress: number // 0-100
+  has_stale_frameworks: boolean
+  can_generate_report: boolean
+}
+
+export interface StepState {
+  step_number: number
+  step_code: string
+  step_name: string
+  is_completed: boolean
+  is_unlocked: boolean // true if previous step is complete
+  frameworks: FrameworkState[]
+}
+
+export interface FrameworkState {
+  code: string
+  name: string
+  status: FrameworkResultStatus
+  result_id?: string
+  is_stale: boolean
+  stale_reason?: string
+  stale_acknowledged_at?: string
+  stale_acknowledged_by?: string
+  version: number
+  generated_at?: string
+  can_execute: boolean
+  missing_dependencies: string[]
+}
+
+/**
+ * Stale frameworks response - GET /companies/:id/stale-frameworks
+ */
+export interface StaleFrameworksResponse {
+  stale_results: StaleResultInfo[]
+  total: number
+}
+
+export interface StaleResultInfo {
+  result_id: string
+  framework_code: string
+  framework_name: string
+  stale_reason: string
+  stale_since?: string
+  upstream_changes: UpstreamChange[]
+  can_acknowledge: boolean
+  can_rerun: boolean
+}
+
+export interface UpstreamChange {
+  framework_code: string
+  framework_name: string
+  change_type: 'updated' | 'rerun' | 'new_version'
+  changed_at: string
+}
+
+/**
+ * Acknowledge stale request - POST /companies/:id/acknowledge-stale
+ */
+export interface AcknowledgeStaleRequest {
+  result_ids: string[]
+  action: 'acknowledge' | 'rerun' | 'rerun_cascade'
+}
+
+export interface AcknowledgeStaleResponse {
+  acknowledged: number
+  rerun_started: number
+  message: string
+}
+
+/**
+ * Framework readiness - GET /companies/:id/frameworks/:code/readiness
+ */
+export interface FrameworkReadinessResponse {
+  framework_code: string
+  is_ready: boolean
+  mode: 'initial' | 'update'
+  missing_dependencies: string[]
+  dependency_status: DependencyStatus[]
+  current_result?: {
+    id: string
+    version: number
+    status: FrameworkResultStatus
+    is_stale: boolean
+  }
+}
+
+export interface DependencyStatus {
+  code: string
+  name: string
+  is_completed: boolean
+  is_stale: boolean
+}
+
+/**
+ * Execute framework request - POST /companies/:id/frameworks/:code/execute
+ */
+export interface ExecuteFrameworkRequest {
+  user_refinement?: string // User feedback for update mode
+  force_rerun?: boolean // Force initial mode even if result exists
+}
+
+export interface ExecuteFrameworkResponse {
+  message: string
+  result_id: string
+  mode: 'initial' | 'update'
+  status: string
+  framework: string
+  previous_version?: number
+  new_version: number
+}
+
+/**
+ * Dependency chain info - GET /frameworks/:code/dependencies
+ */
+export interface DependencyChainResponse {
+  framework_code: string
+  dependencies: DependencyInfo[]
+  dependents: DependencyInfo[]
+  total_dependencies: number
+  total_dependents: number
+}
+
+export interface DependencyInfo {
+  code: string
+  name: string
+  layer: number
+  is_required: boolean
+}
+
+/**
+ * Update suggestion from comparing old/new results
+ */
+export interface UpdateSuggestion {
+  previous_version: number
+  new_version: number
+  changes_summary: string
+  field_changes: FieldChange[]
+  recommendation: 'accept' | 'review' | 'reject'
+}
+
+export interface FieldChange {
+  field: string
+  change_type: 'added' | 'removed' | 'modified'
+  old_value?: unknown
+  new_value?: unknown
 }

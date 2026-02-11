@@ -133,11 +133,10 @@ export function DesafiosTab({
       ) : (
         <div className="flex items-center gap-2">
           <Button
-            variant={isCompleted ? 'outline' : 'default'}
+            variant={isCompleted ? 'outline' : 'architect'}
             size="sm"
             onClick={handleRun}
             disabled={isRunning}
-            className={isCompleted ? '' : 'bg-gold-500 hover:bg-gold-600 text-white'}
           >
             {isRunning ? (
               <Loader2 className="w-4 h-4 mr-1 animate-spin" />

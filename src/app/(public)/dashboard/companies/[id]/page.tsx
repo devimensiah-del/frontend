@@ -5,14 +5,15 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCompany, useMe, useChallenges, useGenerateAccessCode, useUpdateCompany } from '@/lib/hooks'
-import { useEnrichmentStatus } from '@/lib/hooks/use-companies'
+import { useEnrichmentStatus, useReAnalyzeCompany, useAnalyzeChallengeUser } from '@/lib/hooks/use-companies'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Step1Card, Step2Card, Step3Card } from '@/components/features/company'
-import { StrategicAnalysisPanel } from '@/components/features/company/strategic-analysis-panel'
+import { Step1Card, Step2Card } from '@/components/features/company'
+import { AmbienteTab } from '@/components/features/company/ambiente-tab'
+import { ReAnalyzeDialog } from '@/components/features/admin/re-analyze-dialog'
 import {
   getChallengeType,
   getCategoryInfo,
@@ -35,10 +36,8 @@ import {
   Target,
   TrendingUp,
   Briefcase,
-  Shield,
   Zap,
   FileText,
-  ExternalLink,
   Phone,
   Mail,
   BadgeCheck,
@@ -49,6 +48,8 @@ import {
   X,
   Save,
   Plus,
+  Play,
+  Info,
 } from 'lucide-react'
 import type { EnrichmentStatus, Challenge, AnalysisStatus } from '@/lib/types'
 
@@ -128,22 +129,25 @@ function getAnalysisStatusBadge(status: AnalysisStatus | undefined) {
 
 interface ChallengeCardProps {
   challenge: Challenge
+  onAnalyze?: (challengeId: string) => void
+  isAnalyzing?: boolean
   onViewReport?: (analysisId: string, accessCode?: string | null) => void
   isGeneratingCode?: boolean
 }
 
-function ChallengeCard({ challenge, onViewReport, isGeneratingCode }: ChallengeCardProps) {
+function ChallengeCard({ challenge, onAnalyze, isAnalyzing, onViewReport, isGeneratingCode }: ChallengeCardProps) {
   const typeInfo = getChallengeType(challenge.challenge_type)
   const categoryInfo = getCategoryInfo(challenge.challenge_category)
   const analysis = challenge.latest_analysis
-  const hasAnalysis = analysis && analysis.status === 'completed' && analysis.is_visible_to_user
+  const hasAnalysis = analysis && analysis.status === 'completed'
   const isProcessing = analysis?.status === 'processing' || analysis?.status === 'pending'
   const isFailed = analysis?.status === 'failed'
   const accessCode = analysis?.access_code
+  const displayStatus = isAnalyzing ? 'processing' : analysis?.status
 
   return (
     <div className={`bg-white border p-4 transition-colors ${
-      isProcessing ? 'border-info/50 bg-info/5' :
+      isProcessing || isAnalyzing ? 'border-info/50 bg-info/5' :
       isFailed ? 'border-error/30' :
       'border-line hover:border-gold-300'
     }`}>
@@ -159,15 +163,15 @@ function ChallengeCard({ challenge, onViewReport, isGeneratingCode }: ChallengeC
               {typeInfo?.label || challenge.challenge_type}
             </span>
           </div>
-          {getAnalysisStatusBadge(analysis?.status)}
+          {getAnalysisStatusBadge(displayStatus as AnalysisStatus | undefined)}
         </div>
 
         <p className="text-sm text-navy-800 line-clamp-3">
           {challenge.business_challenge}
         </p>
 
-        {hasAnalysis && (
-          <div className="flex items-center gap-2 pt-2 border-t border-line">
+        <div className="flex items-center gap-2 pt-2 border-t border-line">
+          {hasAnalysis ? (
             <Button
               size="sm"
               variant="outline"
@@ -182,17 +186,40 @@ function ChallengeCard({ challenge, onViewReport, isGeneratingCode }: ChallengeC
               )}
               Ver Analise
             </Button>
-          </div>
-        )}
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => onAnalyze?.(challenge.id)}
+              disabled={isAnalyzing || isProcessing}
+            >
+              {(isAnalyzing || isProcessing) ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Play className="w-3.5 h-3.5" />
+              )}
+              Analisar
+            </Button>
+          )}
 
-        {isProcessing && (
-          <div className="flex items-center gap-2 pt-2 border-t border-line">
-            <span className="text-xs text-info flex items-center gap-1">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              Analise em processamento...
-            </span>
-          </div>
-        )}
+          {hasAnalysis && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="gap-1.5 text-muted-foreground hover:text-navy-900"
+              onClick={() => onAnalyze?.(challenge.id)}
+              disabled={isAnalyzing || isProcessing}
+            >
+              {(isAnalyzing || isProcessing) ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Play className="w-3.5 h-3.5" />
+              )}
+              Reanalisar
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -415,7 +442,7 @@ function PageSkeleton() {
   )
 }
 
-type TabType = 'empresa' | 'negocio' | 'mercado' | 'analises' | 'estrategia'
+type TabType = 'empresa' | 'negocio' | 'ambiente' | 'analises'
 
 export default function CompanyDetailPage({
   params,
@@ -433,10 +460,14 @@ export default function CompanyDetailPage({
   const { data: challenges = [], isLoading: challengesLoading } = useChallenges(id)
   const updateCompany = useUpdateCompany()
   const generateAccessCode = useGenerateAccessCode()
+  const analyzeChallenge = useAnalyzeChallengeUser()
+  const reAnalyzeCompany = useReAnalyzeCompany()
 
   const [editMode, setEditMode] = useState(false)
   const [formData, setFormData] = useState<Record<string, unknown>>({})
   const [generatingCodeForId, setGeneratingCodeForId] = useState<string | null>(null)
+  const [reAnalyzeOpen, setReAnalyzeOpen] = useState(false)
+  const [analyzingChallengeId, setAnalyzingChallengeId] = useState<string | null>(null)
 
   // Tab state from URL search params
   const tabFromUrl = searchParams.get('tab') as TabType | null
@@ -539,6 +570,15 @@ export default function CompanyDetailPage({
     setFormData({})
   }
 
+  const handleAnalyzeChallenge = async (challengeId: string) => {
+    setAnalyzingChallengeId(challengeId)
+    try {
+      await analyzeChallenge.mutateAsync(challengeId)
+    } finally {
+      setAnalyzingChallengeId(null)
+    }
+  }
+
   const handleViewReport = async (analysisId: string, accessCode?: string | null) => {
     if (accessCode) {
       window.open(`/report/${accessCode}`, '_blank')
@@ -584,13 +624,6 @@ export default function CompanyDetailPage({
     )
   }
 
-  // Filter challenges to only show those with visible analyses
-  const visibleChallenges = challenges.filter(c =>
-    c.latest_analysis?.is_visible_to_user ||
-    c.latest_analysis?.status === 'processing' ||
-    c.latest_analysis?.status === 'pending'
-  )
-
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-surface-paper py-8 px-4">
       <div className="max-w-5xl mx-auto space-y-6">
@@ -605,7 +638,7 @@ export default function CompanyDetailPage({
               Voltar
             </Link>
 
-            {activeTab !== 'analises' && activeTab !== 'estrategia' && (
+            {activeTab !== 'analises' && activeTab !== 'ambiente' && (
               <div className="flex items-center gap-2">
                 {editMode ? (
                   <>
@@ -705,15 +738,15 @@ export default function CompanyDetailPage({
               Negocio
             </button>
             <button
-              onClick={() => handleTabChange('mercado')}
+              onClick={() => handleTabChange('ambiente')}
               className={`px-4 sm:px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'mercado'
+                activeTab === 'ambiente'
                   ? 'border-gold-500 text-navy-900'
                   : 'border-transparent text-muted-foreground hover:text-navy-700'
               }`}
             >
               <TrendingUp className="w-4 h-4 inline-block mr-2" />
-              Mercado
+              Ambiente
             </button>
             <button
               onClick={() => handleTabChange('analises')}
@@ -725,22 +758,11 @@ export default function CompanyDetailPage({
             >
               <Zap className="w-4 h-4 inline-block mr-2" />
               Analises
-              {visibleChallenges.length > 0 && (
+              {challenges.length > 0 && (
                 <span className="ml-2 px-2 py-0.5 text-xs bg-navy-900/10 rounded-full">
-                  {visibleChallenges.length}
+                  {challenges.length}
                 </span>
               )}
-            </button>
-            <button
-              onClick={() => handleTabChange('estrategia')}
-              className={`px-4 sm:px-6 py-3 text-sm font-medium uppercase tracking-wide border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'estrategia'
-                  ? 'border-gold-500 text-navy-900'
-                  : 'border-transparent text-muted-foreground hover:text-navy-700'
-              }`}
-            >
-              <Target className="w-4 h-4 inline-block mr-2" />
-              Estrategia
             </button>
           </div>
         </div>
@@ -1133,126 +1155,49 @@ export default function CompanyDetailPage({
           </div>
         )}
 
-        {/* TAB: MERCADO (Step 3 - Competitive Intelligence) */}
-        {activeTab === 'mercado' && (
-          <div className="space-y-6">
-            {/* Step 3 Enrichment Status */}
-            <Step3Card companyId={company.id} />
-
-            {/* Concorrentes */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              <EditableList
-                title="Concorrentes"
-                icon={<Target className="w-4 h-4" />}
-                field="competitors"
-                items={company.competitors}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                emptyMessage="Nenhum concorrente identificado"
-              />
-              <EditableList
-                title="Detalhes dos Concorrentes"
-                icon={<Target className="w-4 h-4" />}
-                field="competitor_details"
-                items={company.competitor_details}
-                editMode={editMode}
-                formData={formData}
-                onChange={handleFieldChange}
-                emptyMessage="Nenhum detalhe de concorrente"
-              />
-            </div>
-
-            {/* Contexto do Setor */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              <Section title="Contexto do Setor" icon={<TrendingUp className="w-4 h-4" />}>
-                <EditableField
-                  label="Crescimento do Setor"
-                  field="industry_growth_rate"
-                  value={company.industry_growth_rate}
-                  editMode={editMode}
-                  formData={formData}
-                  onChange={handleFieldChange}
-                  placeholder="Ex: +12% CAGR"
-                />
-                <EditableField
-                  label="Concentracao de Mercado"
-                  field="market_concentration"
-                  value={company.market_concentration}
-                  editMode={editMode}
-                  formData={formData}
-                  onChange={handleFieldChange}
-                  placeholder="Ex: Fragmentado, Concentrado"
-                />
-                <EditableField
-                  label="Posicao no Mercado"
-                  field="market_share_status"
-                  value={company.market_share_status}
-                  editMode={editMode}
-                  formData={formData}
-                  onChange={handleFieldChange}
-                  placeholder="Ex: Lider, Desafiador, Nicho"
-                />
-              </Section>
-
-              <Section title="Contexto Regulatorio" icon={<Shield className="w-4 h-4" />}>
-                <EditableField
-                  label="Contexto Regulatorio"
-                  field="regulatory_context"
-                  value={company.regulatory_context}
-                  editMode={editMode}
-                  formData={formData}
-                  onChange={handleFieldChange}
-                  type="textarea"
-                  placeholder="Marco regulatorio relevante"
-                />
-              </Section>
-            </div>
-
-            {/* Tendencias */}
-            <EditableList
-              title="Tendencias do Setor"
-              icon={<TrendingUp className="w-4 h-4" />}
-              field="industry_trends"
-              items={company.industry_trends}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              emptyMessage="Nenhuma tendencia identificada"
-            />
-
-            {/* Noticias Recentes */}
-            <EditableList
-              title="Noticias Recentes"
-              icon={<FileText className="w-4 h-4" />}
-              field="recent_news"
-              items={company.recent_news}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              emptyMessage="Nenhuma noticia recente"
-            />
-
-            {/* Fontes */}
-            <EditableList
-              title="Fontes do Enriquecimento"
-              icon={<ExternalLink className="w-4 h-4" />}
-              field="enrichment_sources"
-              items={company.enrichment_sources}
-              editMode={editMode}
-              formData={formData}
-              onChange={handleFieldChange}
-              emptyMessage="Nenhuma fonte registrada"
-            />
-          </div>
+        {/* TAB: AMBIENTE (Step 3 + PESTEL/Porter frameworks) */}
+        {activeTab === 'ambiente' && (
+          <AmbienteTab
+            companyId={company.id}
+            company={company}
+            editMode={editMode}
+            formData={formData}
+            onFieldChange={handleFieldChange}
+            onListChange={handleFieldChange}
+          />
         )}
 
-        {/* TAB: ANALISES (Challenges) */}
-        {activeTab === 'analises' && (
+        {/* TAB: ANALISES (Challenges + Analysis Triggering) */}
+        {activeTab === 'analises' && (() => {
+          const allEnrichmentDone =
+            enrichmentStatus?.step1_status === 'completed' &&
+            enrichmentStatus?.step2_status === 'completed' &&
+            enrichmentStatus?.step3_status === 'completed'
+
+          return (
           <div className="space-y-6">
-            <p className="text-sm text-muted-foreground">
-              Visualize os desafios de negocio e suas analises estrategicas.
-            </p>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Gerencie os desafios de negocio e suas analises estrategicas.
+                </p>
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => setReAnalyzeOpen(true)}
+                  disabled={!allEnrichmentDone}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Novo Desafio
+                </Button>
+              </div>
+              {!allEnrichmentDone && (
+                <div className="flex items-center gap-2 px-3 py-2 text-sm text-warning-dark bg-warning/10 border border-warning/30 rounded">
+                  <Info className="w-4 h-4 flex-shrink-0" />
+                  As 3 etapas de enriquecimento precisam ser concluidas antes de criar um desafio.
+                </div>
+              )}
+            </div>
 
             {challengesLoading ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -1260,12 +1205,14 @@ export default function CompanyDetailPage({
                   <Skeleton key={i} className="h-40" />
                 ))}
               </div>
-            ) : visibleChallenges.length > 0 ? (
+            ) : challenges.length > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {visibleChallenges.map((challenge) => (
+                {challenges.map((challenge) => (
                   <ChallengeCard
                     key={challenge.id}
                     challenge={challenge}
+                    onAnalyze={handleAnalyzeChallenge}
+                    isAnalyzing={analyzingChallengeId === challenge.id}
                     onViewReport={handleViewReport}
                     isGeneratingCode={generatingCodeForId === challenge.latest_analysis?.id}
                   />
@@ -1275,24 +1222,37 @@ export default function CompanyDetailPage({
               <div className="flex flex-col items-center justify-center py-16 text-center bg-white border border-line rounded">
                 <FileText className="w-16 h-16 text-muted-foreground/30 mb-4" />
                 <h3 className="text-lg font-medium text-navy-900 mb-2">
-                  Nenhuma analise disponivel
+                  Nenhum desafio cadastrado
                 </h3>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  As analises estrategicas aparecerão aqui quando estiverem concluidas.
+                <p className="text-sm text-muted-foreground mb-6 max-w-md">
+                  {allEnrichmentDone
+                    ? 'Crie um desafio de negocio para iniciar uma analise estrategica completa para esta empresa.'
+                    : 'As 3 etapas de enriquecimento precisam ser concluidas antes de criar um desafio.'}
                 </p>
+                <Button
+                  className="gap-1.5"
+                  onClick={() => setReAnalyzeOpen(true)}
+                  disabled={!allEnrichmentDone}
+                >
+                  <Plus className="w-4 h-4" />
+                  Criar Primeiro Desafio
+                </Button>
               </div>
             )}
           </div>
-        )}
+          )
+        })()}
 
-        {/* TAB: ESTRATEGIA (Strategic Analysis) */}
-        {activeTab === 'estrategia' && (
-          <StrategicAnalysisPanel
-            companyId={id}
-            company={company}
-            isAdmin={false}
-          />
-        )}
+        {/* Re-Analyze Dialog */}
+        <ReAnalyzeDialog
+          companyId={company.id}
+          companyName={company.name}
+          open={reAnalyzeOpen}
+          onOpenChange={setReAnalyzeOpen}
+          onReAnalyze={async (params) => {
+            await reAnalyzeCompany.mutateAsync(params)
+          }}
+        />
       </div>
     </div>
   )

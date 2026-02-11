@@ -5,7 +5,15 @@ import type {
   FrameworkV2,
   FrameworkResult,
   FrameworkResultWithDetails,
-  ExecutionPlan
+  ExecutionPlan,
+  AnalysisState,
+  StaleFrameworksResponse,
+  AcknowledgeStaleRequest,
+  AcknowledgeStaleResponse,
+  FrameworkReadinessResponse,
+  ExecuteFrameworkRequest,
+  ExecuteFrameworkResponse,
+  DependencyChainResponse,
 } from '@/lib/types'
 
 // Legacy framework service (analysisbysteps)
@@ -86,6 +94,68 @@ export const frameworkV2Service = {
     const response = await api.put<{ message: string; result_id: string }>(
       `/companies/${companyId}/framework-results/${resultId}`,
       { result }
+    )
+    return response.data
+  },
+
+  // ==========================================================================
+  // 5-Step Analysis with Dependency Chain (V2 Endpoints)
+  // ==========================================================================
+
+  // Company: Get analysis state (5-step progress with stale tracking)
+  async getAnalysisState(companyId: string, challengeId?: string): Promise<AnalysisState> {
+    const params = challengeId ? { challenge_id: challengeId } : undefined
+    const response = await api.get<{ analysis_state: AnalysisState }>(
+      `/companies/${companyId}/analysis-state`,
+      { params }
+    )
+    return response.data.analysis_state
+  },
+
+  // Company: Get stale frameworks
+  async getStaleFrameworks(companyId: string, challengeId?: string): Promise<StaleFrameworksResponse> {
+    const params = challengeId ? { challenge_id: challengeId } : undefined
+    const response = await api.get<StaleFrameworksResponse>(
+      `/companies/${companyId}/stale-frameworks`,
+      { params }
+    )
+    return response.data
+  },
+
+  // Company: Acknowledge stale frameworks
+  async acknowledgeStale(companyId: string, request: AcknowledgeStaleRequest): Promise<AcknowledgeStaleResponse> {
+    const response = await api.post<AcknowledgeStaleResponse>(
+      `/companies/${companyId}/acknowledge-stale`,
+      request
+    )
+    return response.data
+  },
+
+  // Company: Check framework readiness (dependencies and mode)
+  async getFrameworkReadiness(companyId: string, frameworkCode: string, challengeId?: string): Promise<FrameworkReadinessResponse> {
+    const params = challengeId ? { challenge_id: challengeId } : undefined
+    const response = await api.get<FrameworkReadinessResponse>(
+      `/companies/${companyId}/frameworks/${frameworkCode}/readiness`,
+      { params }
+    )
+    return response.data
+  },
+
+  // Company: Execute framework with dependency awareness
+  async executeFramework(companyId: string, frameworkCode: string, request?: ExecuteFrameworkRequest, challengeId?: string): Promise<ExecuteFrameworkResponse> {
+    const params = challengeId ? { challenge_id: challengeId } : undefined
+    const response = await api.post<ExecuteFrameworkResponse>(
+      `/companies/${companyId}/frameworks/${frameworkCode}/execute`,
+      request || {},
+      { params }
+    )
+    return response.data
+  },
+
+  // Get framework dependency chain (for visualization)
+  async getDependencyChain(frameworkCode: string): Promise<DependencyChainResponse> {
+    const response = await api.get<DependencyChainResponse>(
+      `/frameworks/${frameworkCode}/dependencies`
     )
     return response.data
   },

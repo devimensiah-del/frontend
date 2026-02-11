@@ -190,7 +190,7 @@ export function OndeEstamosTab({
 
           {pestelResult?.result?.status === 'failed' && (
             <FailedState
-              error={pestelResult.result.error}
+              error={pestelResult.result.error_message}
               onRetry={() => handleRun('pestel')}
               isRetrying={isRunning}
             />
@@ -219,7 +219,7 @@ export function OndeEstamosTab({
 
           {porterResult?.result?.status === 'failed' && (
             <FailedState
-              error={porterResult.result.error}
+              error={porterResult.result.error_message}
               onRetry={() => handleRun('porter')}
               isRetrying={isRunning}
             />
@@ -248,7 +248,7 @@ export function OndeEstamosTab({
 
           {swotResult?.result?.status === 'failed' && (
             <FailedState
-              error={swotResult.result.error}
+              error={swotResult.result.error_message}
               onRetry={() => handleRun('swot')}
               isRetrying={isRunning}
             />
@@ -308,11 +308,10 @@ function FrameworkActions({
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant={isCompleted ? 'outline' : 'default'}
+        variant={isCompleted ? 'outline' : 'architect'}
         size="sm"
         onClick={onRun}
         disabled={isRunning}
-        className={isCompleted ? '' : 'bg-gold-500 hover:bg-gold-600 text-white'}
       >
         {isRunning ? (
           <Loader2 className="w-4 h-4 mr-1 animate-spin" />

@@ -1,5 +1,5 @@
 import api from '@/lib/api'
-import type { Company, Challenge, CreateCompanyRequest, CompanyEnrichmentStatus, TriggerEnrichmentResponse } from '@/lib/types'
+import type { Company, Challenge, CreateCompanyRequest, CompanyEnrichmentStatus, TriggerEnrichmentResponse, ChallengeData } from '@/lib/types'
 
 export const companyService = {
   async create(data: CreateCompanyRequest): Promise<Company> {
@@ -18,7 +18,7 @@ export const companyService = {
   },
 
   async update(id: string, data: Partial<Company>): Promise<Company> {
-    const response = await api.put<{ company: Company }>(`/companies/${id}`, data)
+    const response = await api.put<{ company: Company }>(`/companies/${id}`, { fields: data })
     return response.data.company
   },
 
@@ -70,6 +70,19 @@ export const companyService = {
 
   async retryStep3(id: string): Promise<TriggerEnrichmentResponse> {
     const response = await api.post<TriggerEnrichmentResponse>(`/companies/${id}/enrich/step3/retry`)
+    return response.data
+  },
+
+  async reAnalyze(companyId: string, challenge: ChallengeData): Promise<{ message: string; data: { submission_id: string; challenge_id: string } }> {
+    const response = await api.post<{ message: string; data: { submission_id: string; challenge_id: string } }>(
+      `/companies/${companyId}/re-analyze`,
+      challenge
+    )
+    return response.data
+  },
+
+  async analyzeChallenge(challengeId: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>(`/challenges/${challengeId}/analyze`)
     return response.data
   },
 }
